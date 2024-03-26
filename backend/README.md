@@ -20,8 +20,8 @@ See: [Reverse proxy quick-start - Caddy Documentation](https://caddyserver.com/d
 
 1. run `bin/install.bash`
 2. run `bin/build.bash`
-3. run docker compose using `docker compose up -d`
-4. (optional) inspect logs using `docker compose logs -f`
+3. run docker compose using `docker compose --profile dev up -d`
+4. (optional) inspect logs using `docker compose --profile dev logs -f`
 
 ## Swagger UI
 
@@ -88,4 +88,4 @@ If you simply want to host your own instance, it is highly recommended to use th
 To run it:
 
 1. execute `bash bin/build.bash`
-2. execute `docker compose up -d` (or `docker compose up -d db cache` for development)
+2. execute `docker compose --profile all up -d` (or `docker compose --profile dev up -d` for development)

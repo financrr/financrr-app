@@ -9,6 +9,6 @@ cd "$(dirname "$0")"
 cd ..
 
 echo "Building containers."
-docker compose build
+docker compose --profile all build
 
 cd "${WORK_DIR}"

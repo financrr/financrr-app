@@ -1,3 +1,3 @@
-pub mod response;
-pub mod routes;
-pub mod schema;
+pub(crate) mod response;
+pub(crate) mod routes;
+pub(crate) mod schema;

@@ -15,7 +15,7 @@ use entity::currency;
 use entity::prelude::User;
 use entity::utility::time::get_now;
 
-use crate::database::connection::get_database_connection;
+use crate::databases::connections::psql::get_database_connection;
 
 pub(crate) const MIN_PASSWORD_LENGTH: usize = 16;
 pub(crate) const MAX_PASSWORD_LENGTH: usize = 128;

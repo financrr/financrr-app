@@ -2,7 +2,7 @@ use sea_orm::{ActiveModelBehavior, DeleteMany, EntityTrait, IntoActiveModel, Pag
 
 use crate::api::error::api::ApiError;
 use crate::api::pagination::PageSizeParam;
-use crate::database::connection::get_database_connection;
+use crate::databases::connections::psql::get_database_connection;
 
 pub(crate) async fn find_one<T>(select_stm: Select<T>) -> Result<Option<T::Model>, ApiError>
 where

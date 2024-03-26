@@ -1,7 +1,7 @@
 use redis::{AsyncCommands, Cmd, FromRedisValue};
 
 use crate::api::error::api::ApiError;
-use crate::database::connection::get_redis_connection;
+use crate::databases::connections::redis::get_redis_connection;
 
 pub(crate) async fn cmd(cmd: Cmd) -> Result<(), ApiError> {
     Ok(cmd.query_async(&mut get_redis_connection().await?).await?)

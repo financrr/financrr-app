@@ -34,8 +34,12 @@ iban = "0.1.7"
 sea-orm.workspace = true
 entity = { path = "../entity" }
 migration = { path = "../migration" }
+
 # Redis
 redis = {  version = "0.25.2", features = ["aio", "tokio-comp"] }
+
+# (Open-)search
+opensearch = { version = "2.2.0", features = ["rustls-tls"], default-features = false }
 
 # Serialization and deserialization
 serde.workspace = true
@@ -62,6 +66,9 @@ regex = { version = "1.10.4", features = ["std", "perf", "unicode"] }
 itertools = "0.12.1"
 bitflags = {  version = "2.5.0", features = ["std", "serde"] }
 paste = "1.0.14"
+
+# Search utils
+url = "2.5.0"
 
 # Future Utils
 futures-util = "0.3.30"

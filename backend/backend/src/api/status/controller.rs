@@ -2,8 +2,9 @@ use actix_web::{get, web, HttpResponse, Responder};
 
 use crate::api::status::dto::HealthResponse;
 use crate::config::public::PublicConfig;
-use crate::database::connection::{get_database_connection, get_redis_connection};
-use crate::database::redis::cmd;
+use crate::databases::connections::psql::get_database_connection;
+use crate::databases::connections::redis::get_redis_connection;
+use crate::databases::redis::cmd;
 
 pub(crate) fn status_controller(cfg: &mut web::ServiceConfig) {
     cfg.service(web::scope("/status").service(health).service(coffee).service(config));

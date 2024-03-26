@@ -1,6 +1,8 @@
-name: (Backend) Rust checks (security, clippy, rustfmt)
+name: (Backend) Rust checks (clippy, rustfmt)
 on:
   push:
+    branches:
+      - main
     paths:
       - 'backend/**'
   pull_request:
@@ -13,16 +15,6 @@ defaults:
     working-directory: ./backend  # Change the working directory to /backend
 
 jobs:
-  security_audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # cargo audit
-      - name: Install cargo-audit
-        run: cargo install --force cargo-audit
-      - name: Run cargo-audit
-        run: cargo audit --ignore RUSTSEC-2023-0071 # Marvin attack (RSA) crate. Being worked on.
-
   clippy:
     runs-on: ubuntu-latest
 

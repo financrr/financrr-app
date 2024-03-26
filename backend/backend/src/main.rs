@@ -7,15 +7,12 @@ use actix_limitation::{Limiter, RateLimiter};
 use actix_web::middleware::{Compress, DefaultHeaders, NormalizePath, TrailingSlash};
 use actix_web::web::Data;
 use actix_web::{
-    error,
     web::{self},
-    App, HttpResponse, HttpServer,
+    App, HttpServer,
 };
 use actix_web_prom::{PrometheusMetrics, PrometheusMetricsBuilder};
 use actix_web_validator::{Error, JsonConfig, PathConfig, QueryConfig};
 use dotenvy::dotenv;
-use redis::Client;
-use sea_orm::DatabaseConnection;
 use tracing::info;
 use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
 use utoipa::openapi::OpenApi as OpenApiStruct;
@@ -23,6 +20,7 @@ use utoipa::{Modify, OpenApi};
 use utoipa_swagger_ui::SwaggerUi;
 use utoipauto::utoipauto;
 
+use crate::api::error::api::ApiError;
 use entity::utility::loading::load_schema;
 use migration::Migrator;
 use migration::MigratorTrait;
@@ -35,22 +33,24 @@ use crate::api::routes::transaction::controller::transaction_controller;
 use crate::api::routes::user::controller::user_controller;
 use crate::api::status::controller::status_controller;
 use crate::config::{logger, Config};
-use crate::database::connection::{create_redis_client, establish_database_connection, get_database_connection};
-use crate::database::redis::clear_redis;
+use crate::databases::connections::init_data_sources;
+use crate::databases::connections::psql::get_database_connection;
+use crate::databases::redis::clear_redis;
+use crate::util::panic;
 use crate::util::validation::ValidationErrorJsonPayload;
+use crate::wrapper::entity::init_wrapper;
 use crate::wrapper::entity::session::Session;
 use crate::wrapper::permission::cleanup::schedule_clean_up_task;
 
-pub mod api;
-pub mod config;
-pub mod database;
-pub mod event;
-pub mod scheduling;
-pub mod util;
-pub mod wrapper;
+pub(crate) mod api;
+pub(crate) mod config;
+pub(crate) mod databases;
+pub(crate) mod event;
+pub(crate) mod scheduling;
+pub(crate) mod search;
+pub(crate) mod util;
+pub(crate) mod wrapper;
 
-pub(crate) static DB: OnceLock<DatabaseConnection> = OnceLock::new();
-pub(crate) static REDIS: OnceLock<Client> = OnceLock::new();
 pub(crate) static CONFIG: OnceLock<Config> = OnceLock::new();
 
 #[utoipauto(paths = "./backend/src")]
@@ -79,45 +79,52 @@ impl Modify for BearerTokenAddon {
     }
 }
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
     let _guard = logger::configure(); // We need to keep the guard alive to keep the logger running.
 
     info!("Starting up...");
+
+    info!("[*] Installing panic hook...");
+    panic::install_panic_hook();
+
+    info!("[*] Loading configuration..");
     CONFIG.set(Config::load()).expect("Could not load config!");
 
-    info!("\t[*] Establishing database connection...");
-    DB.set(establish_database_connection().await).expect("Could not set database!");
-    info!("\t[*] Establishing redis connection...");
-    REDIS.set(create_redis_client().await).expect("Could not set redis!");
+    info!("[*] Initializing data sources...");
+    init_data_sources().await;
 
-    info!("\t[*] Cleaning redis...");
+    info!("[*] Cleaning redis...");
     clear_redis().await.expect("Could not clear redis!");
 
-    info!("\t[*] Loading schema...");
+    info!("[*] Loading schema...");
     load_schema(get_database_connection()).await;
 
-    info!("\t[*] Migrating database...");
+    info!("[*] Migrating database...");
     Migrator::up(get_database_connection(), None).await.expect("Could not migrate database!");
 
-    info!("\t[*] Loading sessions...");
+    info!("[*] Loading sessions...");
     Session::init().await.expect("Could not load sessions!");
 
-    info!("\t[*] Starting up event system...");
+    info!("[*] Starting up event system...");
     event::init();
 
-    info!("\t[*] Scheduling clean up task...");
+    info!("[*] Scheduling clean up task...");
     schedule_clean_up_task();
 
-    // Make instance variable of ApiDoc so all worker threads gets the same instance.
-    let openapi = ApiDoc::openapi();
+    info!("[*] Initializing wrapper...");
+    init_wrapper().await;
 
-    info!("\t[*] Initializing rate limiter...");
+    info!("[*] Initializing rate limiter...");
     let limiter = Data::new(build_rate_limiter());
 
-    info!("\t[*] Initializing prometheus metrics...");
+    info!("[*] Initializing prometheus metrics...");
     let prometheus_metrics = build_prometheus_metrics();
+
+    info!("[*] Building OpenApi documentation...");
+    // Make instance variable of ApiDoc so all worker threads gets the same instance.
+    let openapi = ApiDoc::openapi();
 
     info!("Starting server... Listening on: {}", Config::get_config().address);
 
@@ -126,9 +133,9 @@ async fn main() -> Result<()> {
             .wrap(Compress::default())
             .wrap(build_cors())
             .wrap(prometheus_metrics.clone())
-            .app_data(JsonConfig::default().error_handler(|err, _| handle_validation_error(err)))
-            .app_data(QueryConfig::default().error_handler(|err, _| handle_validation_error(err)))
-            .app_data(PathConfig::default().error_handler(|err, _| handle_validation_error(err)))
+            .app_data(JsonConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
+            .app_data(QueryConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
+            .app_data(PathConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
             .app_data(limiter.clone())
             .configure(configure_api)
             .service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()))
@@ -138,7 +145,7 @@ async fn main() -> Result<()> {
     .await
 }
 
-fn handle_validation_error(err: Error) -> actix_web::Error {
+fn handle_validation_error(err: Error) -> ApiError {
     let json_error = match &err {
         Error::Validate(error) => ValidationErrorJsonPayload::from(error),
         _ => ValidationErrorJsonPayload {
@@ -146,7 +153,8 @@ fn handle_validation_error(err: Error) -> actix_web::Error {
             fields: Vec::new(),
         },
     };
-    error::InternalError::from_response(err, HttpResponse::BadRequest().json(json_error)).into()
+
+    ApiError::from(json_error)
 }
 
 fn configure_api(cfg: &mut web::ServiceConfig) {

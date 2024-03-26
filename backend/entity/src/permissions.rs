@@ -66,4 +66,11 @@ impl Entity {
             .filter(Column::EntityId.eq(account_id))
             .filter(Column::EntityType.eq(account::Entity.table_name().to_string()))
     }
+
+    pub fn find_users_with_permissions(entity_type: &str, entity_id: i32, permissions: i32) -> Select<Self> {
+        Entity::find()
+            .filter(Column::EntityType.eq(entity_type))
+            .filter(Column::EntityId.eq(entity_id))
+            .filter(Column::Permissions.eq(permissions))
+    }
 }

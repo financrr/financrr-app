@@ -1,25 +1,12 @@
 use std::time::Duration;
 
-use redis::aio::MultiplexedConnection;
-use redis::Client;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 
-use crate::api::error::api::ApiError;
 use crate::config::Config;
-use crate::{DB, REDIS};
+use crate::databases::connections::DB_CONN;
 
 pub(crate) fn get_database_connection<'a>() -> &'a DatabaseConnection {
-    DB.get().expect("Could not get database connection!")
-}
-
-pub(crate) async fn get_redis_connection() -> Result<MultiplexedConnection, ApiError> {
-    let pool = REDIS.get().expect("Could not get redis pool!");
-    pool.get_multiplexed_tokio_connection().await.map_err(ApiError::from)
-}
-
-pub(crate) async fn create_redis_client() -> Client {
-    let config = Config::get_config();
-    Client::open(config.cache.get_url()).expect("Could not open redis connection!")
+    DB_CONN.get().expect("Could not get database connection!")
 }
 
 pub(crate) async fn establish_database_connection() -> DatabaseConnection {

@@ -14,9 +14,12 @@ echo "Building containers"
 bin/build.bash
 
 echo "Stopping containers"
-docker compose down -v
+docker compose --profile all down -v
+
+echo "Pulling images"
+docker compose --profile all pull
 
 echo "Starting containers"
-docker compose up -d
+docker compose --profile all up -d
 
 cd "${WORK_DIR}"

@@ -26,7 +26,7 @@ pub(crate) fn configure() -> WorkerGuard {
         .max_log_files(30)
         .build("logs")
         .expect("Failed to create rolling file appender");
-    let (non_blocking_file_appender, _file_appender_guard) =
+    let (non_blocking_file_appender, file_appender_guard) =
         NonBlockingBuilder::default().lossy(false).finish(file_appender);
 
     let stdout = stdout.with_max_level(Level::INFO);
@@ -39,5 +39,5 @@ pub(crate) fn configure() -> WorkerGuard {
 
     subscriber::set_global_default(subscriber).expect("Setting default subscriber failed");
 
-    _file_appender_guard
+    file_appender_guard
 }

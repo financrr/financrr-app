@@ -11,7 +11,7 @@ use entity::utility::time::get_now;
 
 use crate::api::error::api::ApiError;
 use crate::api::pagination::PageSizeParam;
-use crate::database::entity::{count, delete, find_all_paginated, find_one_or_error, insert, update};
+use crate::databases::entity::{count, delete, find_all_paginated, find_one_or_error, insert, update};
 use crate::event::lifecycle::transaction::{TransactionCreation, TransactionDeletion, TransactionUpdate};
 use crate::event::GenericEvent;
 use crate::wrapper::entity::account::Account;
@@ -24,7 +24,8 @@ use crate::wrapper::permission::{
 };
 use crate::wrapper::types::phantom::{Identifiable, Phantom};
 
-pub mod dto;
+pub(crate) mod dto;
+pub(crate) mod search;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub(crate) struct Transaction {
@@ -120,6 +121,14 @@ impl Transaction {
 
     pub(crate) async fn count_all_by_user(user_id: i32) -> Result<u64, ApiError> {
         count(transaction::Entity::find_all_by_user(user_id)).await
+    }
+
+    pub(crate) async fn find_all_paginated(page_size: PageSizeParam) -> Result<Vec<Self>, ApiError> {
+        Ok(find_all_paginated(transaction::Entity::find(), &page_size).await?.into_iter().map(Self::from).collect())
+    }
+
+    pub(crate) async fn count_all() -> Result<u64, ApiError> {
+        count(transaction::Entity::find()).await
     }
 }
 

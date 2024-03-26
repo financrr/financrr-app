@@ -8,7 +8,7 @@ use entity::budget;
 
 use crate::api::error::api::ApiError;
 use crate::api::pagination::PageSizeParam;
-use crate::database::entity::{count, delete, find_all_paginated, find_one_or_error, insert, update};
+use crate::databases::entity::{count, delete, find_all_paginated, find_one_or_error, insert, update};
 use crate::wrapper::entity::budget::dto::BudgetDTO;
 use crate::wrapper::entity::transaction::Transaction;
 use crate::wrapper::entity::user::User;
@@ -18,8 +18,8 @@ use crate::wrapper::permission::{
 };
 use crate::wrapper::types::phantom::{Identifiable, Phantom};
 
-pub mod dto;
-pub mod event_listener;
+pub(crate) mod dto;
+pub(crate) mod event_listener;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub(crate) struct Budget {

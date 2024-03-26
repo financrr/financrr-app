@@ -5,14 +5,15 @@ use tracing::log::LevelFilter;
 
 use crate::CONFIG;
 
-pub mod logger;
-pub mod public;
+pub(crate) mod logger;
+pub(crate) mod public;
 
 #[derive(Debug, Clone)]
 pub(crate) struct Config {
     pub(crate) address: String,
     pub(crate) database: DatabaseConfig,
     pub(crate) cache: RedisConfig,
+    pub(crate) search: OpenSearchConfig,
     pub(crate) cors: CorsConfig,
     pub(crate) session: SessionConfig,
     pub(crate) rate_limiter: RateLimiterConfig,
@@ -36,6 +37,14 @@ pub(crate) struct DatabaseConfig {
 pub(crate) struct RedisConfig {
     pub(crate) host: String,
     pub(crate) port: u16,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct OpenSearchConfig {
+    pub(crate) host: String,
+    pub(crate) port: u16,
+    pub(crate) username: String,
+    pub(crate) password: String,
 }
 
 #[derive(Debug, Clone)]
@@ -69,6 +78,7 @@ impl Config {
             address: get_env_or_error("ADDRESS"),
             database: DatabaseConfig::build_config(),
             cache: RedisConfig::build_config(),
+            search: OpenSearchConfig::build_config(),
             cors: CorsConfig::build_config(),
             session: SessionConfig::build_config(),
             rate_limiter: RateLimiterConfig::build_config(),
@@ -117,6 +127,21 @@ impl RedisConfig {
 
     pub(crate) fn get_url(&self) -> String {
         format!("redis://{}:{}", self.host, self.port)
+    }
+}
+
+impl OpenSearchConfig {
+    pub(crate) fn build_config() -> Self {
+        Self {
+            host: get_env_or_error("SEARCH_HOST"),
+            port: get_env_or_error("SEARCH_PORT").parse::<u16>().expect("Could not parse SEARCH_PORT to u16!"),
+            username: get_env_or_error("SEARCH_USERNAME"),
+            password: get_env_or_error("SEARCH_PASSWORD"),
+        }
+    }
+
+    pub(crate) fn get_url(&self) -> String {
+        format!("http://{}:{}", self.host, self.port)
     }
 }
 

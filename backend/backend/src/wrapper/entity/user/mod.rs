@@ -12,7 +12,7 @@ use entity::user;
 use entity::user::Model;
 
 use crate::api::error::api::ApiError;
-use crate::database::entity::{count, find_one, find_one_or_error, insert};
+use crate::databases::entity::{count, find_one, find_one_or_error, insert};
 use crate::util::auth::extract_bearer_token;
 use crate::wrapper::entity::session::Session;
 use crate::wrapper::entity::user::dto::UserRegistration;
@@ -20,7 +20,7 @@ use crate::wrapper::entity::{TableName, WrapperEntity};
 use crate::wrapper::permission::{HasPermissionOrError, Permission, PermissionByIds, Permissions};
 use crate::wrapper::types::phantom::{Identifiable, Phantom};
 
-pub mod dto;
+pub(crate) mod dto;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub(crate) struct User {

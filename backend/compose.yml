@@ -6,6 +6,8 @@ services:
       dockerfile: docker/rust/Dockerfile
     init: true
     restart: unless-stopped
+    profiles:
+      - all
     env_file:
       - .env
     environment:
@@ -20,11 +22,16 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      search:
+        condition: service_healthy
 
   db:
     image: postgres:16.2-alpine3.19
     init: true
     restart: unless-stopped
+    profiles:
+      - dev
+      - all
     environment:
       TZ: ${TIMEZONE}
       POSTGRES_USER: ${DATABASE_USER}
@@ -45,6 +52,9 @@ services:
     image: redis:7.2.4-alpine3.19
     init: true
     restart: unless-stopped
+    profiles:
+      - dev
+      - all
     environment:
       TZ: ${TIMEZONE}
     ports:
@@ -57,6 +67,39 @@ services:
     volumes:
       - redis-data:/data
 
+  search:
+    image: opensearchproject/opensearch:2.12.0 # Specifying the latest available image - modify if you want a specific version
+    container_name: search
+    init: true
+    restart: unless-stopped
+    profiles:
+      - dev
+      - all
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: true # Disable JVM heap memory swapping
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${SEARCH_PASSWORD}    # Sets the demo admin user password when using demo configuration, required for OpenSearch 2.12 and later
+      DISABLE_SECURITY_PLUGIN: true
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    healthcheck:
+      test: 'curl --fail localhost:9200/_cat/health >/dev/null || exit 1'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "127.0.0.1:9200:9200" # REST API
+      - "127.0.0.1:9600:9600" # Performance Analyzer
+
 volumes:
   postgres-data: ~
   redis-data: ~
+  opensearch-data: ~
