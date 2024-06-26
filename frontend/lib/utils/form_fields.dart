@@ -25,7 +25,7 @@ class FormFields {
     required TransactionType selectedType,
     required MoneyInputFormatter moneyInputFormatter,
     DateTime? executedAt,
-    void Function(int)? onAmountChanged,
+    void Function(UnformattedAmount)? onAmountChanged,
     void Function(Set<TransactionType>)? onSelectionChanged,
     void Function(Account?)? onSecondaryChanged,
     void Function(DateTime)? onExecutedAtChanged,
@@ -68,7 +68,7 @@ class FormFields {
           label: L10nKey.transactionPropertiesAmount,
           validator: (value) => InputValidators.nonNull(L10nKey.transactionPropertiesAmount.toString(), value),
           required: true,
-          onChanged: (_) => onAmountChanged?.call(moneyInputFormatter.intValue),
+          onChanged: (_) => onAmountChanged?.call(moneyInputFormatter.amount),
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
@@ -130,7 +130,7 @@ class FormFields {
     required TextEditingController originalBalanceController,
     required Currency selectedCurrency,
     required MoneyInputFormatter moneyInputFormatter,
-    void Function(int)? onOriginalBalanceChanged,
+    void Function(UnformattedAmount)? onOriginalBalanceChanged,
     void Function(Currency?)? onCurrencyChanged,
   }) {
     return [
@@ -175,7 +175,7 @@ class FormFields {
           label: L10nKey.accountPropertiesOriginalBalance,
           validator: (value) => InputValidators.nonNull(L10nKey.accountPropertiesOriginalBalance.toString(), value),
           required: true,
-          onChanged: (_) => onOriginalBalanceChanged?.call(moneyInputFormatter.intValue),
+          onChanged: (_) => onOriginalBalanceChanged?.call(moneyInputFormatter.amount),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, moneyInputFormatter],
         ),

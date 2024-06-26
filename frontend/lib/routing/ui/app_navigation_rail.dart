@@ -1,3 +1,4 @@
+import 'package:financrr_frontend/shared/ui/custom_replacements/custom_card.dart';
 import 'package:financrr_frontend/utils/l10n_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -40,8 +41,9 @@ class FinancrrNavigationRail extends ConsumerWidget {
           return MouseRegion(
             onHover: (_) => setState(() => isHovered = true),
             onExit: (_) => setState(() => isHovered = false),
-            child: GestureDetector(
+            child: FinancrrCard(
               onTap: () => onDestinationSelected?.call(index),
+              borderColor: Colors.transparent,
               child: Row(
                 mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
                 children: [

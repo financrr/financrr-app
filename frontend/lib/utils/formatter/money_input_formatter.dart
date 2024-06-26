@@ -1,4 +1,3 @@
-import 'package:financrr_frontend/utils/text_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:restrr/restrr.dart';
 
@@ -16,12 +15,12 @@ class MoneyInputFormatter extends TextInputFormatter {
       : symbol = currency.symbol,
         decimalPlaces = currency.decimalPlaces;
 
-  int intValue = 0;
+  UnformattedAmount amount = UnformattedAmount.zero;
 
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    intValue = int.tryParse(newValue.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    final String formatted = TextUtils.formatBalance(intValue, decimalPlaces, decimalSeparator, thousandSeparator);
+    amount = UnformattedAmount.fromString(newValue.text);
+    final String formatted = amount.format(decimalPlaces, decimalSeparator, thousandsSeparator: thousandSeparator);
     return newValue.copyWith(
       text: '$formatted$symbol',
       selection: TextSelection.collapsed(offset: formatted.length),

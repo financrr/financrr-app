@@ -13,7 +13,7 @@ class TransactionCard extends ConsumerWidget {
   final Id id;
   final Id? source;
   final Id? destination;
-  final int amount;
+  final UnformattedAmount amount;
   final String name;
   final String? description;
   final DateTime executedAt;
@@ -27,7 +27,7 @@ class TransactionCard extends ConsumerWidget {
       : id = transaction.id.value,
         source = transaction.sourceId?.value,
         destination = transaction.destinationId?.value,
-        amount = transaction.amount,
+        amount = transaction.getDisplayAmount(account ?? (transaction.sourceId ?? transaction.destinationId)!.get()!),
         name = transaction.name,
         description = transaction.description,
         executedAt = transaction.executedAt,
@@ -53,7 +53,6 @@ class TransactionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var theme = ref.watch(themeProvider);
     var l10n = ref.watch(l10nProvider);
-    bool isMoneyIn = type == TransactionType.deposit || type == TransactionType.transferIn;
 
     return FinancrrCard(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -73,9 +72,11 @@ class TransactionCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(l10n.dateFormat.format(executedAt)),
-              Text('${isMoneyIn ? '+' : '-'}${TextUtils.formatBalanceWithCurrency(l10n, amount, account.currencyId.get()!)}',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(color: isMoneyIn ? theme.themeData.primaryColor : theme.themeData.colorScheme.error)),
+              Text(
+                  amount.formatWithCurrency(account.currencyId.get()!, l10n.decimalSeparator,
+                      thousandsSeparator: l10n.thousandSeparator),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                      color: amount.rawAmount < 0 ? theme.financrrExtension.error : theme.financrrExtension.primary)),
             ],
           ),
         ],

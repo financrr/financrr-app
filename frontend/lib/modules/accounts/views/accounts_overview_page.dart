@@ -12,7 +12,6 @@ import '../../../routing/page_path.dart';
 import '../../../shared/ui/cards/account_card.dart';
 import '../../../shared/ui/custom_replacements/custom_text_button.dart';
 import '../../../shared/ui/notice_card.dart';
-import '../../../utils/text_utils.dart';
 import '../../settings/providers/l10n.provider.dart';
 import 'account_create_page.dart';
 import 'account_edit_page.dart';
@@ -29,7 +28,7 @@ class AccountsOverviewPage extends StatefulHookConsumerWidget {
 class _AccountsOverviewPageState extends ConsumerState<AccountsOverviewPage> {
   late final Restrr _api = api;
 
-  late Map<Currency, int> _currencies = _api.getAccounts().fold(
+  late Map<Currency, UnformattedAmount> _currencies = _api.getAccounts().fold(
     {},
     (map, account) {
       map.update(account.currencyId.get()!, (value) => value + account.balance, ifAbsent: () => account.balance);
@@ -71,7 +70,9 @@ class _AccountsOverviewPageState extends ConsumerState<AccountsOverviewPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: _currencies.entries.map((entry) {
-                          return Text(TextUtils.formatBalanceWithCurrency(l10n, entry.value, entry.key),
+                          return Text(
+                              entry.value.formatWithCurrency(entry.key, l10n.decimalSeparator,
+                                  thousandsSeparator: l10n.thousandSeparator),
                               style: theme.textTheme.titleSmall?.copyWith(color: theme.themeData.primaryColor));
                         }).toList(),
                       ),

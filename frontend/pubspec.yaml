@@ -36,18 +36,14 @@ dependencies:
   restrr:
     git:
       url: https://github.com/financrr/restrr.git
-      ref: feature/session-enhancements
-  # L10n
+      ref: feature/templates-and-recurring-transactions
+  # Other
   intl: ^0.19.0
   easy_localization: ^3.0.7
-  # Routing
-  # Data
   flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.2.3
-  # State Management
   riverpod: ^2.5.1
   hooks_riverpod: ^2.5.1
-  # Other
   flutter_svg: ^2.0.10+1
   logging: ^1.2.0
   device_info_plus: ^10.1.0
@@ -82,9 +78,6 @@ dev_dependencies:
 flutter:
   generate: true
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
 
   assets:

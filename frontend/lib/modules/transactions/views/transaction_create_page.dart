@@ -23,8 +23,9 @@ class TransactionCreatePage extends StatefulHookConsumerWidget {
   static const PagePathBuilder pagePath = PagePathBuilder.child(parent: AccountPage.pagePath, path: 'transactions/create');
 
   final String? accountId;
+  final TransactionTemplate? template;
 
-  const TransactionCreatePage({super.key, required this.accountId});
+  const TransactionCreatePage({super.key, required this.accountId, this.template});
 
   @override
   ConsumerState<TransactionCreatePage> createState() => _TransactionCreatePageState();
@@ -41,7 +42,7 @@ class _TransactionCreatePageState extends ConsumerState<TransactionCreatePage> {
   late final TextEditingController _executedAtController;
 
   bool _isValid = false;
-  int _amount = 0;
+  UnformattedAmount _amount = UnformattedAmount.zero;
   TransactionType _type = TransactionType.deposit;
   DateTime _executedAt = DateTime.now();
   Account? _secondary;
@@ -55,7 +56,14 @@ class _TransactionCreatePageState extends ConsumerState<TransactionCreatePage> {
   void initState() {
     super.initState();
     _executedAtController = TextEditingController(text: StoreKey.dateTimeFormat.readSync()!.format(_executedAt));
-    _fetchAccount();
+    _fetchAccount().then((account) {
+      if (widget.template != null) {
+        _nameController.text = widget.template!.name;
+        _descriptionController.text = widget.template!.description ?? '';
+        _amount = widget.template!.amount;
+        _type = widget.template!.getType(account!);
+      }
+    });
     _isValid = _formKey.currentState?.validate() ?? false;
   }
 
@@ -79,8 +87,9 @@ class _TransactionCreatePageState extends ConsumerState<TransactionCreatePage> {
         thousandSeparator: l10n.thousandSeparator,
       );
       if (_amountController.text.isEmpty) {
-        _amountController.text =
-            moneyFormatter.formatEditUpdate(const TextEditingValue(text: ''), const TextEditingValue(text: '0')).text;
+        _amountController.text = moneyFormatter
+            .formatEditUpdate(const TextEditingValue(text: ''), TextEditingValue(text: _amount.rawAmount.toString()))
+            .text;
       }
 
       return Padding(
