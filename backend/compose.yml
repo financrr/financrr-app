@@ -46,7 +46,7 @@ services:
       retries: 3
 
   cache:
-    image: ghcr.io/dragonflydb/dragonfly:v1.19.1
+    image: ghcr.io/dragonflydb/dragonfly:v1.19.2
     init: true
     restart: unless-stopped
     ulimits:
