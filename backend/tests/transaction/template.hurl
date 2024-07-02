@@ -1,3 +1,10 @@
+# Get the id from the second currency
+GET {{api_v1}}/currency
+Authorization: Bearer {{admin_token}}
+HTTP 200
+[Captures]
+currency_id: jsonpath "$['data'][1]['id']"
+
 # Try to get all templates without supplying a token
 GET {{api_v1}}/transaction/template
 HTTP 401
@@ -20,7 +27,7 @@ Content-Type: application/json
   "description": null,
   "iban": null,
   "original_balance": 10000,
-  "currency_id": 2
+  "currency_id": {{currency_id}}
 }
 HTTP 201
 [Captures]
@@ -35,7 +42,7 @@ Content-Type: application/json
   "description": null,
   "iban": null,
   "original_balance": 10000,
-  "currency_id": 2
+  "currency_id": {{currency_id}}
 }
 HTTP 201
 [Captures]
@@ -49,7 +56,7 @@ Content-Type: application/json
   "source_id": null,
   "destination_id": {{test_acc1_id}},
   "amount": 1000,
-  "currency_id": 2,
+  "currency_id":  {{currency_id}},
   "name": "10€ Deposit",
   "description": "A longer description bla bla",
   "budget_id": null
@@ -87,7 +94,7 @@ Content-Type: application/json
   "source_id": {{test_acc1_id}},
   "destination_id": {{test_acc2_id}},
   "amount": 2000,
-  "currency_id": 2,
+  "currency_id": {{currency_id}},
   "name": "20€ Deposit",
   "description": "A longer description bla bla",
   "budget_id": null
@@ -112,7 +119,7 @@ jsonpath "$['id']" == {{template_id}}
 jsonpath "$['source_id']" == {{test_acc1_id}}
 jsonpath "$['destination_id']" == {{test_acc2_id}}
 jsonpath "$['amount']" == 2000
-jsonpath "$['currency_id']" == 2
+jsonpath "$['currency_id']" == {{currency_id}}
 jsonpath "$['name']" == "20€ Deposit"
 jsonpath "$['description']" == "A longer description bla bla"
 jsonpath "$['budget_id']" == null

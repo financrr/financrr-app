@@ -10,6 +10,7 @@ use dto::Credentials;
 use entity::prelude::User as DbUser;
 use entity::user;
 use entity::user::Model;
+use utility::snowflake::entity::Snowflake;
 
 use crate::api::error::api::ApiError;
 use crate::database::entity::{count, find_one, find_one_or_error, insert};
@@ -25,7 +26,8 @@ pub(crate) mod dto;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub(crate) struct User {
-    pub(crate) id: i32,
+    #[serde(rename = "id")]
+    pub(crate) snowflake: Snowflake,
     pub(crate) username: String,
     pub(crate) email: Option<String>,
     pub(crate) display_name: Option<String>,
@@ -35,7 +37,7 @@ pub(crate) struct User {
 }
 
 impl User {
-    pub(crate) async fn exists(id: i32) -> Result<bool, ApiError> {
+    pub(crate) async fn exists(id: Snowflake) -> Result<bool, ApiError> {
         Ok(count(user::Entity::find_by_id(id)).await? > 0)
     }
 
@@ -63,7 +65,7 @@ impl User {
             Ok(user) => {
                 let model = insert(user).await?;
                 let user = Self::from(model);
-                user.add_permission(user.id, Permissions::all()).await?;
+                user.add_permission(user.snowflake, Permissions::all()).await?;
 
                 Ok(user)
             }
@@ -75,11 +77,11 @@ impl User {
 permission_impl!(User);
 
 impl Identifiable for User {
-    async fn find_by_id(id: i32) -> Result<Self, ApiError>
+    async fn find_by_id(id: Snowflake) -> Result<Self, ApiError>
     where
         Self: Sized,
     {
-        find_one_or_error(user::Entity::find_by_id(id), "User").await.map(Self::from)
+        find_one_or_error(user::Entity::find_by_id(id)).await.map(Self::from)
     }
 }
 
@@ -90,8 +92,8 @@ impl TableName for User {
 }
 
 impl WrapperEntity for User {
-    fn get_id(&self) -> i32 {
-        self.id
+    fn get_id(&self) -> Snowflake {
+        self.snowflake
     }
 }
 
@@ -127,10 +129,10 @@ impl FromRequest for Phantom<User> {
     }
 }
 
-impl From<user::Model> for User {
+impl From<Model> for User {
     fn from(value: Model) -> Self {
         Self {
-            id: value.id,
+            snowflake: Snowflake::from(value.id),
             username: value.username,
             email: value.email,
             display_name: value.display_name,

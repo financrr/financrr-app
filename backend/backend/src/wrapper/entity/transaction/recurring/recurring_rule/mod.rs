@@ -6,10 +6,10 @@ use time::OffsetDateTime;
 use utoipa::ToSchema;
 
 use entity::utility::time::get_now;
+use utility::datetime::{convert_chrono_to_time, convert_time_to_chrono};
 
 use crate::api::error::api::ApiError;
 use crate::util::cron::get_cron_builder_default;
-use crate::util::datetime::{convert_chrono_to_time, convert_time_to_chrono};
 use crate::wrapper::entity::transaction::recurring::recurring_rule::dto::{CronPatternDTO, RecurringRuleDTO};
 
 pub(crate) mod dto;
@@ -85,11 +85,12 @@ impl RecurringRule {
     }
 
     pub(crate) fn find_next_occurrence(&self, now: &OffsetDateTime) -> Option<OffsetDateTime> {
-        self.to_cron().ok().and_then(|cron| {
-            cron.find_next_occurrence(&convert_time_to_chrono(now), false)
-                .ok()
-                .map(|next_occurrence| convert_chrono_to_time(&next_occurrence))
-        })
+        let now_chrono = convert_time_to_chrono(now).ok()?;
+
+        let next_occurrence_chrono =
+            self.to_cron().ok().and_then(|cron| cron.find_next_occurrence(&now_chrono, false).ok())?;
+
+        convert_chrono_to_time(&next_occurrence_chrono).ok()
     }
 }
 

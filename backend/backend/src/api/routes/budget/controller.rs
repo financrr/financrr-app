@@ -3,6 +3,8 @@ use actix_web::web::Path;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use actix_web_validator5::Json;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::documentation::response::{InternalServerError, ResourceNotFound, Unauthorized, ValidationError};
 use crate::api::error::api::ApiError;
 use crate::api::pagination::{PageSizeParam, Pagination};
@@ -60,11 +62,15 @@ pub(crate) async fn get_all_budgets(
     security(
         ("bearer_token" = [])
     ),
+    params(("budget_id" = Snowflake,)),
     path = "/api/v1/budget/{budget_id}",
     tag = "Budget"
 )]
 #[get("/{budget_id}")]
-pub(crate) async fn get_one_budget(user: Phantom<User>, budget_id: Path<i32>) -> Result<impl Responder, ApiError> {
+pub(crate) async fn get_one_budget(
+    user: Phantom<User>,
+    budget_id: Path<Snowflake>,
+) -> Result<impl Responder, ApiError> {
     let budget = Budget::find_by_id(budget_id.into_inner()).await?;
     budget.has_permission_or_error(user.get_id(), Permissions::READ).await?;
 
@@ -78,17 +84,17 @@ pub(crate) async fn get_one_budget(user: Phantom<User>, budget_id: Path<i32>) ->
         ResourceNotFound,
         InternalServerError,
     ),
-    params(PageSizeParam),
     security(
         ("bearer_token" = [])
     ),
+    params(("budget_id" = Snowflake,), PageSizeParam),
     path = "/api/v1/budget/{budget_id}/transactions",
     tag = "Budget"
 )]
 #[get("/{budget_id}/transactions")]
 pub(crate) async fn get_transactions_from_budget(
     user: Phantom<User>,
-    budget_id: Path<i32>,
+    budget_id: Path<Snowflake>,
     page_size: PageSizeParam,
     uri: Uri,
 ) -> Result<impl Responder, ApiError> {
@@ -131,11 +137,12 @@ pub(crate) async fn create_budget(user: Phantom<User>, budget: Json<BudgetDTO>) 
     security(
         ("bearer_token" = [])
     ),
+    params(("budget_id" = Snowflake,)),
     path = "/api/v1/budget/{budget_id}",
     tag = "Budget"
 )]
 #[delete("/{budget_id}")]
-pub(crate) async fn delete_budget(user: Phantom<User>, budget_id: Path<i32>) -> Result<impl Responder, ApiError> {
+pub(crate) async fn delete_budget(user: Phantom<User>, budget_id: Path<Snowflake>) -> Result<impl Responder, ApiError> {
     let budget = Budget::find_by_id(budget_id.into_inner()).await?;
     budget.has_permission_or_error(user.get_id(), Permissions::READ_DELETE).await?;
 
@@ -155,13 +162,14 @@ pub(crate) async fn delete_budget(user: Phantom<User>, budget_id: Path<i32>) -> 
     security(
         ("bearer_token" = [])
     ),
+    params(("budget_id" = Snowflake,)),
     path = "/api/v1/budget/{budget_id}",
     tag = "Budget"
 )]
 #[patch("/{budget_id}")]
 pub(crate) async fn update_budget(
     user: Phantom<User>,
-    budget_id: Path<i32>,
+    budget_id: Path<Snowflake>,
     budget_dto: Json<BudgetDTO>,
 ) -> Result<impl Responder, ApiError> {
     let budget = Budget::find_by_id(budget_id.into_inner()).await?;

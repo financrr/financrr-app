@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::error::api::ApiError;
 use crate::util::validation::{validate_currency_exists, validate_iban};
 use crate::wrapper::entity::account::Account;
@@ -19,7 +21,7 @@ pub(crate) struct AccountDTO {
     #[validate(custom(function = validate_iban))]
     pub(crate) iban: Option<String>,
     pub(crate) original_balance: i64,
-    pub(crate) currency_id: i32,
+    pub(crate) currency_id: Snowflake,
 }
 
 impl FromRequest for AccountDTO {

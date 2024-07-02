@@ -13,11 +13,8 @@ where
     Ok(model)
 }
 
-pub(crate) async fn find_one_or_error<T: EntityTrait>(
-    select_stm: Select<T>,
-    resource_name: &str,
-) -> Result<T::Model, ApiError> {
-    find_one(select_stm).await?.ok_or_else(|| ApiError::ResourceNotFound(resource_name))
+pub(crate) async fn find_one_or_error<T: EntityTrait>(select_stm: Select<T>) -> Result<T::Model, ApiError> {
+    find_one(select_stm).await?.ok_or_else(|| ApiError::ResourceNotFound(T::default().table_name()))
 }
 
 pub(crate) async fn find_all<T: EntityTrait>(select_stm: Select<T>) -> Result<Vec<T::Model>, ApiError> {

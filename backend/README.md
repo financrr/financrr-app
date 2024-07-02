@@ -25,15 +25,23 @@ See: [Reverse proxy quick-start - Caddy Documentation](https://caddyserver.com/d
 
 ## Swagger UI
 
-We have a `swagger-ui` instance running at `http://localhost:8080/swagger-ui/` (mind the trailing slash) for testing and
-research purposes regarding the API.<br>
+We have a `swagger-ui` instance running at `http://localhost:8080/openapi/swagger-ui/` (mind the trailing slash) for
+testing and
+research purposes regarding the API.  
 **NOTE: Keep in mind that you have to change the URL based on your preferences (`.env` config file and/or reverse
-proxies)**<br>
+proxies)**
+
+## Scalar
+
+We also have a `scalar` instance running at `http://localhost:8080/openapi/scalar` for testing and research purposes
+regarding the API.  
+**NOTE: Keep in mind that you have to change the URL based on your preferences (`.env` config file and/or reverse
+proxies)**
 
 ## Default Login
 
 We provide a default user for every fresh installation.
-<br>
+
 You can log in with the following credentials:
 
 | Username | Password    |
@@ -44,8 +52,8 @@ You can log in with the following credentials:
 
 ## Docker
 
-We use docker to run the application.<br>
-It is designed to run behind a reverse proxy.<br>
+We use docker to run the application.  
+It is designed to run behind a reverse proxy.  
 To run it:
 
 1. execute `bash bin/build.bash`
@@ -53,10 +61,10 @@ To run it:
 
 ## ⚠️ This ONLY supports PostgreSQL!
 
-There is no exception to this rule, as we simply just include the PostgreSQL driver in our application.<br>
+There is no exception to this rule, as we simply just include the PostgreSQL driver in our application.  
 There is currently no way nor any plans to use/support other databases.
 
-**Why is that?**<br>
+**Why is that?**
 
 - Concentrating on only one database makes it way easier to develop, maintain and test existing systems
 - Having an application designed for one specific database may yield performance improvements by fine-tuning both the
@@ -67,7 +75,7 @@ There is currently no way nor any plans to use/support other databases.
 ### Performance Configuration
 
 We provide an optimized configuration for PostgreSQL.
-<br>
+
 This file based upon a general resource configuration:
 
 1. **OS Type:** linux
@@ -82,7 +90,7 @@ tool [here](https://pgtune.leopard.in.ua/).
 
 ## Docker
 
-The intended way to run this, is by using Docker Compose.<br>
+The intended way to run this, is by using Docker Compose.  
 If you simply want to host your own instance, it is highly recommended to use this in combination with a reverse proxy.
 
 To run it:

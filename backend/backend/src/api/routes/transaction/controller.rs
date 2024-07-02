@@ -2,6 +2,8 @@ use actix_web::http::Uri;
 use actix_web::web::Path;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::documentation::response::{InternalServerError, Unauthorized, ValidationError};
 use crate::api::error::api::ApiError;
 use crate::api::pagination::{PageSizeParam, Pagination};
@@ -61,12 +63,13 @@ pub(crate) async fn get_all_transactions(
     security(
         ("bearer_token" = [])
     ),
+    params(("transaction_id" = Snowflake,)),
     path = "/api/v1/transaction/{transaction_id}",
     tag = "Transaction")]
 #[get("/{transaction_id}")]
 pub(crate) async fn get_one_transaction(
     user: Phantom<User>,
-    transaction_id: Path<i32>,
+    transaction_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let transaction_id = transaction_id.into_inner();
     let transaction = Transaction::find_by_id(transaction_id).await?;
@@ -132,12 +135,13 @@ pub(crate) async fn create_from_transaction_template(
     security(
         ("bearer_token" = [])
     ),
+    params(("transaction_id" = Snowflake,)),
     path = "/api/v1/transaction/{transaction_id}",
     tag = "Transaction")]
 #[delete("/{transaction_id}")]
 pub(crate) async fn delete_transaction(
     user: Phantom<User>,
-    transaction_id: Path<i32>,
+    transaction_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let transaction_id = transaction_id.into_inner();
     let transaction = Transaction::find_by_id(transaction_id).await?;
@@ -157,6 +161,7 @@ InternalServerError,
 security(
 ("bearer_token" = [])
 ),
+params(("transaction_id" = Snowflake,)),
 path = "/api/v1/transaction/{transaction_id}",
 request_body = TransactionDTO,
 tag = "Transaction")]
@@ -164,7 +169,7 @@ tag = "Transaction")]
 pub(crate) async fn update_transaction(
     user: Phantom<User>,
     transaction_dto: TransactionDTO,
-    transaction_id: Path<i32>,
+    transaction_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let transaction = Transaction::find_by_id(transaction_id.into_inner()).await?;
     transaction.has_permission_or_error(user.get_id(), Permissions::READ_WRITE).await?;

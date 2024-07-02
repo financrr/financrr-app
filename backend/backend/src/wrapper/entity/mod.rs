@@ -2,6 +2,8 @@ use std::future::Future;
 
 use tracing::info;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::error::validation::ValidationError;
 use crate::wrapper::entity::transaction::recurring::RecurringTransaction;
 
@@ -22,7 +24,7 @@ pub(crate) trait DbValidator {
 }
 
 pub(crate) trait WrapperEntity: TableName {
-    fn get_id(&self) -> i32;
+    fn get_id(&self) -> Snowflake;
 }
 
 pub(crate) trait TableName {

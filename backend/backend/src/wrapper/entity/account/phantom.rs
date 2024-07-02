@@ -1,6 +1,7 @@
 use sea_orm::EntityName;
 
 use entity::account;
+use utility::snowflake::entity::Snowflake;
 
 use crate::wrapper::entity::account::Account;
 use crate::wrapper::entity::{TableName, WrapperEntity};
@@ -8,7 +9,7 @@ use crate::wrapper::permission::{HasPermissionOrError, Permission, PermissionByI
 use crate::wrapper::types::phantom::Phantom;
 
 impl WrapperEntity for Phantom<Account> {
-    fn get_id(&self) -> i32 {
+    fn get_id(&self) -> Snowflake {
         self.get_id()
     }
 }

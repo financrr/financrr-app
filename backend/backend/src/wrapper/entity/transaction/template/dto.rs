@@ -5,6 +5,8 @@ use futures_util::future::LocalBoxFuture;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::error::api::ApiError;
 use crate::api::routes::transaction::check_transaction_permissions;
 use crate::api::routes::transaction::validation::validate_transaction;
@@ -25,7 +27,7 @@ pub(crate) struct TransactionTemplateDTO {
 }
 
 impl TransactionTemplateDTO {
-    pub(crate) async fn check_permissions(&self, user_id: i32) -> Result<bool, ApiError> {
+    pub(crate) async fn check_permissions(&self, user_id: Snowflake) -> Result<bool, ApiError> {
         check_transaction_permissions(&self.budget_id, &self.source_id, &self.destination_id, user_id).await
     }
 

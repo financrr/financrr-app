@@ -3,12 +3,14 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use utility::snowflake::entity::Snowflake;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "budget")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: i32,
-    pub user: i32,
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub id: i64,
+    pub user: i64,
     pub amount: i64,
     #[sea_orm(column_type = "Text")]
     pub name: String,
@@ -21,6 +23,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::transaction::Entity")]
     Transaction,
+    #[sea_orm(has_many = "super::transaction_template::Entity")]
+    TransactionTemplate,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::User",
@@ -31,15 +35,15 @@ pub enum Relation {
     User,
 }
 
-impl Entity {
-    pub fn find_all_by_user_id(user_id: i32) -> Select<Self> {
-        Self::find().filter(Column::User.eq(user_id))
-    }
-}
-
 impl Related<super::transaction::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Transaction.def()
+    }
+}
+
+impl Related<super::transaction_template::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TransactionTemplate.def()
     }
 }
 
@@ -50,3 +54,9 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+    pub fn find_all_by_user_id(user_id: Snowflake) -> Select<Self> {
+        Self::find().filter(Column::User.eq(user_id))
+    }
+}

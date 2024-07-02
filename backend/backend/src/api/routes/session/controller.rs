@@ -3,11 +3,12 @@ use actix_web::web::Path;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use actix_web_validator5::Json;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::documentation::response::ValidationError;
 use crate::api::documentation::response::{InternalServerError, ResourceNotFound, Unauthorized};
 use crate::api::error::api::ApiError;
 use crate::api::pagination::{PageSizeParam, Pagination};
-use crate::api::routes::currency::controller::get_one_currency;
 use crate::wrapper::entity::session::dto::PublicSession;
 use crate::wrapper::entity::session::Session;
 use crate::wrapper::entity::user::dto::Credentials;
@@ -25,7 +26,7 @@ pub(crate) fn session_controller(cfg: &mut web::ServiceConfig) {
             .service(delete_session)
             .service(delete_all_sessions)
             .service(create_session)
-            .service(get_one_currency),
+            .service(get_one_session),
     );
 }
 
@@ -57,11 +58,15 @@ pub(crate) async fn get_current_session(session: Session) -> Result<impl Respond
     security(
         ("bearer_token" = [])
     ),
+    params(("session_id" = Snowflake,)),
     path = "/api/v1/session/{session_id}",
     tag = "Session"
 )]
 #[get("/{session_id}")]
-pub(crate) async fn get_one_session(user: Phantom<User>, session_id: Path<i32>) -> Result<impl Responder, ApiError> {
+pub(crate) async fn get_one_session(
+    user: Phantom<User>,
+    session_id: Path<Snowflake>,
+) -> Result<impl Responder, ApiError> {
     let session = Session::find_by_id(session_id.into_inner()).await?;
     session.has_permission_or_error(user.get_id(), Permissions::READ).await?;
 
@@ -143,11 +148,15 @@ pub(crate) async fn delete_current_session(session: Session) -> Result<impl Resp
     security(
         ("bearer_token" = [])
     ),
+    params(("session_id" = Snowflake,)),
     path = "/api/v1/session/{session_id}",
     tag = "Session"
 )]
 #[delete("/{session_id}")]
-pub(crate) async fn delete_session(user: Phantom<User>, session_id: Path<i32>) -> Result<impl Responder, ApiError> {
+pub(crate) async fn delete_session(
+    user: Phantom<User>,
+    session_id: Path<Snowflake>,
+) -> Result<impl Responder, ApiError> {
     let session = Session::find_by_id(session_id.into_inner()).await?;
     session.has_permission_or_error(user.get_id(), Permissions::READ_DELETE).await?;
 

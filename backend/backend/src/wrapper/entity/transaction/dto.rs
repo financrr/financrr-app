@@ -9,6 +9,8 @@ use time::OffsetDateTime;
 use utoipa::ToSchema;
 use validator::Validate;
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::error::api::ApiError;
 use crate::api::routes::transaction::check_transaction_permissions;
 use crate::api::routes::transaction::validation::validate_transaction;
@@ -55,7 +57,7 @@ impl TransactionDTO {
         })
     }
 
-    pub(crate) async fn check_permissions(&self, user_id: i32) -> Result<bool, ApiError> {
+    pub(crate) async fn check_permissions(&self, user_id: Snowflake) -> Result<bool, ApiError> {
         check_transaction_permissions(&self.budget_id, &self.source_id, &self.destination_id, user_id).await
     }
 

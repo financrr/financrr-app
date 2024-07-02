@@ -27,3 +27,7 @@ tracing.workspace = true
 
 # Date/Time
 time.workspace = true
+
+# Utils
+dotenvy.workspace = true
+utility.workspace = true

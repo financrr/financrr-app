@@ -13,6 +13,8 @@ use utoipa::ToSchema;
 use validator::{ValidationError, ValidationErrors};
 
 use entity::error::EntityError;
+use utility::datetime::error::TimeError;
+use utility::snowflake::error::SnowflakeGeneratorError;
 
 use crate::api::error::api_codes::ApiCode;
 use crate::api::error::validation;
@@ -193,6 +195,17 @@ impl From<serde_json::Error> for ApiError {
     }
 }
 
+impl From<serde_yml::Error> for ApiError {
+    fn from(value: serde_yml::Error) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            api_code: ApiCode::SERIALIZATION_ERROR,
+            details: value.to_string(),
+            reference: None,
+        }
+    }
+}
+
 impl From<actix_web::Error> for ApiError {
     fn from(error: actix_web::Error) -> Self {
         Self {
@@ -222,6 +235,28 @@ impl From<BuilderConfigBuilderError> for ApiError {
             api_code: ApiCode::CRON_BUILDER_ERROR,
             details: value.to_string(),
             reference: None,
+        }
+    }
+}
+
+impl From<TimeError> for ApiError {
+    fn from(value: TimeError) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            api_code: ApiCode::TIME_ERROR,
+            details: value.to_string(),
+            reference: SerializableStruct::new(&value).ok(),
+        }
+    }
+}
+
+impl From<SnowflakeGeneratorError> for ApiError {
+    fn from(value: SnowflakeGeneratorError) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            api_code: ApiCode::SNOWFLAKE_ERROR,
+            details: value.to_string(),
+            reference: SerializableStruct::new(&value).ok(),
         }
     }
 }

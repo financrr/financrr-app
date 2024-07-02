@@ -28,7 +28,10 @@ rand = "0.8.5"
 rust-argon2 = "2.1.0"
 
 # Error handling
-thiserror = "1.0.61"
+thiserror.workspace = true
 
 # Date/Time
 time.workspace = true
+
+# Utilities
+utility.workspace = true

@@ -1,0 +1,43 @@
+[package]
+name = "utility"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "snowflake"
+harness = false
+
+[dependencies]
+# Async runtime
+tokio.workspace = true
+futures = "0.3.30"
+
+# OpenApi
+utoipa.workspace = true
+
+# Date/Time
+time.workspace = true
+chrono.workspace = true
+
+# ORM
+sea-orm.workspace = true
+
+# Serialization and deserialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+thiserror.workspace = true
+
+[dev-dependencies]
+criterion = "0.5.1"

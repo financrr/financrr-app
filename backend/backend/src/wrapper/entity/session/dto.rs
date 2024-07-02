@@ -7,8 +7,8 @@ use crate::wrapper::entity::user::User;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub(crate) struct PublicSession {
-    pub(crate) id: i32,
-    pub(crate) user_id: i32,
+    pub(crate) id: i64,
+    pub(crate) user_id: i64,
     pub(crate) name: String,
     pub(crate) description: Option<String>,
     pub(crate) platform: Option<String>,
@@ -22,8 +22,8 @@ pub(crate) struct PublicSession {
 impl From<Session> for PublicSession {
     fn from(value: Session) -> Self {
         Self {
-            id: value.id,
-            user_id: value.user.id,
+            id: value.snowflake.id,
+            user_id: value.user.snowflake.id,
             name: value.name,
             description: value.description,
             platform: value.platform,

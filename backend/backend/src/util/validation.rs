@@ -14,6 +14,7 @@ use validator::ValidationError;
 use entity::currency;
 use entity::prelude::User;
 use entity::utility::time::get_now;
+use utility::snowflake::entity::Snowflake;
 
 use crate::database::connection::get_database_connection;
 
@@ -125,7 +126,7 @@ pub(crate) fn validate_datetime_not_in_future(datetime: &OffsetDateTime) -> Resu
     Ok(())
 }
 
-pub(crate) async fn validate_currency_exists(id: i32) -> Result<(), ValidationError> {
+pub(crate) async fn validate_currency_exists(id: Snowflake) -> Result<(), ValidationError> {
     match currency::Entity::find_by_id(id).one(get_database_connection()).await {
         Ok(Some(_)) => Ok(()),
         _ => Err(ValidationError::new("Currency does not exist")),
