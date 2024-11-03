@@ -1,2 +1,0 @@
-# clippy.toml
-disallowed-names = ["foo", "bar", "baz", "quux"]

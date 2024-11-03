@@ -167,6 +167,7 @@ async fn main() -> Result<()> {
             .configure(|cfg| configure_app_data(cfg, DB.get().unwrap()))
             .configure(configure_api)
             .configure(configure_openapi)
+            .service(web::resource("/").to(|| async { Ok("Hello, world!") }))
     })
         .bind(&Config::get_config().address)?
         .run()

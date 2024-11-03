@@ -1,9 +1,0 @@
-# App
-/logs
-
-# IDEs / Codeeditors
-/.idea
-
-# Rust
-/target
-
