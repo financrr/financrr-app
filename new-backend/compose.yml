@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17.0-alpine3.20
+    init: true
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: financrr
+      POSTGRES_PASSWORD: financrr
+      POSTGRES_DB: financrr
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/db/postgresql.conf:/etc/postgresql.conf
+
+volumes:
+  postgres-data: ~

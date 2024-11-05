@@ -16,6 +16,17 @@ CREATE TABLE users
     updated_at                 timestamp with time zone NOT NULL
 );
 
+CREATE TABLE user_permissions
+(
+    user_id     BIGINT REFERENCES "users" (id) ON DELETE CASCADE NOT NULL,
+    entity_type TEXT                                             NOT NULL,
+    entity_id   BIGINT                                           NOT NULL,
+    permissions INTEGER                                          NOT NULL,
+    created_at  timestamp with time zone                         NOT NULL,
+    updated_at  timestamp with time zone                         NOT NULL,
+    PRIMARY KEY (user_id, entity_type, entity_id)
+);
+
 CREATE TABLE sessions
 (
     id          BIGINT PRIMARY KEY,
@@ -40,14 +51,23 @@ CREATE TABLE currencies
     updated_at     timestamp with time zone NOT NULL
 );
 
-CREATE TABLE currency_user_permissions
+CREATE TABLE categories
 (
-    user_id     BIGINT REFERENCES "users" (id) ON DELETE CASCADE    NOT NULL,
-    currency_id BIGINT REFERENCES currencies (id) ON DELETE CASCADE NOT NULL,
-    permissions INTEGER                                             NOT NULL,
-    created_at  timestamp with time zone                            NOT NULL,
-    updated_at  timestamp with time zone                            NOT NULL,
-    PRIMARY KEY (user_id, currency_id)
+    id         BIGINT PRIMARY KEY,
+    name       TEXT                     NOT NULL,
+    parent_id  BIGINT REFERENCES categories (id) ON DELETE CASCADE,
+    user_id    BIGINT REFERENCES "users" (id) ON DELETE CASCADE,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE TABLE tags
+(
+    id         BIGINT PRIMARY KEY,
+    name       TEXT                                             NOT NULL,
+    user_id    BIGINT REFERENCES "users" (id) ON DELETE CASCADE NOT NULL,
+    created_at timestamp with time zone                         NOT NULL,
+    updated_at timestamp with time zone                         NOT NULL
 );
 
 CREATE TABLE linked_back_accounts
@@ -57,16 +77,6 @@ CREATE TABLE linked_back_accounts
     api_key    TEXT                     NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
-);
-
-CREATE TABLE linked_back_account_user_permissions
-(
-    user_id                BIGINT REFERENCES "users" (id) ON DELETE CASCADE              NOT NULL,
-    linked_back_account_id BIGINT REFERENCES linked_back_accounts (id) ON DELETE CASCADE NOT NULL,
-    permissions            INTEGER                                                       NOT NULL,
-    created_at             timestamp with time zone                                      NOT NULL,
-    updated_at             timestamp with time zone                                      NOT NULL,
-    PRIMARY KEY (user_id, linked_back_account_id)
 );
 
 CREATE TABLE bank_accounts
@@ -81,16 +91,6 @@ CREATE TABLE bank_accounts
     linked_back_account_id BIGINT                            REFERENCES linked_back_accounts (id) ON DELETE SET NULL,
     created_at             timestamp with time zone          NOT NULL,
     updated_at             timestamp with time zone          NOT NULL
-);
-
-CREATE TABLE bank_account_user_permissions
-(
-    user_id         BIGINT REFERENCES "users" (id) ON DELETE CASCADE       NOT NULL,
-    bank_account_id BIGINT REFERENCES bank_accounts (id) ON DELETE CASCADE NOT NULL,
-    permissions     INTEGER                                                NOT NULL,
-    created_at      timestamp with time zone                               NOT NULL,
-    updated_at      timestamp with time zone                               NOT NULL,
-    PRIMARY KEY (user_id, bank_account_id)
 );
 
 CREATE TABLE base_transactions
@@ -119,7 +119,7 @@ CREATE TABLE transaction_templates
 
 CREATE TABLE recurring_transactions
 (
-    recurring_rule   json NOT NULL,
+    cron             TEXT NOT NULL,
     last_executed_at timestamp with time zone,
     PRIMARY KEY (id)
 ) INHERITS (base_transactions);
