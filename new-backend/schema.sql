@@ -4,7 +4,6 @@
 -- #                                                          #
 -- ############################################################
 
-
 CREATE TABLE users
 (
     id                         BIGINT PRIMARY KEY,
@@ -175,9 +174,37 @@ CREATE TABLE contracts
     PRIMARY KEY (id)
 ) INHERITS (base_contracts);
 
-CREATE TABLE canceled_contracts
+CREATE TABLE inactive_contracts
 (
     canceled_at         timestamp with time zone                              NOT NULL,
     last_transaction_id BIGINT REFERENCES transactions (id) ON DELETE CASCADE NOT NULL,
     PRIMARY KEY (id)
 ) INHERITS (base_contracts);
+
+-- ############################################################
+-- #                                                          #
+-- #                          Budget                          #
+-- #                                                          #
+-- ############################################################
+
+CREATE TABLE base_budgets
+(
+    id             BIGINT PRIMARY KEY,
+    monthly_amount BIGINT                   NOT NULL,
+    correction     BIGINT                   NOT NULL DEFAULT 0,
+    name           TEXT                     NOT NULL,
+    description    TEXT,
+    created_at     timestamp with time zone NOT NULL,
+    updated_at     timestamp with time zone NOT NULL
+);
+
+CREATE TABLE monthly_budgets
+(
+    PRIMARY KEY (id)
+) INHERITS (base_budgets);
+
+CREATE TABLE savings_budgets
+(
+    total_amount BIGINT NOT NULL,
+    PRIMARY KEY (id)
+) INHERITS (base_budgets);
