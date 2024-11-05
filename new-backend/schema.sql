@@ -124,6 +124,7 @@ CREATE TABLE bank_accounts
 -- #                                                          #
 -- ############################################################
 
+-- TODO: Update this: We cannot present transaction that goes to account where we only know the Name, IBAN but we not have a reference to an account entity
 CREATE TABLE base_transactions
 (
     id                 BIGINT PRIMARY KEY,
