@@ -1,4 +1,9 @@
--- noinspection SqlNoDataSourceInspectionForFile
+-- ############################################################
+-- #                                                          #
+-- #                   Basic Entities                         #
+-- #                                                          #
+-- ############################################################
+
 
 CREATE TABLE users
 (
@@ -70,6 +75,16 @@ CREATE TABLE tags
     updated_at timestamp with time zone                         NOT NULL
 );
 
+CREATE TABLE taggings
+(
+    tag_id      BIGINT REFERENCES tags (id) ON DELETE CASCADE NOT NULL,
+    entity_type TEXT                                          NOT NULL,
+    entity_id   BIGINT                                        NOT NULL,
+    created_at  timestamp with time zone                      NOT NULL,
+    updated_at  timestamp with time zone                      NOT NULL,
+    PRIMARY KEY (tag_id, entity_type, entity_id)
+);
+
 CREATE TABLE linked_back_accounts
 (
     id         BIGINT PRIMARY KEY,
@@ -93,6 +108,12 @@ CREATE TABLE bank_accounts
     updated_at             timestamp with time zone          NOT NULL
 );
 
+-- ############################################################
+-- #                                                          #
+-- #                     Transactions                         #
+-- #                                                          #
+-- ############################################################
+
 CREATE TABLE base_transactions
 (
     id          BIGINT PRIMARY KEY,
@@ -100,6 +121,7 @@ CREATE TABLE base_transactions
     destination BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
     amount      BIGINT                                                                NOT NULL,
     currency    BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
     name        TEXT                                                                  NOT NULL,
     description TEXT,
     created_at  timestamp with time zone                                              NOT NULL,
@@ -108,6 +130,7 @@ CREATE TABLE base_transactions
 
 CREATE TABLE transactions
 (
+    type        TEXT,
     executed_at timestamp with time zone,
     PRIMARY KEY (id)
 ) INHERITS (base_transactions);
@@ -129,3 +152,32 @@ CREATE TABLE scheduled_transactions
     scheduled_at timestamp with time zone,
     PRIMARY KEY (id)
 ) INHERITS (base_transactions);
+
+-- ############################################################
+-- #                                                          #
+-- #                      Contracts                           #
+-- #                                                          #
+-- ############################################################
+
+CREATE TABLE base_contracts
+(
+    id          BIGINT PRIMARY KEY,
+    name        TEXT                     NOT NULL,
+    description TEXT,
+    category_id BIGINT                   REFERENCES categories (id) ON DELETE SET NULL,
+    created_at  timestamp with time zone NOT NULL,
+    updated_at  timestamp with time zone NOT NULL
+);
+
+CREATE TABLE contracts
+(
+    recurring_transaction_id BIGINT REFERENCES recurring_transactions (id) ON DELETE CASCADE NOT NULL,
+    PRIMARY KEY (id)
+) INHERITS (base_contracts);
+
+CREATE TABLE canceled_contracts
+(
+    canceled_at         timestamp with time zone                              NOT NULL,
+    last_transaction_id BIGINT REFERENCES transactions (id) ON DELETE CASCADE NOT NULL,
+    PRIMARY KEY (id)
+) INHERITS (base_contracts);
