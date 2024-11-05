@@ -43,6 +43,17 @@ CREATE TABLE sessions
     updated_at  timestamp with time zone                         NOT NULL
 );
 
+CREATE TABLE file_attachments
+(
+    id         BIGINT PRIMARY KEY,
+    name       TEXT                     NOT NULL,
+    path       TEXT                     NOT NULL,
+    type       TEXT                     NOT NULL,
+    size       BIGINT                   NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE currencies
 (
     id             BIGINT PRIMARY KEY,
@@ -115,16 +126,17 @@ CREATE TABLE bank_accounts
 
 CREATE TABLE base_transactions
 (
-    id          BIGINT PRIMARY KEY,
-    source      BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    destination BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    amount      BIGINT                                                                NOT NULL,
-    currency    BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    category_id BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
-    name        TEXT                                                                  NOT NULL,
-    description TEXT,
-    created_at  timestamp with time zone                                              NOT NULL,
-    updated_at  timestamp with time zone                                              NOT NULL
+    id                 BIGINT PRIMARY KEY,
+    source             BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    destination        BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    amount             BIGINT                                                                NOT NULL,
+    currency           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id        BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    name               TEXT                                                                  NOT NULL,
+    description        TEXT,
+    file_attachment_id BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    created_at         timestamp with time zone                                              NOT NULL,
+    updated_at         timestamp with time zone                                              NOT NULL
 );
 
 CREATE TABLE transactions
