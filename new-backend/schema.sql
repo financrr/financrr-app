@@ -114,6 +114,7 @@ CREATE TABLE bank_accounts
     original_balance       BIGINT                            NOT NULL DEFAULT 0,
     currency_id            BIGINT REFERENCES currencies (id) NOT NULL,
     linked_back_account_id BIGINT                            REFERENCES linked_back_accounts (id) ON DELETE SET NULL,
+    global_accessible      BOOLEAN                           NOT NULL,
     created_at             timestamp with time zone          NOT NULL,
     updated_at             timestamp with time zone          NOT NULL
 );
@@ -124,17 +125,18 @@ CREATE TABLE bank_accounts
 -- #                                                          #
 -- ############################################################
 
--- TODO: Update this: We cannot present transaction that goes to account where we only know the Name, IBAN but we not have a reference to an account entity
 CREATE TABLE base_transactions
 (
     id                 BIGINT PRIMARY KEY,
+    type               TEXT                                                                  NOT NULL,
     source             BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
     destination        BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
     amount             BIGINT                                                                NOT NULL,
     currency           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
     category_id        BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
     name               TEXT                                                                  NOT NULL,
-    description        TEXT,
+    purpose            TEXT,
+    note               TEXT,
     file_attachment_id BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
     created_at         timestamp with time zone                                              NOT NULL,
     updated_at         timestamp with time zone                                              NOT NULL
