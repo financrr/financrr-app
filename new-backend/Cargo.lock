@@ -1326,6 +1326,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
+name = "financrr_backend"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "axum",
+ "chrono",
+ "include_dir",
+ "insta",
+ "loco-rs",
+ "migration",
+ "rstest",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+ "validator",
+]
+
+[[package]]
 name = "flate2"
 version = "1.0.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2131,6 +2154,8 @@ dependencies = [
 [[package]]
 name = "loco-gen"
 version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1815e1bd51c41fceb096b27cf98b52ab23d272025337ef5106e549e697e8ee9f"
 dependencies = [
  "chrono",
  "clap",
@@ -2148,6 +2173,8 @@ dependencies = [
 [[package]]
 name = "loco-rs"
 version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4aa14998bbea030a703e8017a5a86c368b022c74b6848f5c16f07adfbc3b98b3"
 dependencies = [
  "argon2",
  "async-trait",
@@ -2199,29 +2226,6 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "ulid",
- "uuid",
- "validator",
-]
-
-[[package]]
-name = "loco_starter_template"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "axum",
- "chrono",
- "include_dir",
- "insta",
- "loco-rs",
- "migration",
- "rstest",
- "sea-orm",
- "serde",
- "serde_json",
- "serial_test",
- "tokio",
- "tracing",
- "tracing-subscriber",
  "uuid",
  "validator",
 ]

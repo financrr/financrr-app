@@ -99,7 +99,6 @@ CREATE TABLE linked_back_accounts
 (
     id         BIGINT PRIMARY KEY,
     provider   TEXT                     NOT NULL,
-    api_key    TEXT                     NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );

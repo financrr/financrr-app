@@ -19,10 +19,6 @@ use crate::{controllers, models::_entities::users, tasks, workers::downloader::D
 pub struct App;
 #[async_trait]
 impl Hooks for App {
-    fn app_name() -> &'static str {
-        env!("CARGO_CRATE_NAME")
-    }
-
     fn app_version() -> String {
         format!(
             "{} ({})",
@@ -31,6 +27,10 @@ impl Hooks for App {
                 .or(option_env!("GITHUB_SHA"))
                 .unwrap_or("dev")
         )
+    }
+
+    fn app_name() -> &'static str {
+        env!("CARGO_CRATE_NAME")
     }
 
     async fn boot(mode: StartMode, environment: &Environment) -> Result<BootResult> {
