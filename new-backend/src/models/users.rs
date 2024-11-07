@@ -195,7 +195,7 @@ impl super::_entities::users::Model {
             .await?
             .is_some()
         {
-            return Err(ModelError::EntityAlreadyExists {});
+            return Err(ModelError::EntityAlreadyExists);
         }
 
         let password_hash =
