@@ -143,16 +143,43 @@ CREATE TABLE linked_transactions
     updated_at    timestamp with time zone NOT NULL
 );
 
-CREATE TABLE base_transactions
+CREATE TABLE transactions
 (
     id                    BIGINT PRIMARY KEY,
-    type                  transaction_type                                                      NOT NULL,
     source                BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
     destination           BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
     currency              BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
     linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
     category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
     file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name           TEXT,
+    source_iban           TEXT,
+    destination_name      TEXT,
+    destination_iban      TEXT,
+    type                  transaction_type                                                      NOT NULL,
+    amount                BIGINT                                                                NOT NULL,
+    name                  TEXT                                                                  NOT NULL,
+    purpose               TEXT,
+    note                  TEXT,
+    booking_date          timestamp with time zone,
+    created_at            timestamp with time zone                                              NOT NULL,
+    updated_at            timestamp with time zone                                              NOT NULL
+);
+
+CREATE TABLE transaction_templates
+(
+    id                    BIGINT PRIMARY KEY,
+    source                BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    destination           BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    currency              BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
+    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name           TEXT,
+    source_iban           TEXT,
+    destination_name      TEXT,
+    destination_iban      TEXT,
+    type                  transaction_type                                                      NOT NULL,
     amount                BIGINT                                                                NOT NULL,
     name                  TEXT                                                                  NOT NULL,
     purpose               TEXT,
@@ -161,29 +188,53 @@ CREATE TABLE base_transactions
     updated_at            timestamp with time zone                                              NOT NULL
 );
 
-CREATE TABLE transactions
-(
-    booking_date timestamp with time zone,
-    PRIMARY KEY (id)
-) INHERITS (base_transactions);
-
-CREATE TABLE transaction_templates
-(
-    PRIMARY KEY (id)
-) INHERITS (base_transactions);
-
 CREATE TABLE recurring_transactions
 (
-    cron             TEXT NOT NULL,
-    last_executed_at timestamp with time zone,
-    PRIMARY KEY (id)
-) INHERITS (base_transactions);
+    id                    BIGINT PRIMARY KEY,
+    source                BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    destination           BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    currency              BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
+    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name           TEXT,
+    source_iban           TEXT,
+    destination_name      TEXT,
+    destination_iban      TEXT,
+    type                  transaction_type                                                      NOT NULL,
+    amount                BIGINT                                                                NOT NULL,
+    name                  TEXT                                                                  NOT NULL,
+    purpose               TEXT,
+    note                  TEXT,
+    cron                  TEXT                                                                  NOT NULL,
+    executions_per_year   REAL                                                                  NOT NULL,
+    last_executed_at      timestamp with time zone,
+    created_at            timestamp with time zone                                              NOT NULL,
+    updated_at            timestamp with time zone                                              NOT NULL
+);
 
 CREATE TABLE pending_transactions
 (
-    value_date timestamp with time zone,
-    PRIMARY KEY (id)
-) INHERITS (base_transactions);
+    id                    BIGINT PRIMARY KEY,
+    source                BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    destination           BIGINT REFERENCES bank_accounts (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    currency              BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
+    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name           TEXT,
+    source_iban           TEXT,
+    destination_name      TEXT,
+    destination_iban      TEXT,
+    type                  transaction_type                                                      NOT NULL,
+    amount                BIGINT                                                                NOT NULL,
+    name                  TEXT                                                                  NOT NULL,
+    purpose               TEXT,
+    note                  TEXT,
+    value_date            timestamp with time zone,
+    created_at            timestamp with time zone                                              NOT NULL,
+    updated_at            timestamp with time zone                                              NOT NULL
+);
 
 -- ############################################################
 -- #                                                          #
@@ -191,28 +242,28 @@ CREATE TABLE pending_transactions
 -- #                                                          #
 -- ############################################################
 
-CREATE TABLE base_contracts
-(
-    id          BIGINT PRIMARY KEY,
-    category_id BIGINT                   REFERENCES categories (id) ON DELETE SET NULL,
-    name        TEXT                     NOT NULL,
-    description TEXT,
-    created_at  timestamp with time zone NOT NULL,
-    updated_at  timestamp with time zone NOT NULL
-);
-
 CREATE TABLE contracts
 (
+    id                       BIGINT PRIMARY KEY,
     recurring_transaction_id BIGINT REFERENCES recurring_transactions (id) ON DELETE CASCADE NOT NULL,
-    PRIMARY KEY (id)
-) INHERITS (base_contracts);
+    category_id              BIGINT                                                          REFERENCES categories (id) ON DELETE SET NULL,
+    name                     TEXT                                                            NOT NULL,
+    description              TEXT,
+    created_at               timestamp with time zone                                        NOT NULL,
+    updated_at               timestamp with time zone                                        NOT NULL
+);
 
 CREATE TABLE inactive_contracts
 (
+    id                  BIGINT PRIMARY KEY,
     last_transaction_id BIGINT REFERENCES transactions (id) ON DELETE CASCADE NOT NULL,
+    category_id         BIGINT                                                REFERENCES categories (id) ON DELETE SET NULL,
     canceled_at         timestamp with time zone                              NOT NULL,
-    PRIMARY KEY (id)
-) INHERITS (base_contracts);
+    name                TEXT                                                  NOT NULL,
+    description         TEXT,
+    created_at          timestamp with time zone                              NOT NULL,
+    updated_at          timestamp with time zone                              NOT NULL
+);
 
 -- ############################################################
 -- #                                                          #
@@ -220,24 +271,48 @@ CREATE TABLE inactive_contracts
 -- #                                                          #
 -- ############################################################
 
-CREATE TABLE base_budgets
+CREATE TYPE budget_type AS ENUM ('resetting', 'accumulating');
+
+CREATE TABLE budgets
 (
     id             BIGINT PRIMARY KEY,
-    monthly_amount BIGINT                   NOT NULL,
-    correction     BIGINT                   NOT NULL DEFAULT 0,
+    type           budget_type              NOT NULL,
+    current_amount BIGINT                   NOT NULL,
+    amount         BIGINT                   NOT NULL,
+    cron           TEXT                     NOT NULL,
     name           TEXT                     NOT NULL,
     description    TEXT,
+    map_all        BOOLEAN                  NOT NULL DEFAULT FALSE,
     created_at     timestamp with time zone NOT NULL,
     updated_at     timestamp with time zone NOT NULL
 );
 
-CREATE TABLE monthly_budgets
+CREATE TABLE budget_categories
 (
-    PRIMARY KEY (id)
-) INHERITS (base_budgets);
+    budget_id   BIGINT REFERENCES budgets (id) ON DELETE CASCADE,
+    category_id BIGINT REFERENCES categories (id) ON DELETE CASCADE,
+    PRIMARY KEY (budget_id, category_id)
+);
 
-CREATE TABLE savings_budgets
+CREATE TABLE budget_tags
 (
-    total_amount BIGINT NOT NULL,
-    PRIMARY KEY (id)
-) INHERITS (base_budgets);
+    budget_id BIGINT REFERENCES budgets (id) ON DELETE CASCADE,
+    tag_id    BIGINT REFERENCES tags (id) ON DELETE CASCADE,
+    PRIMARY KEY (budget_id, tag_id)
+);
+
+CREATE TABLE budget_history
+(
+    id             BIGINT PRIMARY KEY,
+    budget_id      BIGINT                   NOT NULL,
+    budget_type    budget_type              NOT NULL,
+    current_amount BIGINT                   NOT NULL,
+    amount         BIGINT                   NOT NULL,
+    cron           TEXT                     NOT NULL,
+    name           TEXT                     NOT NULL,
+    description    TEXT,
+    map_all        BOOLEAN                  NOT NULL DEFAULT FALSE,
+    recorded_at    timestamp with time zone NOT NULL DEFAULT now(),
+    created_at     timestamp with time zone NOT NULL,
+    updated_at     timestamp with time zone NOT NULL
+);
