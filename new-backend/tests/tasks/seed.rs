@@ -1,5 +1,5 @@
+use financrr::app::App;
 use loco_rs::{boot::run_task, task, testing};
-use financrr_backend::app::App;
 use serial_test::serial;
 
 #[tokio::test]

@@ -1,6 +1,6 @@
 use axum::http::{HeaderName, HeaderValue};
+use financrr::{models::users, views::auth::LoginResponse};
 use loco_rs::{app::AppContext, TestServer};
-use financrr_backend::{models::users, views::auth::LoginResponse};
 
 const USER_EMAIL: &str = "test@loco.com";
 const USER_PASSWORD: &str = "1234";

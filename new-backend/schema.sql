@@ -10,6 +10,7 @@ CREATE TABLE users
     pid                        UUID                     NOT NULL,
     email                      TEXT                     NOT NULL UNIQUE,
     name                       TEXT                     NOT NULL,
+    flags                      INTEGER                  NOT NULL,
     password                   TEXT                     NOT NULL,
     reset_token                TEXT,
     reset_sent_at              timestamp with time zone,
@@ -316,3 +317,9 @@ CREATE TABLE budget_history
     created_at     timestamp with time zone NOT NULL,
     updated_at     timestamp with time zone NOT NULL
 );
+
+/**
+  TODO:
+    - Add indexes
+    - Enhanced Budget Criteria
+ */

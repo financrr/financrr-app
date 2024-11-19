@@ -1,5 +1,5 @@
+use financrr::app::App;
 use loco_rs::cli;
-use financrr_backend::app::App;
 use migration::Migrator;
 
 #[tokio::main]

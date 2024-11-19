@@ -20,6 +20,8 @@ server:
   port: 5150
   # The UI hostname or IP address that mailers will point to.
   host: http://localhost
+  # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
+  middlewares:
 
 # Worker Configuration
 workers:
@@ -27,7 +29,16 @@ workers:
   #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
   #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
-  mode: BackgroundAsync
+  mode: BackgroundQueue
+
+  
+# Queue Configuration
+queue:
+  kind: Redis
+  # Redis connection URI
+  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
+  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
+  dangerously_flush: false
 
 # Mailer Configuration.
 mailer:
@@ -36,7 +47,7 @@ mailer:
     # Enable/Disable smtp mailer.
     enable: true
     # SMTP server host. e.x localhost, smtp.gmail.com
-    host: {{ get_env(name="MAILER_HOST", default="localhost") }}
+    host: localhost
     # SMTP server port
     port: 1025
     # Use secure connection (SSL/TLS).
@@ -55,17 +66,17 @@ mailer:
 # Database Configuration
 database:
   # Database connection URI
-  uri: {{ get_env(name="DATABASE_URL", default="postgres://financrr:financrr@127.0.0.1:5432/financrr") }}
+  uri: {{ get_env(name="DATABASE_URL", default="postgres://loco:loco@localhost:5432/loco_app") }}
   # When enabled, the sql query will be logged.
-  enable_logging: true
+  enable_logging: false
   # Set the timeout duration when acquiring a connection.
   connect_timeout: {{ get_env(name="DB_CONNECT_TIMEOUT", default="500") }}
   # Set the idle duration before closing a connection.
-  idle_timeout: 500
+  idle_timeout: {{ get_env(name="DB_IDLE_TIMEOUT", default="500") }}
   # Minimum number of connections for a pool.
-  min_connections: 1
+  min_connections: {{ get_env(name="DB_MIN_CONNECTIONS", default="1") }}
   # Maximum number of connections for a pool.
-  max_connections: 10
+  max_connections: {{ get_env(name="DB_MAX_CONNECTIONS", default="1") }}
   # Run migration up when application loaded
   auto_migrate: true
   # Truncate database when application loaded. This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
@@ -73,19 +84,11 @@ database:
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_recreate: false
 
-# Queue Configuration
-queue:
-  kind: Redis
-  # Redis connection URI
-  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
-  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
-  dangerously_flush: false
-
 # Authentication Configuration
 auth:
   # JWT authentication
   jwt:
     # Secret key for token generation and verification
-    secret: 3pAbe4VgiFmjlRBx8Z4C
+    secret: fSPHVjkJ1e1JNaowrbqR
     # Token expiration time in seconds
     expiration: 604800 # 7 days

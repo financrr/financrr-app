@@ -4,13 +4,38 @@ services:
     init: true
     restart: unless-stopped
     environment:
-      POSTGRES_USER: financrr
-      POSTGRES_PASSWORD: financrr
-      POSTGRES_DB: financrr
+      TZ: ${TZ}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  cache:
+    image: ghcr.io/dragonflydb/dragonfly:v1.25.0
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    environment:
+      TZ: ${TZ}
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - dragonfly-data:/data
 
 volumes:
   postgres-data: ~
+  dragonfly-data: ~

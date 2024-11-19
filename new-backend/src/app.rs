@@ -1,8 +1,6 @@
-use std::path::Path;
-
 use async_trait::async_trait;
 use loco_rs::{
-    app::{AppContext, Hooks},
+    app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
@@ -12,13 +10,22 @@ use loco_rs::{
     Result,
 };
 use migration::Migrator;
+use mimalloc::MiMalloc;
 use sea_orm::DatabaseConnection;
+use std::path::Path;
 
 use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 pub struct App;
 #[async_trait]
 impl Hooks for App {
+    fn app_name() -> &'static str {
+        env!("CARGO_CRATE_NAME")
+    }
+
     fn app_version() -> String {
         format!(
             "{} ({})",
@@ -29,28 +36,25 @@ impl Hooks for App {
         )
     }
 
-    fn app_name() -> &'static str {
-        env!("CARGO_CRATE_NAME")
-    }
-
     async fn boot(mode: StartMode, environment: &Environment) -> Result<BootResult> {
         create_app::<Self, Migrator>(mode, environment).await
+    }
+
+    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+        Ok(vec![])
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
             .add_route(controllers::auth::routes())
     }
-
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
         queue.register(DownloadWorker::build(ctx)).await?;
         Ok(())
     }
-
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::seed::SeedData);
     }
-
     async fn truncate(db: &DatabaseConnection) -> Result<()> {
         truncate_table(db, users::Entity).await?;
         Ok(())
