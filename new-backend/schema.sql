@@ -192,35 +192,26 @@ CREATE TABLE transaction_parties
     updated_at               timestamp with time zone NOT NULL
 );
 
-CREATE TABLE linked_transactions
-(
-    id            BIGINT PRIMARY KEY,
-    creditor_iban TEXT REFERENCES external_bank_account_ibans (iban),
-    created_at    timestamp with time zone NOT NULL,
-    updated_at    timestamp with time zone NOT NULL
-);
-
 CREATE TABLE transactions
 (
-    id                    BIGINT PRIMARY KEY,
-    source_id             BIGINT REFERENCES transaction_parties (id),
-    destination_id        BIGINT REFERENCES transaction_parties (id),
-    currency_id           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
-    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
-    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
-    source_name           TEXT,
-    source_iban           TEXT,
-    destination_name      TEXT,
-    destination_iban      TEXT,
-    type                  transaction_type                                                      NOT NULL,
-    amount                BIGINT                                                                NOT NULL,
-    name                  TEXT                                                                  NOT NULL,
-    purpose               TEXT,
-    note                  TEXT,
-    booking_date          timestamp with time zone,
-    created_at            timestamp with time zone                                              NOT NULL,
-    updated_at            timestamp with time zone                                              NOT NULL
+    id                 BIGINT PRIMARY KEY,
+    source_id          BIGINT REFERENCES transaction_parties (id),
+    destination_id     BIGINT REFERENCES transaction_parties (id),
+    currency_id        BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id        BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name        TEXT,
+    source_iban        TEXT,
+    destination_name   TEXT,
+    destination_iban   TEXT,
+    type               transaction_type                                                      NOT NULL,
+    amount             BIGINT                                                                NOT NULL,
+    name               TEXT                                                                  NOT NULL,
+    purpose            TEXT,
+    note               TEXT,
+    booking_date       timestamp with time zone,
+    created_at         timestamp with time zone                                              NOT NULL,
+    updated_at         timestamp with time zone                                              NOT NULL
 );
 
 CREATE INDEX idx_transactions_source_id ON transactions (source_id);
@@ -229,24 +220,23 @@ CREATE INDEX idx_transactions_category_id ON transactions (category_id);
 
 CREATE TABLE transaction_templates
 (
-    id                    BIGINT PRIMARY KEY,
-    source_id             BIGINT REFERENCES transaction_parties (id),
-    destination_id        BIGINT REFERENCES transaction_parties (id),
-    currency_id           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
-    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
-    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
-    source_name           TEXT,
-    source_iban           TEXT,
-    destination_name      TEXT,
-    destination_iban      TEXT,
-    type                  transaction_type                                                      NOT NULL,
-    amount                BIGINT                                                                NOT NULL,
-    name                  TEXT                                                                  NOT NULL,
-    purpose               TEXT,
-    note                  TEXT,
-    created_at            timestamp with time zone                                              NOT NULL,
-    updated_at            timestamp with time zone                                              NOT NULL
+    id                 BIGINT PRIMARY KEY,
+    source_id          BIGINT REFERENCES transaction_parties (id),
+    destination_id     BIGINT REFERENCES transaction_parties (id),
+    currency_id        BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id        BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name        TEXT,
+    source_iban        TEXT,
+    destination_name   TEXT,
+    destination_iban   TEXT,
+    type               transaction_type                                                      NOT NULL,
+    amount             BIGINT                                                                NOT NULL,
+    name               TEXT                                                                  NOT NULL,
+    purpose            TEXT,
+    note               TEXT,
+    created_at         timestamp with time zone                                              NOT NULL,
+    updated_at         timestamp with time zone                                              NOT NULL
 );
 
 CREATE INDEX idx_transaction_templates_source_id ON transaction_templates (source_id);
@@ -255,27 +245,26 @@ CREATE INDEX idx_transaction_templates_category_id ON transaction_templates (cat
 
 CREATE TABLE recurring_transactions
 (
-    id                    BIGINT PRIMARY KEY,
-    source_id             BIGINT REFERENCES transaction_parties (id),
-    destination_id        BIGINT REFERENCES transaction_parties (id),
-    currency_id           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
-    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
-    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
-    source_name           TEXT,
-    source_iban           TEXT,
-    destination_name      TEXT,
-    destination_iban      TEXT,
-    type                  transaction_type                                                      NOT NULL,
-    amount                BIGINT                                                                NOT NULL,
-    name                  TEXT                                                                  NOT NULL,
-    purpose               TEXT,
-    note                  TEXT,
-    cron                  TEXT                                                                  NOT NULL,
-    executions_per_year   REAL                                                                  NOT NULL,
-    last_executed_at      timestamp with time zone,
-    created_at            timestamp with time zone                                              NOT NULL,
-    updated_at            timestamp with time zone                                              NOT NULL
+    id                  BIGINT PRIMARY KEY,
+    source_id           BIGINT REFERENCES transaction_parties (id),
+    destination_id      BIGINT REFERENCES transaction_parties (id),
+    currency_id         BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id         BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id  BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name         TEXT,
+    source_iban         TEXT,
+    destination_name    TEXT,
+    destination_iban    TEXT,
+    type                transaction_type                                                      NOT NULL,
+    amount              BIGINT                                                                NOT NULL,
+    name                TEXT                                                                  NOT NULL,
+    purpose             TEXT,
+    note                TEXT,
+    cron                TEXT                                                                  NOT NULL,
+    executions_per_year REAL                                                                  NOT NULL,
+    last_executed_at    timestamp with time zone,
+    created_at          timestamp with time zone                                              NOT NULL,
+    updated_at          timestamp with time zone                                              NOT NULL
 );
 
 CREATE INDEX idx_recurring_transactions_source_id ON recurring_transactions (source_id);
@@ -284,25 +273,24 @@ CREATE INDEX idx_recurring_transactions_category_id ON recurring_transactions (c
 
 CREATE TABLE pending_transactions
 (
-    id                    BIGINT PRIMARY KEY,
-    source_id             BIGINT REFERENCES transaction_parties (id),
-    destination_id        BIGINT REFERENCES transaction_parties (id),
-    currency_id           BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    linked_transaction_id BIGINT                                                                REFERENCES linked_transactions (id) ON DELETE SET NULL,
-    category_id           BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
-    file_attachment_id    BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
-    source_name           TEXT,
-    source_iban           TEXT,
-    destination_name      TEXT,
-    destination_iban      TEXT,
-    type                  transaction_type                                                      NOT NULL,
-    amount                BIGINT                                                                NOT NULL,
-    name                  TEXT                                                                  NOT NULL,
-    purpose               TEXT,
-    note                  TEXT,
-    value_date            timestamp with time zone,
-    created_at            timestamp with time zone                                              NOT NULL,
-    updated_at            timestamp with time zone                                              NOT NULL
+    id                 BIGINT PRIMARY KEY,
+    source_id          BIGINT REFERENCES transaction_parties (id),
+    destination_id     BIGINT REFERENCES transaction_parties (id),
+    currency_id        BIGINT REFERENCES currencies (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+    category_id        BIGINT                                                                REFERENCES categories (id) ON UPDATE SET NULL ON DELETE SET NULL,
+    file_attachment_id BIGINT                                                                REFERENCES file_attachments (id) ON DELETE SET NULL,
+    source_name        TEXT,
+    source_iban        TEXT,
+    destination_name   TEXT,
+    destination_iban   TEXT,
+    type               transaction_type                                                      NOT NULL,
+    amount             BIGINT                                                                NOT NULL,
+    name               TEXT                                                                  NOT NULL,
+    purpose            TEXT,
+    note               TEXT,
+    value_date         timestamp with time zone,
+    created_at         timestamp with time zone                                              NOT NULL,
+    updated_at         timestamp with time zone                                              NOT NULL
 );
 
 CREATE INDEX idx_pending_transactions_source_id ON pending_transactions (source_id);
