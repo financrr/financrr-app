@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: ./backend/docker/rust/Dockerfile
+          file: ./backend/docker/Dockerfile
           platforms: linux/amd64
           load: true
 
@@ -48,6 +48,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: ./backend/docker/rust/Dockerfile
+          file: ./backend/docker/Dockerfile
           platforms: linux/arm64
           load: true

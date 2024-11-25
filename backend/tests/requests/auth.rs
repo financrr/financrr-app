@@ -65,10 +65,7 @@ async fn can_login_with_verify(#[case] test_name: &str, #[case] password: &str) 
         });
 
         //Creating a new user
-        _ = request
-            .post("/api/auth/register")
-            .json(&register_payload)
-            .await;
+        _ = request.post("/api/auth/register").json(&register_payload).await;
 
         let user = users::Model::find_by_email(&ctx.db, email).await.unwrap();
         let verify_payload = serde_json::json!({
@@ -116,10 +113,7 @@ async fn can_login_without_verify() {
         });
 
         //Creating a new user
-        _ = request
-            .post("/api/auth/register")
-            .json(&register_payload)
-            .await;
+        _ = request.post("/api/auth/register").json(&register_payload).await;
 
         //verify user request
         let response = request
@@ -166,9 +160,7 @@ async fn can_reset_password() {
 
         let reset_response = request.post("/api/auth/reset").json(&reset_payload).await;
 
-        let user = users::Model::find_by_email(&ctx.db, &user.email)
-            .await
-            .unwrap();
+        let user = users::Model::find_by_email(&ctx.db, &user.email).await.unwrap();
 
         assert!(user.reset_token.is_none());
         assert!(user.reset_sent_at.is_none());
@@ -203,10 +195,7 @@ async fn can_get_current_user() {
         let user = prepare_data::init_user_login(&request, &ctx).await;
 
         let (auth_key, auth_value) = prepare_data::auth_header(&user.token);
-        let response = request
-            .get("/api/auth/current")
-            .add_header(auth_key, auth_value)
-            .await;
+        let response = request.get("/api/auth/current").add_header(auth_key, auth_value).await;
 
         with_settings!({
             filters => testing::cleanup_user_model()

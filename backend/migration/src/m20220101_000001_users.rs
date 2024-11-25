@@ -17,9 +17,7 @@ impl MigrationTrait for Migration {
             .col(string_null(Users::ResetToken))
             .col(timestamp_with_time_zone_null(Users::ResetSentAt))
             .col(string_null(Users::EmailVerificationToken))
-            .col(timestamp_with_time_zone_null(
-                Users::EmailVerificationSentAt,
-            ))
+            .col(timestamp_with_time_zone_null(Users::EmailVerificationSentAt))
             .col(timestamp_with_time_zone_null(Users::EmailVerifiedAt))
             .to_owned();
         manager.create_table(table).await?;
@@ -27,9 +25,7 @@ impl MigrationTrait for Migration {
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .drop_table(Table::drop().table(Users::Table).to_owned())
-            .await
+        manager.drop_table(Table::drop().table(Users::Table).to_owned()).await
     }
 }
 

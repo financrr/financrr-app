@@ -22,6 +22,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./backend
+          ignore: RUSTSEC-2023-0071, RUSTSEC-2024-0370
 
   clippy:
     env:

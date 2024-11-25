@@ -31,9 +31,7 @@ impl Task for SeedData {
     }
 
     async fn run(&self, app_context: &AppContext, vars: &task::Vars) -> Result<()> {
-        let refresh = vars
-            .cli_arg("refresh")
-            .is_ok_and(|refresh| refresh == "true");
+        let refresh = vars.cli_arg("refresh").is_ok_and(|refresh| refresh == "true");
 
         if refresh {
             db::reset::<Migrator>(&app_context.db).await?;

@@ -84,8 +84,7 @@ async fn can_find_by_email() {
     testing::seed::<App>(&boot.app_context.db).await.unwrap();
 
     let existing_user = Model::find_by_email(&boot.app_context.db, "user1@example.com").await;
-    let non_existing_user_results =
-        Model::find_by_email(&boot.app_context.db, "un@existing-email.com").await;
+    let non_existing_user_results = Model::find_by_email(&boot.app_context.db, "un@existing-email.com").await;
 
     assert_debug_snapshot!(existing_user);
     assert_debug_snapshot!(non_existing_user_results);
@@ -99,8 +98,7 @@ async fn can_find_by_pid() {
     let boot = testing::boot_test::<App>().await.unwrap();
     testing::seed::<App>(&boot.app_context.db).await.unwrap();
 
-    let existing_user =
-        Model::find_by_pid(&boot.app_context.db, "11111111-1111-1111-1111-111111111111").await;
+    let existing_user = Model::find_by_pid(&boot.app_context.db, "11111111-1111-1111-1111-111111111111").await;
     let non_existing_user_results =
         Model::find_by_pid(&boot.app_context.db, "23232323-2323-2323-2323-232323232323").await;
 
@@ -180,11 +178,7 @@ async fn can_verified() {
 
     assert!(user.email_verified_at.is_none());
 
-    assert!(user
-        .into_active_model()
-        .verified(&boot.app_context.db)
-        .await
-        .is_ok());
+    assert!(user.into_active_model().verified(&boot.app_context.db).await.is_ok());
 
     let user = Model::find_by_pid(&boot.app_context.db, "11111111-1111-1111-1111-111111111111")
         .await
