@@ -9,10 +9,19 @@ logger:
   # Log level, options: trace, debug, info, warn or error.
   level: {{get_env(name="LOG_LEVEL", default="debug")}}
   # Define the logging format. options: compact, pretty or json
-  format: {{get_env(name="LOG_FORMAT", default="pretty")}}
+  format: {{get_env(name="LOG_FORMAT", default="compact")}}
   # By default, the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
   # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
   # override_filter: trace
+  file_appender:
+    enable: {{get_env(name="LOG_FILE_ENABLED", default=true)}}
+    non_blocking: true
+    level: {{get_env(name="LOG_LEVEL", default="debug")}}
+    format: {{get_env(name="LOG_FORMAT", default="pretty")}}
+    dir: {{get_env(name="LOG_DIR", default="./logs")}}
+    rotation: {{get_env(name="LOG_ROTATION", default="daily")}}
+    max_log_files: {{get_env(name="LOG_MAX_LOG_FILES", default="7")}}
+    filename_suffix: log
 
 # Web server configuration
 server:
