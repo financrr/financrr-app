@@ -1,4 +1,8 @@
-/target
-/logs
-/.git
-/.idea
+target
+Dockerfile
+docs
+.dockerignore
+.git
+.gitignore
+.idea
+.editorconfig

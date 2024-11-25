@@ -1,7 +1,8 @@
+#![allow(elided_lifetimes_in_paths)]
+#![allow(clippy::wildcard_imports)]
 pub use sea_orm_migration::prelude::*;
 
-mod m20240110_084613_default_currencies;
-mod m20240116_172139_seed_admin_user;
+mod m20220101_000001_users;
 
 pub struct Migrator;
 
@@ -9,8 +10,8 @@ pub struct Migrator;
 impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![
-            Box::new(m20240110_084613_default_currencies::Migration),
-            Box::new(m20240116_172139_seed_admin_user::Migration),
+            Box::new(m20220101_000001_users::Migration),
+            // inject-above (do not remove this comment)
         ]
     }
 }

@@ -1,0 +1,11 @@
+# App
+/system
+/logs
+.env
+
+# IDEs / Codeeditors
+/.idea
+
+# Rust
+/target
+

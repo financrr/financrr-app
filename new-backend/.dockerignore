@@ -1,8 +1,0 @@
-target
-Dockerfile
-docs
-.dockerignore
-.git
-.gitignore
-.idea
-.editorconfig
