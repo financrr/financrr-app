@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::external_bank_account_ibans::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type ExternalBankAccountIbans = Entity;
 
 #[async_trait::async_trait]

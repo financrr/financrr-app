@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::contracts::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type Contracts = Entity;
 
 #[async_trait::async_trait]

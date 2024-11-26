@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::categories::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type Categories = Entity;
 
 #[async_trait::async_trait]

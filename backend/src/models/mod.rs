@@ -1,5 +1,4 @@
 pub mod _entities;
-pub mod users;
 pub mod bank_accounts;
 pub mod budget_criteria;
 pub mod budget_criteria_bank_accounts;
@@ -25,3 +24,4 @@ pub mod transaction_parties;
 pub mod transaction_templates;
 pub mod transactions;
 pub mod user_permissions;
+pub mod users;

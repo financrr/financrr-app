@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::currencies::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type Currencies = Entity;
 
 #[async_trait::async_trait]

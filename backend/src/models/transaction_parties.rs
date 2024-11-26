@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::transaction_parties::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type TransactionParties = Entity;
 
 #[async_trait::async_trait]

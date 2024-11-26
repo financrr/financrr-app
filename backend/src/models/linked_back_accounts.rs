@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::linked_back_accounts::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type LinkedBackAccounts = Entity;
 
 #[async_trait::async_trait]

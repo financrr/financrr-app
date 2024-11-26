@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::pending_transactions::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type PendingTransactions = Entity;
 
 #[async_trait::async_trait]

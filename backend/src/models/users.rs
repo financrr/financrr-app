@@ -1,10 +1,13 @@
+pub use super::_entities::users::{self, ActiveModel, Entity, Model};
+use crate::models::_entities::sessions;
 use async_trait::async_trait;
 use chrono::offset::Local;
 use loco_rs::{auth::jwt, hash, prelude::*};
+use sea_orm::prelude::Expr;
+use sea_orm::sea_query::IntoCondition;
+use sea_orm::{JoinType, QuerySelect, RelationTrait};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-pub use super::_entities::users::{self, ActiveModel, Entity, Model};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginParams {
@@ -46,7 +49,7 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
         if insert {
             let mut this = self;
             this.pid = ActiveValue::Set(Uuid::new_v4());
-            this.api_key = ActiveValue::Set(format!("lo-{}", Uuid::new_v4()));
+            // this.api_key = ActiveValue::Set(format!("lo-{}", Uuid::new_v4()));
             Ok(this)
         } else {
             Ok(self)
@@ -57,11 +60,7 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
 #[async_trait]
 impl Authenticable for super::_entities::users::Model {
     async fn find_by_api_key(db: &DatabaseConnection, api_key: &str) -> ModelResult<Self> {
-        let user = users::Entity::find()
-            .filter(model::query::condition().eq(users::Column::ApiKey, api_key).build())
-            .one(db)
-            .await?;
-        user.ok_or_else(|| ModelError::EntityNotFound)
+        users::Model::find_by_api_key(db, api_key).await
     }
 
     async fn find_by_claims_key(db: &DatabaseConnection, claims_key: &str) -> ModelResult<Self> {
@@ -77,7 +76,7 @@ impl super::_entities::users::Model {
     /// When could not find user by the given token or DB query error
     pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
         let user = users::Entity::find()
-            .filter(model::query::condition().eq(users::Column::Email, email).build())
+            .filter(query::condition().eq(users::Column::Email, email).build())
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
@@ -91,7 +90,7 @@ impl super::_entities::users::Model {
     pub async fn find_by_verification_token(db: &DatabaseConnection, token: &str) -> ModelResult<Self> {
         let user = users::Entity::find()
             .filter(
-                model::query::condition()
+                query::condition()
                     .eq(users::Column::EmailVerificationToken, token)
                     .build(),
             )
@@ -107,7 +106,7 @@ impl super::_entities::users::Model {
     /// When could not find user by the given token or DB query error
     pub async fn find_by_reset_token(db: &DatabaseConnection, token: &str) -> ModelResult<Self> {
         let user = users::Entity::find()
-            .filter(model::query::condition().eq(users::Column::ResetToken, token).build())
+            .filter(query::condition().eq(users::Column::ResetToken, token).build())
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
@@ -121,7 +120,7 @@ impl super::_entities::users::Model {
     pub async fn find_by_pid(db: &DatabaseConnection, pid: &str) -> ModelResult<Self> {
         let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
         let user = users::Entity::find()
-            .filter(model::query::condition().eq(users::Column::Pid, parse_uuid).build())
+            .filter(query::condition().eq(users::Column::Pid, parse_uuid).build())
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
@@ -133,8 +132,16 @@ impl super::_entities::users::Model {
     ///
     /// When could not find user by the given token or DB query error
     pub async fn find_by_api_key(db: &DatabaseConnection, api_key: &str) -> ModelResult<Self> {
+        let cloned_api_key = api_key.to_string();
         let user = users::Entity::find()
-            .filter(model::query::condition().eq(users::Column::ApiKey, api_key).build())
+            .join(
+                JoinType::LeftJoin,
+                sessions::Relation::Users.def().rev().on_condition(move |_left, right| {
+                    Expr::col((right, sessions::Column::ApiKey))
+                        .eq(cloned_api_key.as_str())
+                        .into_condition()
+                }),
+            )
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
@@ -160,11 +167,7 @@ impl super::_entities::users::Model {
         let txn = db.begin().await?;
 
         if users::Entity::find()
-            .filter(
-                model::query::condition()
-                    .eq(users::Column::Email, &params.email)
-                    .build(),
-            )
+            .filter(query::condition().eq(users::Column::Email, &params.email).build())
             .one(&txn)
             .await?
             .is_some()

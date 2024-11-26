@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::transaction_templates::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type TransactionTemplates = Entity;
 
 #[async_trait::async_trait]

@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::sessions::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type Sessions = Entity;
 
 #[async_trait::async_trait]

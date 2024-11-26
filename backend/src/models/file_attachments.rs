@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::file_attachments::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type FileAttachments = Entity;
 
 #[async_trait::async_trait]

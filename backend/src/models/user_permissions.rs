@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::user_permissions::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type UserPermissions = Entity;
 
 #[async_trait::async_trait]

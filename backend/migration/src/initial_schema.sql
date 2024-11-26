@@ -14,7 +14,7 @@ CREATE TABLE users
     password                   TEXT                     NOT NULL,
     reset_token                TEXT,
     reset_sent_at              timestamp with time zone,
-    email_verification_token   TEXT,
+    email_verification_tokens  TEXT,
     email_verification_sent_at timestamp with time zone,
     email_verified_at          timestamp with time zone,
     created_at                 timestamp with time zone NOT NULL,

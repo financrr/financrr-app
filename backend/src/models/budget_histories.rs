@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::budget_histories::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type BudgetHistories = Entity;
 
 #[async_trait::async_trait]

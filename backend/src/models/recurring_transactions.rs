@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::recurring_transactions::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type RecurringTransactions = Entity;
 
 #[async_trait::async_trait]

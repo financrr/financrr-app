@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::budget_criteria_external_bank_accounts::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type BudgetCriteriaExternalBankAccounts = Entity;
 
 #[async_trait::async_trait]

@@ -10,14 +10,14 @@ default-run = "financrr-cli"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-loco-rs = { version = "0.13.1" }
+loco-rs = { version = "0.13.2", features = ["with-db", "cache_inmem"] }
 
 [dependencies]
-loco-rs = { workspace = true  }
+loco-rs = { workspace = true }
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
 tokio = { version = "1.41.1", default-features = false, features = [
-  "rt-multi-thread",
+    "rt-multi-thread",
 ] }
 async-trait = "0.1.83"
 axum = "0.7.9"
@@ -25,10 +25,10 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json"] }
 migration = { path = "migration" }
 sea-orm = { version = "1.1.1", features = [
-  "sqlx-sqlite",
-  "sqlx-postgres",
-  "runtime-tokio-rustls",
-  "macros",
+    "sqlx-sqlite",
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros",
 ] }
 chrono = "0.4.38"
 validator = { version = "0.18" }
@@ -38,6 +38,21 @@ dotenvy = "0.15.7"
 
 # Mimalloc for better performance (eg. Alpine)
 mimalloc = "0.1.43"
+
+# Utoipa
+utoipa = { version = "5.2.0", features = [
+    "axum_extras",
+    "openapi_extensions",
+    "yaml",
+    "preserve_order",
+    "preserve_path_order",
+    "non_strict_integers",
+    "chrono",
+    "uuid",
+] }
+utoipa-scalar = { version = "0.2.0", features = ["axum"] }
+utoipa-swagger-ui = { version = "8.0.3", features = ["axum", "debug-embed"] }
+utoipauto = "0.2.0"
 
 [[bin]]
 name = "financrr-cli"
