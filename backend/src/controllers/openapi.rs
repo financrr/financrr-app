@@ -32,7 +32,7 @@ async fn openapi_yaml() -> Result<Response> {
 
     let mut res = Response::new(Body::new(doc));
     let headers = res.headers_mut();
-    headers.insert("Content-Type", "application/x-yaml".parse()?);
+    headers.insert("Content-Type", "application/yaml".parse()?);
 
     Ok(res)
 }
