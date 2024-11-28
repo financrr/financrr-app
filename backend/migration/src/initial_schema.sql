@@ -7,14 +7,14 @@
 CREATE TABLE users
 (
     id                         BIGINT PRIMARY KEY,
-    pid                        UUID                     NOT NULL,
+    pid                        BIGINT                   NOT NULL UNIQUE,
     email                      TEXT                     NOT NULL UNIQUE,
     name                       TEXT                     NOT NULL,
     flags                      INTEGER                  NOT NULL,
     password                   TEXT                     NOT NULL,
     reset_token                TEXT,
     reset_sent_at              timestamp with time zone,
-    email_verification_tokens  TEXT,
+    email_verification_token   TEXT,
     email_verification_sent_at timestamp with time zone,
     email_verified_at          timestamp with time zone,
     created_at                 timestamp with time zone NOT NULL,
@@ -22,6 +22,7 @@ CREATE TABLE users
 );
 
 CREATE INDEX idx_user_email ON users (email);
+CREATE INDEX idx_user_pid ON users (pid);
 
 CREATE TABLE user_permissions
 (

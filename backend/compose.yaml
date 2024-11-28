@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.2-alpine3.20
     init: true
     restart: unless-stopped
     environment:
@@ -19,7 +19,7 @@ services:
       retries: 3
 
   cache:
-    image: ghcr.io/dragonflydb/dragonfly:v1.25.0
+    image: ghcr.io/dragonflydb/dragonfly:v1.25.4
     init: true
     restart: unless-stopped
     ports:
