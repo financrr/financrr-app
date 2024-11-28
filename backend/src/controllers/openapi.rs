@@ -22,7 +22,7 @@ async fn openapi_json() -> Result<Response> {
 #[utoipa::path(get,
 path="/api/v1/openapi.yaml",
 responses(
-    (status=200, description="OpenAPI YAML", content_type="application/x-yaml"),
+    (status=200, description="OpenAPI YAML", content_type="application/yaml"),
     (status=500, description="Internal Server Error")
 ),
 tag = "OpenAPI",

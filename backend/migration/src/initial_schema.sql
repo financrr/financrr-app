@@ -4,25 +4,28 @@
 -- #                                                          #
 -- ############################################################
 
+CREATE TABLE instances
+(
+    node_id    SMALLINT PRIMARY KEY,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE users
 (
     id                         BIGINT PRIMARY KEY,
-    pid                        BIGINT                   NOT NULL UNIQUE,
     email                      TEXT                     NOT NULL UNIQUE,
     name                       TEXT                     NOT NULL,
     flags                      INTEGER                  NOT NULL,
     password                   TEXT                     NOT NULL,
-    reset_token                TEXT,
+    reset_token                TEXT UNIQUE,
     reset_sent_at              timestamp with time zone,
-    email_verification_token   TEXT,
+    email_verification_token   TEXT UNIQUE,
     email_verification_sent_at timestamp with time zone,
     email_verified_at          timestamp with time zone,
     created_at                 timestamp with time zone NOT NULL,
     updated_at                 timestamp with time zone NOT NULL
 );
-
-CREATE INDEX idx_user_email ON users (email);
-CREATE INDEX idx_user_pid ON users (pid);
 
 CREATE TABLE user_permissions
 (

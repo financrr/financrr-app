@@ -15,6 +15,7 @@ pub use super::external_bank_account_ibans::Entity as ExternalBankAccountIbans;
 pub use super::external_bank_accounts::Entity as ExternalBankAccounts;
 pub use super::file_attachments::Entity as FileAttachments;
 pub use super::inactive_contracts::Entity as InactiveContracts;
+pub use super::instances::Entity as Instances;
 pub use super::linked_back_accounts::Entity as LinkedBackAccounts;
 pub use super::pending_transactions::Entity as PendingTransactions;
 pub use super::recurring_transactions::Entity as RecurringTransactions;

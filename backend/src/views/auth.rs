@@ -15,7 +15,7 @@ impl LoginResponse {
     pub fn new(user: &users::Model, token: &String) -> Self {
         Self {
             token: token.to_string(),
-            pid: user.pid.to_string(),
+            pid: user.id.to_string(),
             name: user.name.clone(),
             is_verified: user.email_verified_at.is_some(),
         }
@@ -33,7 +33,7 @@ impl CurrentResponse {
     #[must_use]
     pub fn new(user: &users::Model) -> Self {
         Self {
-            pid: user.pid.to_string(),
+            pid: user.id.to_string(),
             name: user.name.clone(),
             email: user.email.clone(),
         }

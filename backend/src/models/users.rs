@@ -1,5 +1,6 @@
 pub use super::_entities::users::{self, ActiveModel, Entity, Model};
 use crate::models::_entities::sessions;
+use crate::services::snowflake_generator::SnowflakeGenerator;
 use async_trait::async_trait;
 use chrono::offset::Local;
 use loco_rs::{auth::jwt, hash, prelude::*};
@@ -7,6 +8,7 @@ use sea_orm::prelude::Expr;
 use sea_orm::sea_query::IntoCondition;
 use sea_orm::{JoinType, QuerySelect, RelationTrait};
 use serde::{Deserialize, Serialize};
+use std::num::ParseIntError;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -48,7 +50,7 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
         self.validate()?;
         if insert {
             let mut this = self;
-            this.pid = ActiveValue::Set(0i64);
+            this.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
             Ok(this)
         } else {
             Ok(self)
@@ -117,9 +119,9 @@ impl super::_entities::users::Model {
     ///
     /// When could not find user  or DB query error
     pub async fn find_by_pid(db: &DatabaseConnection, pid: &str) -> ModelResult<Self> {
-        let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
+        let parsed_id: i64 = pid.parse().map_err(|e: ParseIntError| ModelError::Any(e.into()))?;
         let user = users::Entity::find()
-            .filter(query::condition().eq(users::Column::Pid, parse_uuid).build())
+            .filter(query::condition().eq(users::Column::Id, parsed_id).build())
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
@@ -162,7 +164,11 @@ impl super::_entities::users::Model {
     /// # Errors
     ///
     /// When could not save the user into the DB
-    pub async fn create_with_password(db: &DatabaseConnection, params: &RegisterParams) -> ModelResult<Self> {
+    pub async fn create_with_password(
+        db: &DatabaseConnection,
+        snowflake_generator: &SnowflakeGenerator,
+        params: &RegisterParams,
+    ) -> ModelResult<Self> {
         let txn = db.begin().await?;
 
         if users::Entity::find()
@@ -176,6 +182,7 @@ impl super::_entities::users::Model {
 
         let password_hash = hash::hash_password(&params.password).map_err(|e| ModelError::Any(e.into()))?;
         let user = users::ActiveModel {
+            id: ActiveValue::set(snowflake_generator.next_id().map_err(|e| ModelError::Any(e.into()))?),
             email: ActiveValue::set(params.email.to_string()),
             password: ActiveValue::set(password_hash),
             name: ActiveValue::set(params.name.to_string()),
@@ -195,7 +202,7 @@ impl super::_entities::users::Model {
     ///
     /// when could not convert user claims to jwt token
     pub fn generate_jwt(&self, secret: &str, expiration: &u64) -> ModelResult<String> {
-        Ok(jwt::JWT::new(secret).generate_token(expiration, self.pid.to_string(), None)?)
+        Ok(jwt::JWT::new(secret).generate_token(expiration, self.id.to_string(), None)?)
     }
 }
 

@@ -1,3 +1,4 @@
+use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::{
     app::App,
     models::users::{self, Model, RegisterParams},
@@ -6,6 +7,7 @@ use insta::assert_debug_snapshot;
 use loco_rs::{model::ModelError, testing};
 use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel};
 use serial_test::serial;
+use std::sync::Arc;
 
 macro_rules! configure_insta {
     ($($expr:expr),*) => {
@@ -46,7 +48,9 @@ async fn can_create_with_password() {
         password: "1234".to_string(),
         name: "framework".to_string(),
     };
-    let res = Model::create_with_password(&boot.app_context.db, &params).await;
+    let snowflake_generator = Arc::new(SnowflakeGeneratorInner::with_node_id(1));
+
+    let res = Model::create_with_password(&boot.app_context.db, &snowflake_generator, &params).await;
 
     insta::with_settings!({
         filters => testing::cleanup_user_model()

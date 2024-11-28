@@ -2,7 +2,6 @@ services:
   db:
     image: postgres:17.2-alpine3.20
     init: true
-    restart: unless-stopped
     environment:
       TZ: ${TZ}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -21,7 +20,6 @@ services:
   cache:
     image: ghcr.io/dragonflydb/dragonfly:v1.25.4
     init: true
-    restart: unless-stopped
     ports:
       - "127.0.0.1:6379:6379"
     environment:
@@ -36,6 +34,21 @@ services:
     volumes:
       - dragonfly-data:/data
 
+  mailpit:
+    image: axllent/mailpit
+    init: true
+    volumes:
+      - mailpit-data:/data
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "1025:1025"
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
 volumes:
   postgres-data: ~
   dragonfly-data: ~
+  mailpit-data: ~

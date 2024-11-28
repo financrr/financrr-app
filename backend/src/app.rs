@@ -1,3 +1,4 @@
+use crate::services::configure_services;
 use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
 use async_trait::async_trait;
 use axum::routing::Router as AxumRouter;
@@ -87,8 +88,10 @@ impl Hooks for App {
         })
     }
 
-    async fn after_routes(router: AxumRouter, _ctx: &AppContext) -> Result<AxumRouter> {
-        Ok(router.merge(open_api_routes()))
+    async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
+        let service_injected_router = configure_services(router, ctx).await?;
+
+        Ok(service_injected_router.merge(open_api_routes()))
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {

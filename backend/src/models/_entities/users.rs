@@ -8,8 +8,6 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
-    #[sea_orm(unique)]
-    pub pid: i64,
     #[sea_orm(column_type = "Text", unique)]
     pub email: String,
     #[sea_orm(column_type = "Text")]
@@ -17,10 +15,10 @@ pub struct Model {
     pub flags: i32,
     #[sea_orm(column_type = "Text")]
     pub password: String,
-    #[sea_orm(column_type = "Text", nullable)]
+    #[sea_orm(column_type = "Text", nullable, unique)]
     pub reset_token: Option<String>,
     pub reset_sent_at: Option<DateTimeWithTimeZone>,
-    #[sea_orm(column_type = "Text", nullable)]
+    #[sea_orm(column_type = "Text", nullable, unique)]
     pub email_verification_token: Option<String>,
     pub email_verification_sent_at: Option<DateTimeWithTimeZone>,
     pub email_verified_at: Option<DateTimeWithTimeZone>,

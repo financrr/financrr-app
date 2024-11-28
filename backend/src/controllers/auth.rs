@@ -1,7 +1,9 @@
-use axum::debug_handler;
+use axum::{debug_handler, Extension};
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::services::snowflake_generator::SnowflakeGenerator;
+use crate::services::user_verification::UserVerificationService;
 use crate::{
     mailers::auth::AuthMailer,
     models::{
@@ -10,6 +12,7 @@ use crate::{
     },
     views::auth::{CurrentResponse, LoginResponse},
 };
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct VerifyParams {
     pub token: String,
@@ -29,8 +32,13 @@ pub struct ResetParams {
 /// Register function creates a new user with the given parameters and sends a
 /// welcome email to the user
 #[debug_handler]
-async fn register(State(ctx): State<AppContext>, Json(params): Json<RegisterParams>) -> Result<Response> {
-    let res = users::Model::create_with_password(&ctx.db, &params).await;
+async fn register(
+    State(ctx): State<AppContext>,
+    Extension(user_verification_service): Extension<UserVerificationService>,
+    Extension(snowflake_generator): Extension<SnowflakeGenerator>,
+    Json(params): Json<RegisterParams>,
+) -> Result<Response> {
+    let res = users::Model::create_with_password(&ctx.db, &snowflake_generator, &params).await;
 
     let user = match res {
         Ok(user) => user,
@@ -44,9 +52,11 @@ async fn register(State(ctx): State<AppContext>, Json(params): Json<RegisterPara
         }
     };
 
-    let user = user.into_active_model().set_email_verification_sent(&ctx.db).await?;
+    let active_model = user.into_active_model();
 
-    AuthMailer::send_welcome(&ctx, &user).await?;
+    user_verification_service
+        .send_verification_email_or_verify_user(active_model)
+        .await?;
 
     format::json(())
 }
@@ -58,11 +68,11 @@ async fn verify(State(ctx): State<AppContext>, Json(params): Json<VerifyParams>)
     let user = users::Model::find_by_verification_token(&ctx.db, &params.token).await?;
 
     if user.email_verified_at.is_some() {
-        tracing::info!(pid = user.pid.to_string(), "user already verified");
+        tracing::info!(id = user.id.to_string(), "user already verified");
     } else {
         let active_model = user.into_active_model();
         let user = active_model.verified(&ctx.db).await?;
-        tracing::info!(pid = user.pid.to_string(), "user verified");
+        tracing::info!(id = user.id.to_string(), "user verified");
     }
 
     format::json(())

@@ -14,6 +14,7 @@ pub mod external_bank_account_ibans;
 pub mod external_bank_accounts;
 pub mod file_attachments;
 pub mod inactive_contracts;
+pub mod instances;
 pub mod linked_back_accounts;
 pub mod pending_transactions;
 pub mod recurring_transactions;
