@@ -1,7 +1,5 @@
-use crate::services::configure_services;
 use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
 use async_trait::async_trait;
-use axum::routing::Router as AxumRouter;
 use loco_rs::cache::Cache;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
@@ -18,38 +16,9 @@ use migration::Migrator;
 use mimalloc::MiMalloc;
 use sea_orm::DatabaseConnection;
 use std::path::Path;
-use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
-use utoipa::openapi::OpenApi as OpenApiStruct;
-use utoipa::{Modify, OpenApi};
-use utoipa_scalar::{Scalar, Servable};
-use utoipa_swagger_ui::SwaggerUi;
-use utoipauto::utoipauto;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
-
-#[utoipauto]
-#[derive(OpenApi)]
-#[openapi(
-    tags(
-        (name = "Status", description = "Endpoints that contain information about the health status of the server."),
-        (name = "OpenAPI", description = "Endpoints for OpenAPI documentation."),
-        (name = "Metrics", description = "Endpoints for prometheus metrics."),
-        (name = "Session", description = "Endpoints for session management."),
-        (name = "User", description = "Endpoints for user management.")
-    ),
-    modifiers(&ApiKeyModifier)
-)]
-pub struct ApiDocs;
-
-struct ApiKeyModifier;
-
-impl Modify for ApiKeyModifier {
-    fn modify(&self, openapi: &mut OpenApiStruct) {
-        let components = openapi.components.as_mut().expect("Components not found!");
-        components.add_security_scheme("bearer_token", SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)))
-    }
-}
 
 pub struct App;
 #[async_trait]
@@ -88,12 +57,6 @@ impl Hooks for App {
         })
     }
 
-    async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
-        let service_injected_router = configure_services(router, ctx).await?;
-
-        Ok(service_injected_router.merge(open_api_routes()))
-    }
-
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
         queue.register(DownloadWorker::build(ctx)).await?;
         Ok(())
@@ -113,12 +76,4 @@ impl Hooks for App {
         db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
         Ok(())
     }
-}
-
-fn open_api_routes() -> AxumRouter {
-    let doc = ApiDocs::openapi();
-
-    AxumRouter::new()
-        .merge(SwaggerUi::new("/api/v1/openapi/swagger-ui").url("/api/v1/openapi/openapi.json", doc.clone()))
-        .merge(Scalar::with_url("/api/v1/openapi/scalar", doc))
 }

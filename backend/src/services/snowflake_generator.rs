@@ -73,12 +73,9 @@ impl SnowflakeGeneratorInner {
                 match instances::Model::find_by_node_id(&db, node_id).await {
                     Ok(instance) => {
                         let active_model = instance.into_active_model();
-                        match active_model.update_heartbeat(&db).await {
-                            Err(e) => {
-                                error!("Failed to update heartbeat: {}", e);
-                                exit(1);
-                            }
-                            _ => {}
+                        if let Err(e) = active_model.update_heartbeat(&db).await {
+                            error!("Failed to update heartbeat: {}", e);
+                            exit(1);
                         }
                     }
                     Err(err) => {

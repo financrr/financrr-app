@@ -14,7 +14,7 @@ responses(
 tag = "OpenAPI",
 )]
 async fn openapi_json() -> Result<Response> {
-    let doc = crate::app::ApiDocs::openapi();
+    let doc = crate::initializers::openapi::ApiDocs::openapi();
 
     format::json(doc)
 }
@@ -28,7 +28,9 @@ responses(
 tag = "OpenAPI",
 )]
 async fn openapi_yaml() -> Result<Response> {
-    let doc = crate::app::ApiDocs::openapi().to_yaml().map_err(Error::YAML)?;
+    let doc = crate::initializers::openapi::ApiDocs::openapi()
+        .to_yaml()
+        .map_err(Error::YAML)?;
 
     let mut res = Response::new(Body::new(doc));
     let headers = res.headers_mut();

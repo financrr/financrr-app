@@ -42,7 +42,7 @@ impl Model {
     pub async fn find_by_node_id(db: &DatabaseConnection, node_id: i16) -> ModelResult<Self> {
         let result = Entity::find().filter(Column::NodeId.eq(node_id)).one(db).await?;
 
-        Ok(result.ok_or_else(|| ModelError::EntityNotFound)?)
+        result.ok_or_else(|| ModelError::EntityNotFound)
     }
 
     pub async fn find_all_inactive_instances(db: &DatabaseConnection) -> ModelResult<Vec<Self>> {
