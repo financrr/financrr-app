@@ -33,13 +33,18 @@ RUN addgroup -g ${UID} -S financrr && \
 # Set the working directory
 WORKDIR /home/financrr
 
+# Creating config directory
+RUN mkdir -p /home/financrr/config
+RUN chown -R ${UID}:${GUID} /home/financrr/config
+
 # Copy the binaries from the builder stage
-COPY --from=builder /usr/src/config/docker.yaml /usr/app/config/production.yaml
+COPY --from=builder /usr/src/config/docker.yaml /home/financrr/config/production.yaml
 COPY --from=builder /usr/src/target/release/financrr-cli /home/financrr/financrr-cli
 
 # Set permissions for the binary
-RUN chmod +x /home/financrr/financrr_backend-cli
+RUN chmod +x /home/financrr/financrr-cli
 
+# Create a directory for logs
 RUN mkdir "./logs"
 RUN chown -R ${UID}:${GUID} "./logs"
 
@@ -52,4 +57,6 @@ USER financrr
 # Entrypoint command
 ENTRYPOINT ["/home/financrr/financrr-cli"]
 
+# TODO move cmds below to compose file when deployment docs are ready
 CMD ["start", "--server-and-worker"]
+CMD ["scheduler", "--tag", "all"]

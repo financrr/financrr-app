@@ -101,3 +101,13 @@ auth:
     secret: {{get_env(name="JWT_SECRET")}}
     # Token expiration time in seconds
     expiration: {{get_env(name="JWT_EXPIRATION")}} # 7 days
+
+scheduler:
+  output: stdout
+  jobs:
+    cleanup_instances:
+      run: "cleanup_instances"
+      schedule: "run every 10 seconds"
+      tags:
+        - maintenance
+        - all

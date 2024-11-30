@@ -6,9 +6,10 @@
 
 CREATE TABLE instances
 (
-    node_id    SMALLINT PRIMARY KEY,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    node_id        SMALLINT PRIMARY KEY,
+    last_heartbeat timestamp with time zone NOT NULL,
+    created_at     timestamp with time zone NOT NULL,
+    updated_at     timestamp with time zone NOT NULL
 );
 
 CREATE TABLE users

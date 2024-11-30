@@ -4,11 +4,14 @@ use crate::utils::datetime::get_epoch_millis;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
 use loco_rs::Error;
+use sea_orm::{DatabaseConnection, IntoActiveModel};
 use std::env::VarError;
 use std::num::ParseIntError;
+use std::process::exit;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use thiserror::Error;
+use tokio::{spawn, time};
 use tracing::error;
 
 pub const SNOWFLAKE_EPOCH: i64 = 1_705_247_483_000;
@@ -20,6 +23,8 @@ pub const TIMESTAMP_SHIFT: u8 = NODE_ID_BITS + SEQUENCE_BITS;
 
 pub const MAX_NODE_ID: u64 = (1 << NODE_ID_BITS) - 1;
 pub const MAX_SEQUENCE: u64 = (1 << SEQUENCE_BITS) - 1;
+
+pub const SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS: u64 = 10;
 
 pub type SnowflakeGenerator = Arc<SnowflakeGeneratorInner>;
 
@@ -43,7 +48,10 @@ impl Service for SnowflakeGeneratorInner {
             instances::Model::create_new_instance(&ctx.db, node_id).await?
         };
 
-        Ok(Self::with_node_id(instance.node_id as u64))
+        let generator = Self::with_node_id(instance.node_id as u64);
+        generator.start_heartbeat(ctx.db.clone());
+
+        Ok(generator)
     }
 }
 
@@ -54,6 +62,35 @@ impl SnowflakeGeneratorInner {
             last_timestamp: AtomicU64::new(0),
             sequence: AtomicU64::new(0),
         }
+    }
+
+    fn start_heartbeat(&self, db: DatabaseConnection) {
+        let node_id = self.node_id as i16;
+        spawn(async move {
+            let mut interval = time::interval(time::Duration::from_secs(SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS));
+            loop {
+                interval.tick().await;
+                match instances::Model::find_by_node_id(&db, node_id).await {
+                    Ok(instance) => {
+                        let active_model = instance.into_active_model();
+                        match active_model.update_heartbeat(&db).await {
+                            Err(e) => {
+                                error!("Failed to update heartbeat: {}", e);
+                                exit(1);
+                            }
+                            _ => {}
+                        }
+                    }
+                    Err(err) => {
+                        error!(
+                            "Failed to get instance by current node id: {} | Error: {}",
+                            node_id, err
+                        );
+                        exit(1);
+                    }
+                }
+            }
+        });
     }
 
     pub fn next_id(&self) -> Result<i64> {

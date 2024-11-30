@@ -1,7 +1,10 @@
 use super::_entities::instances::{ActiveModel, Column, Entity, Model};
+use crate::services::snowflake_generator::SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS;
+use loco_rs::model::ModelError;
 use loco_rs::prelude::ModelResult;
 use sea_orm::entity::prelude::*;
 use sea_orm::{ActiveValue, QueryOrder, QuerySelect};
+
 pub type Instances = Entity;
 
 #[async_trait::async_trait]
@@ -36,13 +39,42 @@ impl Model {
         Ok(find_smallest_missing_number(&result))
     }
 
+    pub async fn find_by_node_id(db: &DatabaseConnection, node_id: i16) -> ModelResult<Self> {
+        let result = Entity::find().filter(Column::NodeId.eq(node_id)).one(db).await?;
+
+        Ok(result.ok_or_else(|| ModelError::EntityNotFound)?)
+    }
+
+    pub async fn find_all_inactive_instances(db: &DatabaseConnection) -> ModelResult<Vec<Self>> {
+        let result = Entity::find()
+            .filter(
+                Column::LastHeartbeat
+                    .lt(chrono::Utc::now()
+                        - chrono::Duration::seconds((SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS + 1) as i64)),
+            )
+            .all(db)
+            .await?;
+
+        Ok(result)
+    }
+
     pub async fn create_new_instance(db: &DatabaseConnection, node_id: i16) -> ModelResult<Self> {
         let instance = ActiveModel {
             node_id: ActiveValue::set(node_id),
-            ..Default::default()
+            last_heartbeat: ActiveValue::set(chrono::Utc::now().into()),
+            created_at: ActiveValue::set(chrono::Utc::now().into()),
+            updated_at: ActiveValue::set(chrono::Utc::now().into()),
         };
 
         Ok(instance.insert(db).await?)
+    }
+}
+
+impl ActiveModel {
+    pub async fn update_heartbeat(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
+        self.last_heartbeat = ActiveValue::Set(chrono::Utc::now().into());
+
+        Ok(self.update(db).await?)
     }
 }
 
