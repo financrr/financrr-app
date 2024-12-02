@@ -1,4 +1,5 @@
 use axum::body::Body;
+use axum::debug_handler;
 use axum::routing::get;
 use loco_rs::prelude::{format, Response};
 use loco_rs::prelude::{Result, Routes};
@@ -13,6 +14,7 @@ responses(
 ),
 tag = "OpenAPI",
 )]
+#[debug_handler]
 async fn openapi_json() -> Result<Response> {
     let doc = crate::initializers::openapi::ApiDocs::openapi();
 
@@ -27,6 +29,7 @@ responses(
 ),
 tag = "OpenAPI",
 )]
+#[debug_handler]
 async fn openapi_yaml() -> Result<Response> {
     let doc = crate::initializers::openapi::ApiDocs::openapi()
         .to_yaml()

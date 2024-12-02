@@ -43,12 +43,13 @@ async fn register(
     let user = match res {
         Ok(user) => user,
         Err(err) => {
-            tracing::info!(
+            tracing::warn!(
                 message = err.to_string(),
                 user_email = &params.email,
                 "could not register user",
             );
-            return format::json(());
+
+            return Err(Error::InternalServerError);
         }
     };
 
@@ -136,7 +137,12 @@ async fn login(State(ctx): State<AppContext>, Json(params): Json<LoginParams>) -
 
 #[debug_handler]
 async fn current(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Response> {
-    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let id: i64 = auth
+        .claims
+        .pid
+        .parse()
+        .map_err(|_| Error::BadRequest("invalid user id".to_string()))?;
+    let user = users::Model::find_by_id(&ctx.db, id).await?;
     format::json(CurrentResponse::new(&user))
 }
 

@@ -1,8 +1,12 @@
 target
 Dockerfile
 docs
+logs
+.github
 .dockerignore
 .git
 .gitignore
 .idea
 .editorconfig
+.env
+.env.dist

@@ -28,7 +28,7 @@ pub struct RegisterParams {
 pub struct Validator {
     #[validate(length(min = 2, message = "Name must be at least 2 characters long."))]
     pub name: String,
-    #[validate(custom(function = "validation::is_valid_email"))]
+    #[validate(email)]
     pub email: String,
 }
 
@@ -65,7 +65,10 @@ impl Authenticable for super::_entities::users::Model {
     }
 
     async fn find_by_claims_key(db: &DatabaseConnection, claims_key: &str) -> ModelResult<Self> {
-        Self::find_by_pid(db, claims_key).await
+        let id = claims_key
+            .parse::<i64>()
+            .map_err(|e: ParseIntError| ModelError::Any(e.into()))?;
+        Self::find_by_id(db, id).await
     }
 }
 
@@ -113,15 +116,9 @@ impl super::_entities::users::Model {
         user.ok_or_else(|| ModelError::EntityNotFound)
     }
 
-    /// finds a user by the provided pid
-    ///
-    /// # Errors
-    ///
-    /// When could not find user  or DB query error
-    pub async fn find_by_pid(db: &DatabaseConnection, pid: &str) -> ModelResult<Self> {
-        let parsed_id: i64 = pid.parse().map_err(|e: ParseIntError| ModelError::Any(e.into()))?;
+    pub async fn find_by_id(db: &DatabaseConnection, id: i64) -> ModelResult<Self> {
         let user = users::Entity::find()
-            .filter(query::condition().eq(users::Column::Id, parsed_id).build())
+            .filter(query::condition().eq(users::Column::Id, id).build())
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)

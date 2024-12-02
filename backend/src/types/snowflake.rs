@@ -1,3 +1,6 @@
+use migration::{ArrayType, ColumnType, Value, ValueTypeErr};
+use sea_orm::sea_query::{Nullable, ValueType};
+use sea_orm::{sea_query, ColIdx, QueryResult, TryGetError, TryGetable};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
@@ -83,5 +86,41 @@ impl<'de> Deserialize<'de> for Snowflake {
     {
         let s = String::deserialize(deserializer)?;
         s.parse::<i64>().map_err(Error::custom).map(Self::new)
+    }
+}
+
+impl From<Snowflake> for sea_query::Value {
+    fn from(value: Snowflake) -> Self {
+        Self::from(value.id)
+    }
+}
+
+impl TryGetable for Snowflake {
+    fn try_get_by<I: ColIdx>(res: &QueryResult, index: I) -> Result<Self, TryGetError> {
+        i64::try_get_by(res, index).map(Self::new)
+    }
+}
+
+impl ValueType for Snowflake {
+    fn try_from(v: Value) -> Result<Self, ValueTypeErr> {
+        <i64 as ValueType>::try_from(v).map(Self::new)
+    }
+
+    fn type_name() -> String {
+        i64::type_name()
+    }
+
+    fn array_type() -> ArrayType {
+        i64::array_type()
+    }
+
+    fn column_type() -> ColumnType {
+        i64::column_type()
+    }
+}
+
+impl Nullable for Snowflake {
+    fn null() -> Value {
+        i64::null()
     }
 }

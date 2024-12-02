@@ -17,25 +17,8 @@ services:
       timeout: 3s
       retries: 3
 
-  cache:
-    image: ghcr.io/dragonflydb/dragonfly:v1.25.4
-    init: true
-    ports:
-      - "127.0.0.1:6379:6379"
-    environment:
-      TZ: ${TZ}
-    ulimits:
-      memlock: -1
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-    volumes:
-      - dragonfly-data:/data
-
   mailpit:
-    image: axllent/mailpit
+    image: axllent/mailpit:latest
     init: true
     volumes:
       - mailpit-data:/data
@@ -50,5 +33,4 @@ services:
 
 volumes:
   postgres-data: ~
-  dragonfly-data: ~
   mailpit-data: ~

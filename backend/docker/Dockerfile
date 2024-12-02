@@ -22,10 +22,6 @@ ENV GUID=1000
 RUN apk add --no-cache curl
 RUN apk update
 
-# Update package repositories
-RUN apk add --no-cache curl
-RUN apk update
-
 # Create a non-root user
 RUN addgroup -g ${UID} -S financrr && \
     adduser -u ${GUID} -S -D -G financrr -H -h /home/financrr -s /bin/sh financrr
@@ -56,7 +52,3 @@ USER financrr
 
 # Entrypoint command
 ENTRYPOINT ["/home/financrr/financrr-cli"]
-
-# TODO move cmds below to compose file when deployment docs are ready
-CMD ["start", "--server-and-worker"]
-CMD ["scheduler", "--tag", "all"]
