@@ -13,7 +13,7 @@ COPY . .
 RUN cargo build --release --features "mimalloc"
 
 # Final stage: create a minimal runtime image
-FROM alpine:3.20.2
+FROM alpine:3.21.0
 
 # Update package repositories
 RUN apk add --no-cache curl
