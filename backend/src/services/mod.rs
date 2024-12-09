@@ -9,6 +9,8 @@ use std::sync::Arc;
 pub mod snowflake_generator;
 pub mod user_verification;
 
+// TODO:
+//   - use "singleton" -> OnceLock that returns Arc<Self> so only initlize once
 pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
     Ok(router
         .layer(UserVerificationServiceInner::new_extension(ctx).await?)

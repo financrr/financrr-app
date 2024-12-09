@@ -17,9 +17,11 @@ pub struct LoginParams {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct RegisterParams {
+    #[validate(email)]
     pub email: String,
+    #[validate(length(min = 8, max = 10240))]
     pub password: String,
     pub name: String,
 }
