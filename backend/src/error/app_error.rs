@@ -5,6 +5,7 @@ use axum::response::{IntoResponse, Response};
 use derive_more::{Display, Error};
 use loco_rs::prelude::Error as LocoError;
 use serde::Serialize;
+use tracing::error;
 use utoipa::ToSchema;
 
 /// AppError is a custom error type that we use to return errors in the API with a specific structure.
@@ -77,7 +78,11 @@ impl From<LocoError> for AppError {
             LocoError::Message(msg) => AppError::GeneralInternalServerError(msg),
             LocoError::QueueProviderMissing => AppError::QueueProviderMissing(),
             LocoError::TaskNotFound(msg) => AppError::TaskNotFound(msg),
-            _ => AppError::GeneralInternalServerError("An unknown error occurred.".to_string()),
+            e => {
+                error!("An unmapped loco error occurred: {:?}", e);
+
+                AppError::GeneralInternalServerError("An unknown error occurred.".to_string())
+            },
         }
     }
 }
