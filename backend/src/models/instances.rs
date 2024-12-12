@@ -30,7 +30,7 @@ impl Model {
         let result = Entity::find()
             .select_only()
             .column(Column::NodeId)
-            .filter(Column::NodeId.gt(0))
+            .filter(Column::NodeId.gte(0))
             .order_by_asc(Column::NodeId)
             .into_tuple::<i16>()
             .all(db)
@@ -80,12 +80,12 @@ impl ActiveModel {
 
 fn find_smallest_missing_number(numbers: &[i16]) -> i16 {
     for (i, &number) in numbers.iter().enumerate() {
-        if number != (i as i16 + 1) {
-            return i as i16 + 1;
+        if number != i as i16 {
+            return i as i16;
         }
     }
 
-    numbers.len() as i16 + 1
+    numbers.len() as i16
 }
 
 #[cfg(test)]
@@ -94,9 +94,9 @@ mod tests {
 
     #[test]
     fn test_find_smallest_missing_number() {
-        assert_eq!(find_smallest_missing_number(&[1, 2, 4, 5, 6, 7]), 3);
-        assert_eq!(find_smallest_missing_number(&[1, 2, 3, 4, 5, 6, 7]), 8);
-        assert_eq!(find_smallest_missing_number(&[2, 3, 4, 5, 6, 7]), 1);
-        assert_eq!(find_smallest_missing_number(&[]), 1);
+        assert_eq!(find_smallest_missing_number(&[0, 1, 2, 4, 5, 6, 7]), 3);
+        assert_eq!(find_smallest_missing_number(&[0, 1, 2, 3, 4, 5, 6, 7]), 8);
+        assert_eq!(find_smallest_missing_number(&[2, 3, 4, 5, 6, 7]), 0);
+        assert_eq!(find_smallest_missing_number(&[]), 0);
     }
 }

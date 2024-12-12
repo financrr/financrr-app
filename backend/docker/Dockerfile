@@ -1,4 +1,4 @@
-FROM rust:1.82.0-alpine3.20 as builder
+FROM rust:1.83.0-alpine3.21 as builder
 
 RUN apk add --no-cache \
     musl-dev \
@@ -12,7 +12,7 @@ COPY . .
 
 RUN cargo build --release
 
-FROM alpine:3.20.3
+FROM alpine:3.21.0
 
 ENV PORT=8080
 ENV UID=1000

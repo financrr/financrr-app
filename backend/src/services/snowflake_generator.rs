@@ -23,6 +23,8 @@ pub const SEQUENCE_BITS: u8 = 12;
 pub const TIMESTAMP_SHIFT: u8 = NODE_ID_BITS + SEQUENCE_BITS;
 
 pub const MAX_NODE_ID: u64 = (1 << NODE_ID_BITS) - 1;
+pub const MIN_NODE_ID: i64 = u64::MIN as i64;
+
 pub const MAX_SEQUENCE: u64 = (1 << SEQUENCE_BITS) - 1;
 
 pub const SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS: u64 = 10;
@@ -41,9 +43,16 @@ impl Service for SnowflakeGeneratorInner {
         let instance = {
             let node_id = instances::Model::find_next_node_id(&ctx.db).await?;
 
+            if node_id < MIN_NODE_ID as i16 {
+                error!("Node ID must be greater than or equal to 0.");
+
+                return Err(SnowflakeGeneratorError::NodeIdTooSmall.into());
+            }
+
             if node_id as u64 > MAX_NODE_ID {
                 error!("Node ID is too large. Which means the maximum number of instances has been started.");
-                return Err(Error::Any(SnowflakeGeneratorError::NodeIdTooLarge.into()));
+
+                return Err(SnowflakeGeneratorError::NodeIdTooLarge.into());
             }
 
             instances::Model::create_new_instance(&ctx.db, node_id).await?
@@ -153,10 +162,18 @@ impl SnowflakeGeneratorInner {
 pub enum SnowflakeGeneratorError {
     #[error("Node ID is too large")]
     NodeIdTooLarge,
+    #[error("Node ID is too small")]
+    NodeIdTooSmall,
     #[error("Invalid system clock")]
     InvalidSystemClock,
     #[error("Environment variable error")]
     EnvVarError(#[from] VarError),
     #[error("Parse int error")]
     ParseIntError(#[from] ParseIntError),
+}
+
+impl From<SnowflakeGeneratorError> for Error {
+    fn from(err: SnowflakeGeneratorError) -> Self {
+        Error::Any(err.into())
+    }
 }
