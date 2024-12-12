@@ -1,2 +1,2 @@
 pub mod openapi;
-mod services;
+pub mod services;

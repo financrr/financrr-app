@@ -82,7 +82,7 @@ impl From<LocoError> for AppError {
                 error!("An unmapped loco error occurred: {:?}", e);
 
                 AppError::GeneralInternalServerError("An unknown error occurred.".to_string())
-            },
+            }
         }
     }
 }

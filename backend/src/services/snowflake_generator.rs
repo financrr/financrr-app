@@ -9,9 +9,10 @@ use std::env::VarError;
 use std::num::ParseIntError;
 use std::process::exit;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
+use std::time::Duration;
 use thiserror::Error;
-use tokio::{spawn, time};
+use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 use tracing::error;
 
 pub const SNOWFLAKE_EPOCH: i64 = 1_705_247_483_000;
@@ -41,7 +42,7 @@ impl Service for SnowflakeGeneratorInner {
             let node_id = instances::Model::find_next_node_id(&ctx.db).await?;
 
             if node_id as u64 > MAX_NODE_ID {
-                error!("Node ID is too large. Which means the maximum number of instancs has been started.");
+                error!("Node ID is too large. Which means the maximum number of instances has been started.");
                 return Err(Error::Any(SnowflakeGeneratorError::NodeIdTooLarge.into()));
             }
 
@@ -49,14 +50,23 @@ impl Service for SnowflakeGeneratorInner {
         };
 
         let generator = Self::with_node_id(instance.node_id as u64);
-        generator.start_heartbeat(ctx.db.clone());
+        generator
+            .start_heartbeat(ctx.db.clone())
+            .await
+            .map_err(|err| Error::Any(Box::new(err)))?;
 
         Ok(generator)
+    }
+
+    fn get_static_once() -> &'static OnceLock<Arc<Self>> {
+        static INSTANCE: OnceLock<Arc<SnowflakeGeneratorInner>> = OnceLock::new();
+
+        &INSTANCE
     }
 }
 
 impl SnowflakeGeneratorInner {
-    pub fn with_node_id(node_id: u64) -> Self {
+    fn with_node_id(node_id: u64) -> Self {
         Self {
             node_id,
             last_timestamp: AtomicU64::new(0),
@@ -64,30 +74,41 @@ impl SnowflakeGeneratorInner {
         }
     }
 
-    fn start_heartbeat(&self, db: DatabaseConnection) {
+    async fn start_heartbeat(&self, db: DatabaseConnection) -> Result<(), JobSchedulerError> {
+        let scheduler = JobScheduler::new().await?;
+
         let node_id = self.node_id as i16;
-        spawn(async move {
-            let mut interval = time::interval(time::Duration::from_secs(SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS));
-            loop {
-                interval.tick().await;
-                match instances::Model::find_by_node_id(&db, node_id).await {
-                    Ok(instance) => {
-                        let active_model = instance.into_active_model();
-                        if let Err(e) = active_model.update_heartbeat(&db).await {
-                            error!("Failed to update heartbeat: {}", e);
+        let job = Job::new_repeated_async(
+            Duration::from_secs(SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS),
+            move |_uuid, _l| {
+                let db = db.clone();
+                Box::pin(async move {
+                    match instances::Model::find_by_node_id(&db, node_id).await {
+                        Ok(instance) => {
+                            let active_model = instance.into_active_model();
+                            if let Err(e) = active_model.update_heartbeat(&db).await {
+                                error!("Failed to update heartbeat: {}", e);
+                                exit(1);
+                            }
+                        }
+                        Err(err) => {
+                            error!(
+                                "Failed to get instance by current node id: {} | Error: {}",
+                                node_id, err
+                            );
                             exit(1);
                         }
                     }
-                    Err(err) => {
-                        error!(
-                            "Failed to get instance by current node id: {} | Error: {}",
-                            node_id, err
-                        );
-                        exit(1);
-                    }
-                }
-            }
-        });
+                })
+            },
+        )?;
+
+        scheduler.add(job).await?;
+
+        scheduler.shutdown_on_ctrl_c();
+        scheduler.start().await?;
+
+        Ok(())
     }
 
     pub fn next_id(&self) -> Result<i64> {

@@ -19,7 +19,7 @@ axum = "0.7.9"
 async-trait = "0.1.83"
 
 # Database and ORM
-sea-orm = { version = "1.1.1", features = [
+sea-orm = { version = "1.1.2", features = [
     "sqlx-sqlite",
     "sqlx-postgres",
     "runtime-tokio-rustls",
@@ -27,13 +27,16 @@ sea-orm = { version = "1.1.1", features = [
 ] }
 migration = { path = "migration" }
 
-# Async runtime
-tokio = { version = "1.41.1", default-features = false, features = [
+# Async runtime and scheduler
+tokio = { version = "1.42.0", default-features = false, features = [
     "rt-multi-thread",
+    "parking_lot",
+    "signal"
 ] }
+tokio-cron-scheduler = { version = "0.13.0", features = ["signal"] }
 
 # Serialization
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { version = "1.0.216", features = ["derive"] }
 serde_json = "1.0.133"
 
 # Utoipa / OpenApi
@@ -59,7 +62,7 @@ chrono = "0.4.39"
 uuid = { version = "1.11.0", features = ["v4"] }
 
 # Validation
-validator = { version = "0.18" }
+validator = { version = "0.18.1" }
 
 # Env loading
 dotenvy = "0.15.7"
@@ -68,7 +71,7 @@ dotenvy = "0.15.7"
 mimalloc = "0.1.43"
 
 # Derive and Error utils
-thiserror = "2.0.3"
+thiserror = "2.0.6"
 derive_more = { version = "1.0.0", features = ["display", "error"] }
 
 # File utils

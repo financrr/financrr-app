@@ -3,7 +3,7 @@ use crate::models::users;
 use crate::services::Service;
 use crate::utils::context::AdditionalAppContextMethods;
 use loco_rs::prelude::{AppContext, Result};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 pub type UserVerificationService = Arc<UserVerificationServiceInner>;
 
@@ -15,6 +15,12 @@ pub struct UserVerificationServiceInner {
 impl Service for UserVerificationServiceInner {
     async fn new(ctx: &AppContext) -> Result<Self> {
         Ok(Self { ctx: ctx.clone() })
+    }
+
+    fn get_static_once() -> &'static OnceLock<Arc<Self>> {
+        static INSTANCE: OnceLock<Arc<UserVerificationServiceInner>> = OnceLock::new();
+
+        &INSTANCE
     }
 }
 

@@ -1,3 +1,5 @@
+use crate::initializers::openapi::OpenApiInitializer;
+use crate::initializers::services::ServicesInitializer;
 use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
@@ -40,7 +42,7 @@ impl Hooks for App {
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![])
+        Ok(vec![Box::new(OpenApiInitializer), Box::new(ServicesInitializer)])
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
