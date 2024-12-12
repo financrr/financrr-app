@@ -25,14 +25,17 @@ impl Service for UserVerificationServiceInner {
 }
 
 impl UserVerificationServiceInner {
-    pub async fn send_verification_email_or_verify_user(&self, user: users::ActiveModel) -> Result<()> {
-        if self.ctx.is_mailer_enabled() {
-            let user = user.set_email_verification_sent(&self.ctx.db).await?;
-            AuthMailer::send_welcome(&self.ctx, &user).await?;
-        } else {
-            user.verified(&self.ctx.db).await?;
-        }
+    pub async fn send_verification_email_or_verify_user(&self, user: users::ActiveModel) -> Result<users::Model> {
+        let model = match self.ctx.is_mailer_enabled() {
+            true => {
+                let model = user.set_email_verification_sent(&self.ctx.db).await?;
+                AuthMailer::send_welcome(&self.ctx, &model).await?;
 
-        Ok(())
+                model
+            }
+            false => user.verified(&self.ctx.db).await?,
+        };
+
+        Ok(model)
     }
 }

@@ -125,7 +125,7 @@ impl SnowflakeGeneratorInner {
         let last_timestamp = self.last_timestamp.load(Ordering::SeqCst);
 
         if current_timestamp < last_timestamp {
-            return Err(Error::Any(SnowflakeGeneratorError::InvalidSystemClock.into()));
+            return Err(SnowflakeGeneratorError::InvalidSystemClock.into());
         }
 
         let mut sequence = self.sequence.load(Ordering::SeqCst);

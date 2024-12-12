@@ -1,14 +1,18 @@
 pub use super::_entities::users::{self, ActiveModel, Entity, Model};
+use crate::error::app_error::AppError;
 use crate::models::_entities::sessions;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use async_trait::async_trait;
 use chrono::offset::Local;
+use enumflags2::_internal::RawBitFlags;
+use enumflags2::bitflags;
 use loco_rs::{auth::jwt, hash, prelude::*};
 use sea_orm::prelude::Expr;
 use sea_orm::sea_query::IntoCondition;
-use sea_orm::{JoinType, QuerySelect, RelationTrait};
+use sea_orm::{JoinType, PaginatorTrait, QuerySelect, RelationTrait};
 use serde::{Deserialize, Serialize};
 use std::num::ParseIntError;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -17,30 +21,22 @@ pub struct LoginParams {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
 pub struct RegisterParams {
     #[validate(email)]
     pub email: String,
     #[validate(length(min = 8, max = 10240))]
     pub password: String,
-    pub name: String,
-}
-
-#[derive(Debug, Validate, Deserialize)]
-pub struct Validator {
     #[validate(length(min = 2, message = "Name must be at least 2 characters long."))]
     pub name: String,
-    #[validate(email)]
-    pub email: String,
 }
 
-impl Validatable for super::_entities::users::ActiveModel {
-    fn validator(&self) -> Box<dyn Validate> {
-        Box::new(Validator {
-            name: self.name.as_ref().to_owned(),
-            email: self.email.as_ref().to_owned(),
-        })
-    }
+#[bitflags(default = User)]
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum UserFlags {
+    Admin = 0b0001,
+    User = 0b0010,
 }
 
 #[async_trait::async_trait]
@@ -49,10 +45,10 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
     where
         C: ConnectionTrait,
     {
-        self.validate()?;
         if insert {
             let mut this = self;
             this.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+            this.created_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
             Ok(this)
         } else {
             Ok(self)
@@ -70,6 +66,7 @@ impl Authenticable for super::_entities::users::Model {
         let id = claims_key
             .parse::<i64>()
             .map_err(|e: ParseIntError| ModelError::Any(e.into()))?;
+
         Self::find_by_id(db, id).await
     }
 }
@@ -86,6 +83,17 @@ impl super::_entities::users::Model {
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)
+    }
+
+    pub async fn is_email_unique(db: &DatabaseConnection, email: &str) -> ModelResult<bool> {
+        let user = users::Entity::find()
+            .select_only()
+            .column(users::Column::Email)
+            .filter(users::Column::Email.eq(email))
+            .count(db)
+            .await?;
+
+        Ok(user == 0)
     }
 
     /// finds a user by the provided verification token
@@ -167,24 +175,16 @@ impl super::_entities::users::Model {
         db: &DatabaseConnection,
         snowflake_generator: &SnowflakeGenerator,
         params: &RegisterParams,
-    ) -> ModelResult<Self> {
+    ) -> Result<Self, AppError> {
         let txn = db.begin().await?;
 
-        if users::Entity::find()
-            .filter(query::condition().eq(users::Column::Email, &params.email).build())
-            .one(&txn)
-            .await?
-            .is_some()
-        {
-            return Err(ModelError::EntityAlreadyExists {});
-        }
-
-        let password_hash = hash::hash_password(&params.password).map_err(|e| ModelError::Any(e.into()))?;
+        let password_hash = hash::hash_password(&params.password)?;
         let user = users::ActiveModel {
             id: ActiveValue::set(snowflake_generator.next_id().map_err(|e| ModelError::Any(e.into()))?),
             email: ActiveValue::set(params.email.to_string()),
             password: ActiveValue::set(password_hash),
             name: ActiveValue::set(params.name.to_string()),
+            flags: ActiveValue::set(UserFlags::DEFAULT as i32),
             ..Default::default()
         }
         .insert(&txn)

@@ -50,6 +50,7 @@ impl Hooks for App {
             .prefix("/api/v1")
             .add_route(controllers::auth::routes())
             .add_route(controllers::openapi::routes())
+            .add_route(controllers::user::routes())
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
