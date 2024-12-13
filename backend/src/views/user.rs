@@ -4,7 +4,7 @@ use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
-pub struct RegistrationResponse {
+pub struct UserResponse {
     pub id: Snowflake,
     pub email: String,
     pub name: String,
@@ -15,7 +15,7 @@ pub struct RegistrationResponse {
     pub updated_at: DateTimeWithTimeZone,
 }
 
-impl From<Model> for RegistrationResponse {
+impl From<Model> for UserResponse {
     fn from(value: Model) -> Self {
         Self {
             id: Snowflake::new(value.id),
