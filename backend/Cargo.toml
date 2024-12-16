@@ -58,7 +58,7 @@ sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustl
 
 # Date/Time
 time = { version = "0.3.36", features = ["serde-human-readable", "local-offset"] }
-chrono = { version = "0.4.38", features = ["clock"] }
+chrono = { version = "0.4.39", features = ["clock"] }
 
 # Error handling
 thiserror = "1.0.63"
