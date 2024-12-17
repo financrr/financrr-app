@@ -1,18 +1,19 @@
 use crate::models::users::Model;
 use crate::types::snowflake::Snowflake;
-use sea_orm::prelude::DateTimeWithTimeZone;
+use chrono::{DateTime, FixedOffset};
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct UserResponse {
     pub id: Snowflake,
     pub email: String,
     pub name: String,
     pub flags: i32,
-    pub email_verification_sent_at: Option<DateTimeWithTimeZone>,
-    pub email_verified_at: Option<DateTimeWithTimeZone>,
-    pub created_at: DateTimeWithTimeZone,
-    pub updated_at: DateTimeWithTimeZone,
+    pub email_verification_sent_at: Option<DateTime<FixedOffset>>,
+    pub email_verified_at: Option<DateTime<FixedOffset>>,
+    pub created_at: DateTime<FixedOffset>,
+    pub updated_at: DateTime<FixedOffset>,
 }
 
 impl From<Model> for UserResponse {

@@ -41,18 +41,16 @@ pub enum UserFlags {
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for super::_entities::users::ActiveModel {
-    async fn before_save<C>(self, _db: &C, insert: bool) -> Result<Self, DbErr>
+    async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
     where
         C: ConnectionTrait,
     {
+        self.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
         if insert {
-            let mut this = self;
-            this.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
-            this.created_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
-            Ok(this)
-        } else {
-            Ok(self)
+            self.created_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
         }
+
+        Ok(self)
     }
 }
 
@@ -101,16 +99,15 @@ impl super::_entities::users::Model {
     /// # Errors
     ///
     /// When could not find user by the given token or DB query error
-    pub async fn find_by_verification_token(db: &DatabaseConnection, token: &str) -> ModelResult<Self> {
-        let user = users::Entity::find()
+    pub async fn find_by_verification_token(db: &DatabaseConnection, token: &str) -> Result<Option<Self>, AppError> {
+        Ok(users::Entity::find()
             .filter(
                 query::condition()
                     .eq(users::Column::EmailVerificationToken, token)
                     .build(),
             )
             .one(db)
-            .await?;
-        user.ok_or_else(|| ModelError::EntityNotFound)
+            .await?)
     }
 
     /// finds a user by the provided reset token
@@ -183,9 +180,15 @@ impl super::_entities::users::Model {
             id: ActiveValue::set(snowflake_generator.next_id().map_err(|e| ModelError::Any(e.into()))?),
             email: ActiveValue::set(params.email.to_string()),
             password: ActiveValue::set(password_hash),
+            reset_token: Default::default(),
+            reset_sent_at: Default::default(),
+            email_verification_token: Default::default(),
+            email_verification_sent_at: Default::default(),
+            email_verified_at: Default::default(),
             name: ActiveValue::set(params.name.to_string()),
             flags: ActiveValue::set(UserFlags::DEFAULT as i32),
-            ..Default::default()
+            created_at: Default::default(),
+            updated_at: Default::default(),
         }
         .insert(&txn)
         .await?;
@@ -217,6 +220,7 @@ impl super::_entities::users::ActiveModel {
     /// when has DB query error
     pub async fn set_email_verification_sent(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
         self.email_verification_sent_at = ActiveValue::set(Some(Local::now().into()));
+        // TODO: generate a more unique and secure token based on the instance id
         self.email_verification_token = ActiveValue::Set(Some(Uuid::new_v4().to_string()));
         Ok(self.update(db).await?)
     }
@@ -250,6 +254,7 @@ impl super::_entities::users::ActiveModel {
     /// when has DB query error
     pub async fn verified(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
         self.email_verified_at = ActiveValue::set(Some(Local::now().into()));
+        self.email_verification_token = ActiveValue::Set(None);
         Ok(self.update(db).await?)
     }
 

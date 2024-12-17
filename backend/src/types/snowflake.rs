@@ -8,7 +8,7 @@ use std::fmt::{Display, Formatter};
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use utoipa::openapi::schema::SchemaType;
 use utoipa::openapi::{KnownFormat, ObjectBuilder, RefOr, Required, Schema, SchemaFormat, Type};
-use utoipa::{IntoParams, PartialSchema};
+use utoipa::{IntoParams, PartialSchema, ToSchema};
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Snowflake {
@@ -44,6 +44,8 @@ impl Display for Snowflake {
         write!(f, "{}", self.id)
     }
 }
+
+impl ToSchema for Snowflake {}
 
 impl PartialSchema for Snowflake {
     fn schema() -> RefOr<Schema> {

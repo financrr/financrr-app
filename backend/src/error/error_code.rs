@@ -32,6 +32,7 @@ error_codes!(
 // Validation errors
 error_codes!(
     (2000, GENERAL_VALIDATION_ERROR, "A general validation error occurred.");
+    (2001, INVALID_VERIFICATION_TOKEN, "Invalid verification token.");
 );
 
 // Configuration error

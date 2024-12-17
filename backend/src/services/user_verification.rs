@@ -1,8 +1,9 @@
+use crate::error::app_error::AppResult;
 use crate::mailers::auth::AuthMailer;
 use crate::models::users;
 use crate::services::Service;
 use crate::utils::context::AdditionalAppContextMethods;
-use loco_rs::prelude::{AppContext, Result};
+use loco_rs::prelude::AppContext;
 use std::sync::{Arc, OnceLock};
 
 pub type UserVerificationService = Arc<UserVerificationServiceInner>;
@@ -13,7 +14,7 @@ pub struct UserVerificationServiceInner {
 }
 
 impl Service for UserVerificationServiceInner {
-    async fn new(ctx: &AppContext) -> Result<Self> {
+    async fn new(ctx: &AppContext) -> Result<Self, loco_rs::Error> {
         Ok(Self { ctx: ctx.clone() })
     }
 
@@ -25,7 +26,7 @@ impl Service for UserVerificationServiceInner {
 }
 
 impl UserVerificationServiceInner {
-    pub async fn send_verification_email_or_verify_user(&self, user: users::ActiveModel) -> Result<users::Model> {
+    pub async fn send_verification_email_or_verify_user(&self, user: users::ActiveModel) -> AppResult<users::Model> {
         let model = match self.ctx.is_mailer_enabled() {
             true => {
                 let model = user.set_email_verification_sent(&self.ctx.db).await?;

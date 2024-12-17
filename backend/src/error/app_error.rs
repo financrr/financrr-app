@@ -9,6 +9,8 @@ use tracing::{error, warn};
 use utoipa::ToSchema;
 use validator::ValidationErrors;
 
+pub type AppResult<T> = Result<T, AppError>;
+
 /// AppError is a custom error type that we use to return errors in the API with a specific structure.
 #[derive(Debug, Clone, Serialize, ToSchema, Display, Error)]
 #[display("{}", serde_json::to_string(self).expect("Failed to serialize AppError"))]
@@ -82,6 +84,10 @@ impl AppError {
 }
 
 // Validation errors
+app_errors!(
+    (StatusCode::BAD_REQUEST, ErrorCode::INVALID_VERIFICATION_TOKEN, ErrorCode::INVALID_VERIFICATION_TOKEN.message, InvalidVerificationToken);
+);
+
 impl AppError {
     #[allow(non_snake_case)]
     pub fn GeneralValidationError(msg: String, reference: Option<JsonReference>) -> Self {

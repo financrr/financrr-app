@@ -1,15 +1,10 @@
-use axum::{debug_handler, Extension};
+use axum::debug_handler;
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::services::snowflake_generator::SnowflakeGenerator;
-use crate::services::user_verification::UserVerificationService;
 use crate::{
     mailers::auth::AuthMailer,
-    models::{
-        _entities::users,
-        users::{LoginParams, RegisterParams},
-    },
+    models::{_entities::users, users::LoginParams},
     views::auth::{CurrentResponse, LoginResponse},
 };
 
@@ -27,56 +22,6 @@ pub struct ForgotParams {
 pub struct ResetParams {
     pub token: String,
     pub password: String,
-}
-
-/// Register function creates a new user with the given parameters and sends a
-/// welcome email to the user
-#[debug_handler]
-async fn register(
-    State(ctx): State<AppContext>,
-    Extension(user_verification_service): Extension<UserVerificationService>,
-    Extension(snowflake_generator): Extension<SnowflakeGenerator>,
-    Json(params): Json<RegisterParams>,
-) -> Result<Response> {
-    let res = users::Model::create_with_password(&ctx.db, &snowflake_generator, &params).await;
-
-    let user = match res {
-        Ok(user) => user,
-        Err(err) => {
-            tracing::warn!(
-                message = err.to_string(),
-                user_email = &params.email,
-                "could not register user",
-            );
-
-            return Err(Error::InternalServerError);
-        }
-    };
-
-    let active_model = user.into_active_model();
-
-    user_verification_service
-        .send_verification_email_or_verify_user(active_model)
-        .await?;
-
-    format::json(())
-}
-
-/// Verify register user. if the user not verified his email, he can't login to
-/// the system.
-#[debug_handler]
-async fn verify(State(ctx): State<AppContext>, Json(params): Json<VerifyParams>) -> Result<Response> {
-    let user = users::Model::find_by_verification_token(&ctx.db, &params.token).await?;
-
-    if user.email_verified_at.is_some() {
-        tracing::info!(id = user.id.to_string(), "user already verified");
-    } else {
-        let active_model = user.into_active_model();
-        let user = active_model.verified(&ctx.db).await?;
-        tracing::info!(id = user.id.to_string(), "user verified");
-    }
-
-    format::json(())
 }
 
 /// In case the user forgot his password  this endpoints generate a forgot token
@@ -149,8 +94,6 @@ async fn current(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Respo
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("/auth")
-        .add("/register", post(register))
-        .add("/verify", post(verify))
         .add("/login", post(login))
         .add("/forgot", post(forgot))
         .add("/reset", post(reset))
