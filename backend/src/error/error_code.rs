@@ -57,7 +57,7 @@ error_codes!(
     (5007, COULD_NOT_RETRIEVE_LAST_INSERT_ID, "Could not retrieve last insert id.");
     (5008, RECORD_NOT_FOUND, "Database record could not be found.");
     (5009, DB_CUSTOM_ERROR, "Custom DB error occurred.");
-    (5010, ATTR_NOT_SEND, "Attribute in active model not set.");
+    (5010, ATTR_NOT_SET, "Attribute in active model not set.");
     (5011, PARSE_VALUE_AS_TARGET_TYPE, "An error occurred while trying to parse a value as a target type.");
     (5012, DB_PARSE_JSON, "Could not parse JSON from or to db.");
     (5013, MIGRATION_ERROR, "A migration error occurred.");

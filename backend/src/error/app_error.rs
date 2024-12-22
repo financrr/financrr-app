@@ -62,20 +62,9 @@ impl AppError {
 
 // Validation errors
 app_errors!(
+    (StatusCode::BAD_REQUEST, ErrorCode::GENERAL_VALIDATION_ERROR, GeneralValidationError, argument=Option<JsonReference>);
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_VERIFICATION_TOKEN, InvalidVerificationToken);
 );
-
-impl AppError {
-    #[allow(non_snake_case)]
-    pub fn GeneralValidationError(msg: String, reference: Option<JsonReference>) -> Self {
-        Self {
-            status_code: StatusCode::BAD_REQUEST,
-            error_code: ErrorCode::GENERAL_VALIDATION_ERROR,
-            details: msg,
-            reference,
-        }
-    }
-}
 
 // Configuration error
 app_errors!(
@@ -83,17 +72,9 @@ app_errors!(
 );
 
 // CLI errors
-impl AppError {
-    #[allow(non_snake_case)]
-    pub fn TaskNotFound(msg: String) -> Self {
-        Self {
-            status_code: StatusCode::NOT_FOUND,
-            error_code: ErrorCode::TASK_NOT_FOUND,
-            details: msg,
-            reference: None,
-        }
-    }
-}
+app_errors!(
+    (StatusCode::NOT_FOUND, ErrorCode::TASK_NOT_FOUND, TaskNotFound, argument=String);
+);
 
 // DB Errors
 app_errors!(
@@ -106,92 +87,19 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::COULD_NOT_RETRIEVE_LAST_INSERT_ID, CouldNotRetrieveLastInsertId);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_INSERTED, RecordsNotInserted);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_UPDATED, RecordsNotUpdated);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CONNECTION_AQUIRE, ConnectionAcquire, argument=Option<JsonReference>);
+    (StatusCode::NOT_FOUND, ErrorCode::RECORD_NOT_FOUND, RecordNotFound, argument=Option<JsonReference>);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_CUSTOM_ERROR, DbCustomError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::ATTR_NOT_SET, AttrNotSet, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::PARSE_VALUE_AS_TARGET_TYPE, ParseValueAsTargetType, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_PARSE_JSON, DbParseJson, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::MIGRATION_ERROR, MigrationError, argument=String);
 );
 
-impl AppError {
-    #[allow(non_snake_case)]
-    pub fn ConnectionAcquire(reference: Option<JsonReference>) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::CONNECTION_AQUIRE,
-            details: "Connection could not be acquired. Maybe your DB Pool is to small configured.".to_string(),
-            reference,
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn RecordNotFound(reference: Option<JsonReference>) -> Self {
-        Self {
-            status_code: StatusCode::NOT_FOUND,
-            error_code: ErrorCode::RECORD_NOT_FOUND,
-            details: "Database record could not be found.".to_string(),
-            reference,
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn DbCustomError(msg: String) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::DB_CUSTOM_ERROR,
-            details: "A custom DB error occurred.".to_string(),
-            reference: JsonReference::new_with_default_none(&msg),
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn AttrNotSet(attribute: String) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::ATTR_NOT_SEND,
-            details: "Attribute in active model not set.".to_string(),
-            reference: JsonReference::new_with_default_none(&attribute),
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn ParseValueAsTargetType(typ: String) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::PARSE_VALUE_AS_TARGET_TYPE,
-            details: ErrorCode::PARSE_VALUE_AS_TARGET_TYPE.message.to_string(),
-            reference: JsonReference::new_with_default_none(&typ),
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn DbParseJson(json: String) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::DB_PARSE_JSON,
-            details: ErrorCode::DB_PARSE_JSON.message.to_string(),
-            reference: JsonReference::new_with_default_none(&json),
-        }
-    }
-
-    #[allow(non_snake_case)]
-    pub fn MigrationError(err: String) -> Self {
-        Self {
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            error_code: ErrorCode::MIGRATION_ERROR,
-            details: "A migration error occurred.".to_string(),
-            reference: JsonReference::new_with_default_none(&err),
-        }
-    }
-}
-
 // Auth errors
-impl AppError {
-    #[allow(non_snake_case)]
-    pub fn InvalidJwt(reference: Option<JsonReference>) -> Self {
-        Self {
-            status_code: StatusCode::UNAUTHORIZED,
-            error_code: ErrorCode::INVALID_JWT,
-            details: "An invalid JWT was provided.".to_string(),
-            reference,
-        }
-    }
-}
+app_errors!(
+    (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_JWT, InvalidJwt, argument=Option<JsonReference>);
+);
 
 impl From<LocoError> for AppError {
     fn from(value: LocoError) -> Self {
@@ -215,10 +123,9 @@ impl From<ModelError> for AppError {
         match value {
             ModelError::EntityAlreadyExists => AppError::EntityAlreadyExists(),
             ModelError::EntityNotFound => AppError::EntityNotFound(),
-            ModelError::ModelValidation { errors } => AppError::GeneralValidationError(
-                "Validation error occurred.".to_string(),
-                JsonReference::new_with_default_none(&errors),
-            ),
+            ModelError::ModelValidation { errors } => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors))
+            }
             ModelError::Jwt(err) => AppError::InvalidJwt(JsonReference::new_with_default_none(&err.to_string())),
             ModelError::DbErr(err) => AppError::from(err),
             ModelError::Any(err) => {
@@ -300,10 +207,7 @@ impl From<DbErr> for AppError {
 
 impl From<ValidationErrors> for AppError {
     fn from(value: ValidationErrors) -> Self {
-        AppError::GeneralValidationError(
-            "Validation error occurred.".to_string(),
-            JsonReference::new_with_default_none(&value),
-        )
+        AppError::GeneralValidationError(JsonReference::new_with_default_none(&value))
     }
 }
 
