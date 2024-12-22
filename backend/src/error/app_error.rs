@@ -2,11 +2,12 @@ use crate::error::error_code::ErrorCode;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use derive_more::{Display, Error};
+use financrr_macros::app_errors;
 use loco_rs::prelude::{Error as LocoError, ModelError};
 use sea_orm::DbErr;
 use serde::Serialize;
 use tracing::{error, warn};
-use utoipa::ToSchema;
+use utoipa::{IntoResponses, ToSchema};
 use validator::ValidationErrors;
 
 pub type AppResult<T> = Result<T, AppError>;
@@ -46,27 +47,9 @@ impl JsonReference {
     }
 }
 
-macro_rules! app_errors {
-    (
-        $(
-            $(#[$docs:meta])*
-            ($status_code:expr, $error_code:expr, $details:expr, $func:ident);
-        )+
-    ) => {
-        impl AppError {
-        $(
-            $(#[$docs])*
-            #[allow(non_snake_case)]
-            pub(crate) fn $func() -> Self {
-                Self {
-                    status_code: $status_code,
-                    error_code: $error_code,
-                    details: String::from($details),
-                    reference: None,
-                }
-            }
-        )+
-        }
+impl Default for Option<JsonReference> {
+    fn default() -> Self {
+        None
     }
 }
 
@@ -130,6 +113,16 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_INSERTED, "Records could not be inserted.", RecordsNotInserted);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_UPDATED, "Records could not be updated.", RecordsNotUpdated);
 );
+
+#[derive(IntoResponses)]
+#[response(
+status = StatusCode::INTERNAL_SERVER_ERROR,
+description = "A general database error occurred. Please take look at the logs",
+example = json!(AppError::GeneralDatabaseError()),
+content_type="application/json"
+)]
+#[allow(dead_code)]
+pub struct ConnectionAcquireResponse(#[to_schema] AppError);
 
 impl AppError {
     #[allow(non_snake_case)]
