@@ -1,18 +1,14 @@
-use crate::models::_entities::instances;
+use crate::services::instance_handler::{InstanceHandler, InstanceHandlerInner};
 use crate::services::Service;
 use crate::utils::datetime::get_epoch_millis;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
 use loco_rs::Error;
-use sea_orm::{DatabaseConnection, IntoActiveModel};
 use std::env::VarError;
 use std::num::ParseIntError;
-use std::process::exit;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
-use std::time::Duration;
 use thiserror::Error;
-use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 use tracing::error;
 
 pub const SNOWFLAKE_EPOCH: i64 = 1_705_247_483_000;
@@ -33,38 +29,16 @@ pub type SnowflakeGenerator = Arc<SnowflakeGeneratorInner>;
 
 #[derive(Debug)]
 pub struct SnowflakeGeneratorInner {
-    node_id: u64,
+    instance_handler: InstanceHandler,
     last_timestamp: AtomicU64,
     sequence: AtomicU64,
 }
 
 impl Service for SnowflakeGeneratorInner {
     async fn new(ctx: &AppContext) -> Result<Self> {
-        let instance = {
-            let node_id = instances::Model::find_next_node_id(&ctx.db).await?;
+        let handler = InstanceHandlerInner::get_arc(ctx).await?;
 
-            if node_id < MIN_NODE_ID as i16 {
-                error!("Node ID must be greater than or equal to 0.");
-
-                return Err(SnowflakeGeneratorError::NodeIdTooSmall.into());
-            }
-
-            if node_id as u64 > MAX_NODE_ID {
-                error!("Node ID is too large. Which means the maximum number of instances has been started.");
-
-                return Err(SnowflakeGeneratorError::NodeIdTooLarge.into());
-            }
-
-            instances::Model::create_new_instance(&ctx.db, node_id).await?
-        };
-
-        let generator = Self::with_node_id(instance.node_id as u64);
-        generator
-            .start_heartbeat(ctx.db.clone())
-            .await
-            .map_err(|err| Error::Any(Box::new(err)))?;
-
-        Ok(generator)
+        Ok(Self::with_instance_handler(handler))
     }
 
     fn get_static_once() -> &'static OnceLock<Arc<Self>> {
@@ -75,47 +49,26 @@ impl Service for SnowflakeGeneratorInner {
 }
 
 impl SnowflakeGeneratorInner {
-    fn with_node_id(node_id: u64) -> Self {
+    fn with_instance_handler(handler: InstanceHandler) -> Self {
         Self {
-            node_id,
+            instance_handler: handler,
             last_timestamp: AtomicU64::new(0),
             sequence: AtomicU64::new(0),
         }
     }
 
-    async fn start_heartbeat(&self, db: DatabaseConnection) -> Result<(), JobSchedulerError> {
-        let scheduler = JobScheduler::new().await?;
+    pub fn validate_node_id(node_id: i16) -> Result<(), SnowflakeGeneratorError> {
+        if node_id < MIN_NODE_ID as i16 {
+            error!("Node ID must be greater than or equal to 0.");
 
-        let node_id = self.node_id as i16;
-        let job = Job::new_repeated_async(
-            Duration::from_secs(SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS),
-            move |_uuid, _l| {
-                let db = db.clone();
-                Box::pin(async move {
-                    match instances::Model::find_by_node_id(&db, node_id).await {
-                        Ok(instance) => {
-                            let active_model = instance.into_active_model();
-                            if let Err(e) = active_model.update_heartbeat(&db).await {
-                                error!("Failed to update heartbeat: {}", e);
-                                exit(1);
-                            }
-                        }
-                        Err(err) => {
-                            error!(
-                                "Failed to get instance by current node id: {} | Error: {}",
-                                node_id, err
-                            );
-                            exit(1);
-                        }
-                    }
-                })
-            },
-        )?;
+            return Err(SnowflakeGeneratorError::NodeIdTooSmall);
+        }
 
-        scheduler.add(job).await?;
+        if node_id > MAX_NODE_ID as i16 {
+            error!("Node ID is too large. Which means the maximum number of instances has been started.");
 
-        scheduler.shutdown_on_ctrl_c();
-        scheduler.start().await?;
+            return Err(SnowflakeGeneratorError::NodeIdTooLarge);
+        }
 
         Ok(())
     }
@@ -142,7 +95,8 @@ impl SnowflakeGeneratorInner {
         self.last_timestamp.store(current_timestamp, Ordering::SeqCst);
         self.sequence.store(sequence, Ordering::SeqCst);
 
-        Ok(((current_timestamp << (NODE_ID_BITS + SEQUENCE_BITS)) | (self.node_id << SEQUENCE_BITS) | sequence) as i64)
+        let node_id = self.instance_handler.get_instance_id() as u64;
+        Ok(((current_timestamp << (NODE_ID_BITS + SEQUENCE_BITS)) | (node_id << SEQUENCE_BITS) | sequence) as i64)
     }
 
     fn timestamp(&self) -> u64 {

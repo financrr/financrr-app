@@ -6,6 +6,7 @@ use loco_rs::prelude::Result;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
+mod instance_handler;
 pub mod snowflake_generator;
 pub mod user_verification;
 
