@@ -78,6 +78,7 @@ impl Hooks for App {
     }
 
     async fn truncate(db: &DatabaseConnection) -> Result<()> {
+        // TODO add all other tables
         truncate_table(db, users::Entity).await?;
         Ok(())
     }
