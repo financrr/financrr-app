@@ -47,12 +47,6 @@ impl JsonReference {
     }
 }
 
-impl Default for Option<JsonReference> {
-    fn default() -> Self {
-        None
-    }
-}
-
 // General errors
 impl AppError {
     #[allow(non_snake_case)]
@@ -68,7 +62,7 @@ impl AppError {
 
 // Validation errors
 app_errors!(
-    (StatusCode::BAD_REQUEST, ErrorCode::INVALID_VERIFICATION_TOKEN, ErrorCode::INVALID_VERIFICATION_TOKEN.message, InvalidVerificationToken);
+    (StatusCode::BAD_REQUEST, ErrorCode::INVALID_VERIFICATION_TOKEN, InvalidVerificationToken);
 );
 
 impl AppError {
@@ -85,7 +79,7 @@ impl AppError {
 
 // Configuration error
 app_errors!(
-  (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::QUEUE_PROVIDER_MISSING, "No provider is configured for the queue.", QueueProviderMissing);
+  (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::QUEUE_PROVIDER_MISSING, QueueProviderMissing);
 );
 
 // CLI errors
@@ -103,26 +97,16 @@ impl AppError {
 
 // DB Errors
 app_errors!(
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::GENERAL_DATABASE_ERROR, "A general database error occurred. Please take look at the logs", GeneralDatabaseError);
-    (StatusCode::BAD_REQUEST, ErrorCode::ENTITY_ALREADY_EXIST, "An entity with the same primary key already exists.", EntityAlreadyExists);
-    (StatusCode::NOT_FOUND, ErrorCode::ENTITY_DOES_NOT_EXIST, "An entity that was requested does not exist", EntityNotFound);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CONNECTION_ERROR, "Something went wrong while connecting to the database.", ConnectionError);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_EXECUTION_ERROR, "Could not execute operation successfully.", DbExecutionError);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_QUERY_ERROR, "Error occurred while performing a query.", DbQueryError);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::COULD_NOT_RETRIEVE_LAST_INSERT_ID, "Could not retrieve last insert id.", CouldNotRetrieveLastInsertId);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_INSERTED, "Records could not be inserted.", RecordsNotInserted);
-    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_UPDATED, "Records could not be updated.", RecordsNotUpdated);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::GENERAL_DATABASE_ERROR, GeneralDatabaseError);
+    (StatusCode::BAD_REQUEST, ErrorCode::ENTITY_ALREADY_EXIST, EntityAlreadyExists);
+    (StatusCode::NOT_FOUND, ErrorCode::ENTITY_DOES_NOT_EXIST, EntityNotFound);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CONNECTION_ERROR, ConnectionError);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_EXECUTION_ERROR, DbExecutionError);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_QUERY_ERROR, DbQueryError);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::COULD_NOT_RETRIEVE_LAST_INSERT_ID, CouldNotRetrieveLastInsertId);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_INSERTED, RecordsNotInserted);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::RECORDS_NOT_UPDATED, RecordsNotUpdated);
 );
-
-#[derive(IntoResponses)]
-#[response(
-status = StatusCode::INTERNAL_SERVER_ERROR,
-description = "A general database error occurred. Please take look at the logs",
-example = json!(AppError::GeneralDatabaseError()),
-content_type="application/json"
-)]
-#[allow(dead_code)]
-pub struct ConnectionAcquireResponse(#[to_schema] AppError);
 
 impl AppError {
     #[allow(non_snake_case)]
