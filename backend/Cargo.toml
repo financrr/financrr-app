@@ -113,3 +113,9 @@ loco-rs = { workspace = true, features = ["testing"] }
 serial_test = "3.2.0"
 rstest = "0.23.0"
 insta = { version = "1.41.1", features = ["redactions", "yaml", "filters"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
