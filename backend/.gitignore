@@ -1,5 +1,6 @@
 # App
 logs/
+data/
 
 # Config
 **/config/local.yaml

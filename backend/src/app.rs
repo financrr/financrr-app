@@ -1,8 +1,10 @@
 use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::services::ServicesInitializer;
+use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
+use loco_rs::storage::Storage;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
@@ -11,6 +13,7 @@ use loco_rs::{
     controller::AppRoutes,
     db::{self, truncate_table},
     environment::Environment,
+    storage,
     task::Tasks,
     Result,
 };
@@ -23,6 +26,7 @@ use std::path::Path;
 static GLOBAL: MiMalloc = MiMalloc;
 
 pub struct App;
+
 #[async_trait]
 impl Hooks for App {
     fn app_version() -> String {
@@ -54,8 +58,11 @@ impl Hooks for App {
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
+        create_necessary_folders()?;
+
         Ok(AppContext {
             cache: Cache::new(cache::drivers::inmem::new()).into(),
+            storage: Storage::single(storage::drivers::local::new_with_prefix(STORAGE_FOLDER)?).into(),
             ..ctx
         })
     }
