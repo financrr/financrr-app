@@ -66,6 +66,7 @@ error_codes!(
 // Configuration error
 error_codes!(
     (4001, QUEUE_PROVIDER_MISSING, "No provider is configured for the queue.");
+    (4002, EMAIL_CONFIGURATION_MISSING, "No email configuration is set.");
 );
 
 // CLI errors

@@ -39,4 +39,11 @@ impl UserVerificationServiceInner {
 
         Ok(model)
     }
+
+    pub async fn send_forgot_password_email(&self, user: users::ActiveModel) -> AppResult<users::Model> {
+        let model = user.set_forgot_password_sent(&self.ctx.db).await?;
+        AuthMailer::forgot_password(&self.ctx, &model).await?;
+
+        Ok(model)
+    }
 }

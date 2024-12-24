@@ -239,6 +239,7 @@ impl super::_entities::users::ActiveModel {
     /// when has DB query error
     pub async fn set_forgot_password_sent(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
         self.reset_sent_at = ActiveValue::set(Some(Local::now().into()));
+        // TODO generate more unique and secure token based on the instance id
         self.reset_token = ActiveValue::Set(Some(Uuid::new_v4().to_string()));
         Ok(self.update(db).await?)
     }

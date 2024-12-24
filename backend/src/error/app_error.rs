@@ -91,7 +91,8 @@ app_errors!(
 
 // Configuration error
 app_errors!(
-  (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::QUEUE_PROVIDER_MISSING, QueueProviderMissing);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::QUEUE_PROVIDER_MISSING, QueueProviderMissing);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::EMAIL_CONFIGURATION_MISSING, EmailConfigurationMissing);
 );
 
 // CLI errors
