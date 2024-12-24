@@ -1,4 +1,7 @@
 use crate::error::app_error::AppError;
+use crate::error::app_error::{
+    GeneralInternalServerErrorResponse, GeneralValidationErrorResponse, InvalidVerificationTokenResponse,
+};
 use crate::models::users::{Model, RegisterParams};
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::services::user_verification::UserVerificationService;
@@ -25,7 +28,8 @@ pub struct VerifyParams {
     tag = "User",
     responses(
         (status = StatusCode::CREATED, description = "Successfully registered a new User.", content_type="application/json", body = UserResponse),
-        (status = StatusCode::BAD_REQUEST, description = "Validation error.", content_type="application/json", body = AppError),
+        GeneralValidationErrorResponse,
+        GeneralInternalServerErrorResponse,
     )
 )]
 #[debug_handler]
@@ -59,7 +63,9 @@ async fn register(
     tag = "User",
     responses(
         (status = StatusCode::OK, description = "Successfully verified a User.", content_type="application/json", body = UserResponse),
-        (status = StatusCode::BAD_REQUEST, description = "Invalid verification token.", content_type="application/json", body = AppError),
+        InvalidVerificationTokenResponse,
+        GeneralValidationErrorResponse,
+        GeneralInternalServerErrorResponse,
     )
 )]
 #[debug_handler]

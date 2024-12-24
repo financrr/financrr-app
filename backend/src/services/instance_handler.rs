@@ -1,5 +1,5 @@
 use crate::models::_entities::instances;
-use crate::services::snowflake_generator::{SnowflakeGeneratorInner, SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS};
+use crate::services::snowflake_generator::SnowflakeGeneratorInner;
 use crate::services::Service;
 use loco_rs::app::AppContext;
 use loco_rs::Error;
@@ -8,7 +8,10 @@ use std::process::abort;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
-use tracing::error;
+use tracing::{error, info};
+
+pub const INSTANCE_HEARTBEAT_INTERVAL_SECONDS: u64 = 10;
+pub const INSTANCE_HEARTBEAT_TOLERANCE_SECONDS: u64 = INSTANCE_HEARTBEAT_INTERVAL_SECONDS * 3;
 
 pub type InstanceHandler = Arc<InstanceHandlerInner>;
 
@@ -20,11 +23,11 @@ pub struct InstanceHandlerInner {
 impl Service for InstanceHandlerInner {
     async fn new(ctx: &AppContext) -> loco_rs::Result<Self> {
         let instance = {
-            let node_id = instances::Model::find_next_node_id(&ctx.db).await?;
+            let instance = instances::Model::get_node_id_and_create_new_instance(&ctx.db).await?;
 
-            SnowflakeGeneratorInner::validate_node_id(node_id)?;
+            SnowflakeGeneratorInner::validate_node_id(instance.node_id)?;
 
-            instances::Model::create_new_instance(&ctx.db, node_id).await?
+            instance
         };
 
         let handler = Self::with_node_id(instance.node_id);
@@ -32,6 +35,8 @@ impl Service for InstanceHandlerInner {
             .start_heartbeat(ctx.db.clone())
             .await
             .map_err(|err| Error::Any(err.into()))?;
+
+        info!("Instance handler started with node id: {}", handler.get_instance_id());
 
         Ok(handler)
     }
@@ -55,7 +60,7 @@ impl InstanceHandlerInner {
 
         let node_id = self.instance_id as i16;
         let job = Job::new_repeated_async(
-            Duration::from_secs(SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS),
+            Duration::from_secs(INSTANCE_HEARTBEAT_INTERVAL_SECONDS),
             move |_uuid, _l| {
                 let db = db.clone();
                 Box::pin(async move {

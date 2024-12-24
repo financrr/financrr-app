@@ -1,3 +1,4 @@
+use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
 use crate::services::user_verification::UserVerificationServiceInner;
 use axum::{Extension, Router as AxumRouter};
@@ -6,12 +7,13 @@ use loco_rs::prelude::Result;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
-mod instance_handler;
+pub mod instance_handler;
 pub mod snowflake_generator;
 pub mod user_verification;
 
 pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
     Ok(router
+        .layer(InstanceHandlerInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)
         .layer(SnowflakeGeneratorInner::get_extension(ctx).await?))
 }

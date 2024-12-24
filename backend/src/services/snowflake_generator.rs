@@ -23,8 +23,6 @@ pub const MIN_NODE_ID: i64 = u64::MIN as i64;
 
 pub const MAX_SEQUENCE: u64 = (1 << SEQUENCE_BITS) - 1;
 
-pub const SNOWFLAKE_HEARTBEAT_INTERVAL_SECONDS: u64 = 10;
-
 pub type SnowflakeGenerator = Arc<SnowflakeGeneratorInner>;
 
 #[derive(Debug)]

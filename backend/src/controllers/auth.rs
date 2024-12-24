@@ -26,7 +26,7 @@ pub struct ResetParams {
 
 /// In case the user forgot his password  this endpoints generate a forgot token
 /// and send email to the user. In case the email not found in our DB, we are
-/// returning a valid request for for security reasons (not exposing users DB
+/// returning a valid request for security reasons (not exposing users DB
 /// list).
 #[debug_handler]
 async fn forgot(State(ctx): State<AppContext>, Json(params): Json<ForgotParams>) -> Result<Response> {
