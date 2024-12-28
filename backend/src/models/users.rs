@@ -1,35 +1,18 @@
 pub use super::_entities::users::{self, ActiveModel, Entity, Model};
-use crate::error::app_error::AppError;
+use crate::controllers::user::RegisterParams;
+use crate::error::app_error::{AppError, AppResult};
 use crate::models::_entities::sessions;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use async_trait::async_trait;
 use chrono::offset::Local;
 use enumflags2::_internal::RawBitFlags;
 use enumflags2::bitflags;
-use loco_rs::{auth::jwt, hash, prelude::*};
+use loco_rs::{hash, prelude::*};
 use sea_orm::prelude::Expr;
 use sea_orm::sea_query::IntoCondition;
 use sea_orm::{JoinType, PaginatorTrait, QuerySelect, RelationTrait};
-use serde::{Deserialize, Serialize};
 use std::num::ParseIntError;
-use utoipa::ToSchema;
 use uuid::Uuid;
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct LoginParams {
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
-pub struct RegisterParams {
-    #[validate(email)]
-    pub email: String,
-    #[validate(length(min = 8, max = 10240))]
-    pub password: String,
-    #[validate(length(min = 2, message = "Name must be at least 2 characters long."))]
-    pub name: String,
-}
 
 #[bitflags(default = User)]
 #[repr(u8)]
@@ -75,12 +58,13 @@ impl super::_entities::users::Model {
     /// # Errors
     ///
     /// When could not find user by the given token or DB query error
-    pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
+    pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> AppResult<Option<Self>> {
         let user = users::Entity::find()
             .filter(query::condition().eq(users::Column::Email, email).build())
             .one(db)
             .await?;
-        user.ok_or_else(|| ModelError::EntityNotFound)
+
+        Ok(user)
     }
 
     pub async fn is_email_unique(db: &DatabaseConnection, email: &str) -> ModelResult<bool> {
@@ -196,15 +180,6 @@ impl super::_entities::users::Model {
         txn.commit().await?;
 
         Ok(user)
-    }
-
-    /// Creates a JWT
-    ///
-    /// # Errors
-    ///
-    /// when could not convert user claims to jwt token
-    pub fn generate_jwt(&self, secret: &str, expiration: &u64) -> ModelResult<String> {
-        Ok(jwt::JWT::new(secret).generate_token(expiration, self.id.to_string(), None)?)
     }
 }
 

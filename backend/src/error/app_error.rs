@@ -78,6 +78,7 @@ app_errors!(
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_HEADER_VALUE, InvalidHeaderValue, argument=String);
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_HEADER_NAME, InvalidHeaderName, argument=String);
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_HTTP_METHOD, InvalidHttpMethod, argument=String);
+    (StatusCode::BAD_REQUEST, ErrorCode::INVALID_EMAIL_OR_PASSWORD, InvalidEmailOrPassword);
 );
 
 #[derive(Debug, Clone, Default, Serialize)]

@@ -4,16 +4,19 @@ use crate::services::user_verification::UserVerificationServiceInner;
 use axum::{Extension, Router as AxumRouter};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
+use secret_generator::SecretGeneratorInner;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
 pub mod instance_handler;
+pub mod secret_generator;
 pub mod snowflake_generator;
 pub mod user_verification;
 
 pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
     Ok(router
         .layer(InstanceHandlerInner::get_extension(ctx).await?)
+        .layer(SecretGeneratorInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)
         .layer(SnowflakeGeneratorInner::get_extension(ctx).await?))
 }

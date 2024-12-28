@@ -55,6 +55,7 @@ error_codes!(
     (2008, INVALID_HEADER_VALUE, "A invalid header value was given.");
     (2009, INVALID_HEADER_NAME, "A invalid header name was given");
     (2010, INVALID_HTTP_METHOD, "A invalid http method was used.");
+    (2011, INVALID_EMAIL_OR_PASSWORD, "Invalid E-Mail or Password given.");
 );
 
 // User errors

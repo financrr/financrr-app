@@ -3,7 +3,7 @@ use crate::error::app_error::{
     GeneralInternalServerErrorResponse, GeneralValidationErrorResponse, InvalidVerificationTokenResponse,
 };
 use crate::models::users;
-use crate::models::users::{Model, RegisterParams};
+use crate::models::users::Model;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::services::user_verification::UserVerificationService;
 use crate::utils::context::AdditionalAppContextMethods;
@@ -15,9 +15,15 @@ use axum::{debug_handler, Extension, Json};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Routes;
 use sea_orm::IntoActiveModel;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::{Validate, ValidationError, ValidationErrors};
+
+pub const MIN_PASSWORD_LENGTH: u64 = 8;
+pub const MAX_PASSWORD_LENGTH: u64 = 10240;
+
+pub const MIN_NAME_LENGTH: u64 = 2;
+pub const MAX_NAME_LENGTH: u64 = 512;
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct VerifyParams {
@@ -33,8 +39,18 @@ pub struct ForgotParams {
 #[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct ResetParams {
     pub token: String,
-    #[validate(length(min = 8, max = 10240))]
+    #[validate(length(min = "MIN_PASSWORD_LENGTH", max = "MAX_PASSWORD_LENGTH"))]
     pub password: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
+pub struct RegisterParams {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = "MIN_PASSWORD_LENGTH", max = "MAX_PASSWORD_LENGTH"))]
+    pub password: String,
+    #[validate(length(min = "MIN_NAME_LENGTH", max = "MAX_NAME_LENGTH"))]
+    pub name: String,
 }
 
 #[utoipa::path(post,
@@ -114,7 +130,7 @@ async fn forgot_password(
     Json(params): Json<ForgotParams>,
 ) -> AppResult<StatusCode> {
     params.validate()?;
-    let Ok(user) = Model::find_by_email(&ctx.db, &params.email).await else {
+    let Some(user) = Model::find_by_email(&ctx.db, &params.email).await? else {
         // Return success to not expose registered users.
         return Ok(StatusCode::OK);
     };
