@@ -12,7 +12,7 @@ use syn::parse_macro_input;
 ///
 /// # Optional Named Arguments
 ///
-/// 1. `details`: A custom message for the error. Defaults to the `.message` attribute of the given `ErrorCode`.
+/// 1. `details`: A custom message for the error. Defaults to `None`.
 /// 2. `argument`: The type of the reference argument. Defaults to `None`.
 /// 3. `generate_response`: A boolean indicating whether to generate a response struct. Defaults to `true`.
 ///
@@ -32,7 +32,7 @@ use syn::parse_macro_input;
 /// - `status_code`: `StatusCode::INTERNAL_SERVER_ERROR`
 /// - `error_code`: `ErrorCode::DB_CUSTOM_ERROR`
 /// - `func_name`: `DbCustomError`
-/// - `details`: `ErrorCode::DB_CUSTOM_ERROR.message`
+/// - `details`: `None`
 /// - `argument`: `None`
 /// - `generate_response`: `true`
 ///
