@@ -3,7 +3,6 @@ use crate::controllers::user::RegisterParams;
 use crate::error::app_error::{AppError, AppResult};
 use crate::models::_entities::sessions;
 use crate::services::snowflake_generator::SnowflakeGenerator;
-use async_trait::async_trait;
 use chrono::offset::Local;
 use enumflags2::_internal::RawBitFlags;
 use enumflags2::bitflags;
@@ -11,7 +10,6 @@ use loco_rs::{hash, prelude::*};
 use sea_orm::prelude::Expr;
 use sea_orm::sea_query::IntoCondition;
 use sea_orm::{JoinType, PaginatorTrait, QuerySelect, RelationTrait};
-use std::num::ParseIntError;
 use uuid::Uuid;
 
 #[bitflags(default = User)]
@@ -34,21 +32,6 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
         }
 
         Ok(self)
-    }
-}
-
-#[async_trait]
-impl Authenticable for super::_entities::users::Model {
-    async fn find_by_api_key(db: &DatabaseConnection, api_key: &str) -> ModelResult<Self> {
-        users::Model::find_by_api_key(db, api_key).await
-    }
-
-    async fn find_by_claims_key(db: &DatabaseConnection, claims_key: &str) -> ModelResult<Self> {
-        let id = claims_key
-            .parse::<i64>()
-            .map_err(|e: ParseIntError| ModelError::Any(e.into()))?;
-
-        Self::find_by_id(db, id).await
     }
 }
 

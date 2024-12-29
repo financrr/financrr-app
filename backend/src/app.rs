@@ -1,7 +1,8 @@
 use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
-use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
+use crate::workers::session_used::SessionUsedWorker;
+use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
 use loco_rs::storage::Storage;
@@ -52,7 +53,7 @@ impl Hooks for App {
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
             .prefix("/api/v1")
-            .add_route(controllers::auth::routes())
+            .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
             .add_route(controllers::openapi::routes())
     }
@@ -68,7 +69,7 @@ impl Hooks for App {
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(DownloadWorker::build(ctx)).await?;
+        queue.register(SessionUsedWorker::build(ctx)).await?;
         Ok(())
     }
     fn register_tasks(tasks: &mut Tasks) {

@@ -3,6 +3,7 @@ pub mod controllers;
 pub mod error;
 pub mod initializers;
 pub mod mailers;
+pub mod middlewares;
 pub mod models;
 pub mod services;
 pub mod tasks;

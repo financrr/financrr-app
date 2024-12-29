@@ -99,6 +99,8 @@ error_codes!(
 // Auth errors
 error_codes!(
     (7001, INVALID_JWT, "An invalid JWT was provided.");
+    (7002, AUTH_HEADER_MISSING, "Authorization header required but missing.");
+    (7003, INVALID_BEARER_TOKEN, "Invalid bearer token.");
 );
 
 // Misc Errors

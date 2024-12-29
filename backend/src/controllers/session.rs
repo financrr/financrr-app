@@ -1,7 +1,8 @@
 use crate::controllers::user::{MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH};
 use crate::error::app_error::{
-    AppError, AppResult, GeneralInternalServerErrorResponse, InvalidEmailOrPasswordResponse,
+    AppError, AppResult, GeneralInternalServerErrorResponse, InvalidBearerTokenResponse, InvalidEmailOrPasswordResponse,
 };
+use crate::middlewares::authentication::Authenticated;
 use crate::models::_entities::sessions;
 use crate::models::users;
 use crate::services::secret_generator::SecretGenerator;
@@ -9,7 +10,7 @@ use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::views::session::SessionResponse;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::{debug_handler, Extension, Json};
 use loco_rs::app::AppContext;
 use loco_rs::controller::Routes;
@@ -27,8 +28,12 @@ pub struct CreateSessionParams {
     pub user_agent: Option<String>,
 }
 
+/// Login/Create a new Session.
+///
+/// This endpoint is used to create a new Session for a User.
+/// Returns a new Session with a Bearer Token that can be used to authenticate the User.
 #[utoipa::path(post,
-    path = "/api/v1/sessions/create",
+    path = "/api/v1/sessions",
     tag = "Session",
     responses(
         (status = StatusCode::CREATED, description = "Successfully created a new Session.", content_type="application/json", body = SessionResponse),
@@ -61,6 +66,32 @@ async fn create(
     Ok((StatusCode::CREATED, Json(SessionResponse::from((session, user)))))
 }
 
+/// Retrieve the current Session.
+#[utoipa::path(get,
+    path = "/api/v1/sessions/current",
+    tag = "Session",
+    responses(
+        (status = StatusCode::OK, description = "Successfully retrieved the current Session.", content_type="application/json", body = SessionResponse),
+        GeneralInternalServerErrorResponse,
+        InvalidBearerTokenResponse,
+    ),
+    security(
+        ("bearer_token" = [])
+    ),
+)]
+#[debug_handler]
+async fn current(
+    State(ctx): State<AppContext>,
+    Authenticated(session): Authenticated<sessions::Model>,
+) -> AppResult<(StatusCode, Json<SessionResponse>)> {
+    let user = users::Model::find_by_id(&ctx.db, session.user_id).await?;
+
+    Ok((StatusCode::OK, Json(SessionResponse::from((session, user)))))
+}
+
 pub fn routes() -> Routes {
-    Routes::new().add("/create", post(create))
+    Routes::new()
+        .prefix("/sessions")
+        .add("/", post(create))
+        .add("/current", get(current))
 }

@@ -53,6 +53,7 @@ pub struct RegisterParams {
     pub name: String,
 }
 
+/// Registers a new User
 #[utoipa::path(post,
     path = "/api/v1/users/register",
     tag = "User",
@@ -87,6 +88,10 @@ async fn register(
     Ok((StatusCode::CREATED, Json(UserResponse::from(model))))
 }
 
+/// Verifies a User
+///
+/// This endpoint is only used if an Email Server was configured.
+/// Otherwise, the User is automatically verified.
 #[utoipa::path(post,
     path = "/api/v1/users/verify",
     tag = "User",
@@ -114,6 +119,9 @@ async fn verify(
     }
 }
 
+/// Sends a forgot password email to the User
+///
+/// This endpoint only works if an Email Server was configured.
 #[utoipa::path(post,
     path = "/api/v1/users/forgot",
     tag = "User",
@@ -146,6 +154,7 @@ async fn forgot_password(
     Ok(StatusCode::OK)
 }
 
+/// Resets the password of a User
 #[utoipa::path(post,
     path = "/api/v1/users/reset",
     tag = "User",
