@@ -19,7 +19,7 @@ pub struct AppError {
     #[serde(skip)]
     pub status_code: StatusCode,
     pub error_code: ErrorCode,
-    pub details: String,
+    pub details: Option<String>,
     pub reference: Option<JsonReference>,
 }
 
@@ -156,7 +156,7 @@ impl From<LocoError> for AppError {
             LocoError::CustomError(status, detail) => AppError {
                 status_code: status,
                 error_code: ErrorCode::CUSTOM_ERROR,
-                details: ErrorCode::CUSTOM_ERROR.message.to_string(),
+                details: None,
                 reference: JsonReference::new_with_default_none(&detail),
             },
             LocoError::InternalServerError => AppError::GeneralInternalServerError(Default::default()),

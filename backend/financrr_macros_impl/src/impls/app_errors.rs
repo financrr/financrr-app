@@ -11,7 +11,7 @@ pub struct ErrorDefinition {
     error_code: Expr,
     func_name: Ident,
     // Optional arguments
-    details: Expr,
+    details: Option<Expr>,
     reference_type: Option<syn::Type>,
     generate_response: bool,
 }
@@ -34,7 +34,7 @@ impl Parse for ErrorDefinition {
         let func_name: Ident = content.parse()?;
 
         // Default values for optional named arguments
-        let mut details: Expr = syn::parse_quote! { #error_code.message };
+        let mut details = None;
         let mut reference_type = None;
         let mut generate_response = true;
 
@@ -44,7 +44,7 @@ impl Parse for ErrorDefinition {
             let ident: Ident = content.parse()?;
             content.parse::<Token![=]>()?;
             match ident.to_string().as_str() {
-                "details" => details = content.parse()?,
+                "details" => details = Some(content.parse()?),
                 "argument" => reference_type = Some(content.parse()?),
                 "generate_response" => generate_response = parse_bool(&content)?,
                 _ => return Err(syn::Error::new(ident.span(), "Unexpected named argument")),
@@ -88,7 +88,6 @@ pub fn app_error_implementation(input: AppErrorsInput) -> TokenStream {
         let docs = &error.docs;
         let status_code = &error.status_code;
         let error_code = &error.error_code;
-        let details = &error.details;
         let func_name = &error.func_name;
 
         let reference_code = if let Some(reference_type) = &error.reference_type {
@@ -107,6 +106,12 @@ pub fn app_error_implementation(input: AppErrorsInput) -> TokenStream {
             quote! { () }
         };
 
+        let details_code = if let Some(details) = &error.details {
+            quote! { String::from(#details) }
+        } else {
+            quote! { None }
+        };
+
         quote! {
             #(#docs)*
             #[allow(non_snake_case)]
@@ -114,7 +119,7 @@ pub fn app_error_implementation(input: AppErrorsInput) -> TokenStream {
                 Self {
                     status_code: #status_code,
                     error_code: #error_code,
-                    details: String::from(#details),
+                    details: #details_code,
                     reference: #reference_code,
                 }
             }
@@ -127,7 +132,7 @@ pub fn app_error_implementation(input: AppErrorsInput) -> TokenStream {
         .filter(|error| error.generate_response)
         .map(|error| {
             let status_code = &error.status_code;
-            let details = &error.details;
+            let error_code = &error.error_code;
             let func_name = &error.func_name;
 
             let example = if error.reference_type.is_some() {
@@ -142,7 +147,7 @@ pub fn app_error_implementation(input: AppErrorsInput) -> TokenStream {
                 #[derive(IntoResponses)]
                 #[response(
                     status = #status_code,
-                    description = #details,
+                    description = #error_code.message,
                     example = json!(#example),
                     content_type = "application/json"
                 )]
@@ -181,7 +186,7 @@ mod tests {
                     Self {
                         status_code: StatusCode::INTERNAL_SERVER_ERROR,
                         error_code: ErrorCode::DB_CUSTOM_ERROR,
-                        details: String::from(ErrorCode::DB_CUSTOM_ERROR.message),
+                        details: None,
                         reference: None,
                     }
                 }
@@ -215,7 +220,7 @@ mod tests {
                     Self {
                         status_code: StatusCode::BAD_REQUEST,
                         error_code: ErrorCode::INVALID_VERIFICATION_TOKEN,
-                        details: String::from(ErrorCode::INVALID_VERIFICATION_TOKEN.message),
+                        details: None,
                         reference: JsonReference::new_with_default_none(&reference),
                     }
                 }
@@ -249,7 +254,7 @@ mod tests {
                     Self {
                         status_code: StatusCode::BAD_REQUEST,
                         error_code: ErrorCode::INVALID_VERIFICATION_TOKEN,
-                        details: String::from(ErrorCode::INVALID_VERIFICATION_TOKEN.message),
+                        details: None,
                         reference: reference,
                     }
                 }
@@ -284,7 +289,7 @@ mod tests {
                     Self {
                         status_code: StatusCode::INTERNAL_SERVER_ERROR,
                         error_code: ErrorCode::DB_CUSTOM_ERROR,
-                        details: String::from(ErrorCode::DB_CUSTOM_ERROR.message),
+                        details: None,
                         reference: None,
                     }
                 }
@@ -294,7 +299,7 @@ mod tests {
                     Self {
                         status_code: StatusCode::UNAUTHORIZED,
                         error_code: ErrorCode::INVALID_JWT,
-                        details: String::from(ErrorCode::INVALID_JWT.message),
+                        details: None,
                         reference: None,
                     }
                 }
