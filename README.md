@@ -48,4 +48,3 @@ Alternatively, you can create an [issue](https://github.com/financrr/financrr-ap
 We greatly appreciate your support for financrr! You can support us through the following methods:
 
 - Starring, forking, and/or contributing to the project
-- > Monetary donations options will be added soon
