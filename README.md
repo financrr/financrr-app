@@ -1,7 +1,7 @@
 <p align="center">
 <img src="/resources/Logo/banner_light_bg.png" width="2500">
 </p>
-<h3 align="center">financrr — Know your money</h3>
+<h3 align="center">financrr — Finance tracking.  Easy and open source.</h3>
 <br/>
 
 > [!IMPORTANT]
@@ -24,9 +24,9 @@ With its intuitive interface and powerful features, Financrr empowers users to t
 
 ## 🌐 Links
 
-- [Docs](https://financrr.github.io/financrr-app/docs/)
-- [Frontend stage](https://financrr.github.io/financrr-app/frontend-stage/)
-- [Backend stage](https://api-stage.financrr.app/swagger-ui/)
+- [Docs](https://jt-foss.github.io/financrr-app/docs/)
+- [Frontend stage](https://jt-foss.github.io/financrr-app/frontend-stage/)
+- [Backend stage](https://api-stage.financrr.app/openapi/swagger-ui/)
 
 ## 🔧 Contributing
 
@@ -48,4 +48,3 @@ Alternatively, you can create an [issue](https://github.com/financrr/financrr-ap
 We greatly appreciate your support for financrr! You can support us through the following methods:
 
 - Starring, forking, and/or contributing to the project
-- > Monetary donations options will be added soon

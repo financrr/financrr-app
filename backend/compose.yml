@@ -26,7 +26,7 @@ services:
         condition: service_healthy
 
   db:
-    image: postgres:16.3-alpine3.20
+    image: postgres:16.4-alpine3.20
     init: true
     restart: unless-stopped
     environment:
@@ -46,7 +46,7 @@ services:
       retries: 3
 
   cache:
-    image: ghcr.io/dragonflydb/dragonfly:v1.19.0
+    image: ghcr.io/dragonflydb/dragonfly:v1.21.4
     init: true
     restart: unless-stopped
     ulimits:

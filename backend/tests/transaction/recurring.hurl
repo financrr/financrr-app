@@ -1,3 +1,10 @@
+# Get the id from the second currency
+GET {{api_v1}}/currency
+Authorization: Bearer {{admin_token}}
+HTTP 200
+[Captures]
+currency_id: jsonpath "$['data'][1]['id']"
+
 # Try to get all recurring transactions with out a token
 GET {{api_v1}}/transaction/recurring
 HTTP 401
@@ -20,7 +27,7 @@ Content-Type: application/json
   "description": null,
   "iban": null,
   "original_balance": 10000,
-  "currency_id": 2
+  "currency_id": "{{currency_id}}"
 }
 HTTP 201
 [Captures]
@@ -32,9 +39,9 @@ Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 {
   "source_id": null,
-  "destination_id": {{test_acc_id}},
+  "destination_id": "{{test_acc_id}}",
   "amount": 1000,
-  "currency_id": 2,
+  "currency_id": "{{currency_id}}",
   "name": "10€ Deposit",
   "description": "A longer description bla bla",
   "budget_id": null
@@ -48,7 +55,7 @@ POST {{api_v1}}/transaction/recurring
 Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 {
-  "template_id": {{template_id}},
+  "template_id": "{{template_id}}",
   "recurring_rule": {
     "cron_pattern": {
       "day_of_month": "*",
@@ -73,7 +80,7 @@ PATCH {{api_v1}}/transaction/recurring/{{recurring_id}}
 Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 {
-    "template_id": {{template_id}},
+    "template_id": "{{template_id}}",
     "recurring_rule": {
         "cron_pattern": {
         "day_of_month": "*",
@@ -109,9 +116,9 @@ Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 {
   "source_id": null,
-  "destination_id": {{test_acc_id}},
+  "destination_id": "{{test_acc_id}}",
   "amount": 1000,
-  "currency_id": 2,
+  "currency_id": "{{currency_id}}",
   "name": "10€ Deposit",
   "description": "A longer description bla bla",
   "budget_id": null
@@ -125,7 +132,7 @@ POST {{api_v1}}/transaction/recurring
 Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 {
-  "template_id": {{template_id}},
+  "template_id": "{{template_id}}",
   "recurring_rule": {
     "cron_pattern": {
       "day_of_month": "*",

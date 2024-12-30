@@ -2,6 +2,8 @@ use actix_web::http::Uri;
 use actix_web::web::{Path, ServiceConfig};
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 
+use utility::snowflake::entity::Snowflake;
+
 use crate::api::documentation::response::{InternalServerError, Unauthorized};
 use crate::api::error::api::ApiError;
 use crate::api::pagination::{PageSizeParam, Pagination};
@@ -55,12 +57,13 @@ pub(crate) async fn get_all_recurring_transactions(
     security(
         ("bearer_token" = [])
     ),
+    params(("recurring_transaction_id" = Snowflake,)),
     path = "/api/v1/transaction/recurring/{recurring_transaction_id}",
     tag = "Recurring-Transaction")]
 #[get("/{recurring_transaction_id}")]
 pub(crate) async fn get_one_recurring_transaction(
     user: Phantom<User>,
-    recurring_transaction_id: Path<i32>,
+    recurring_transaction_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let transaction = RecurringTransaction::find_by_id(recurring_transaction_id.into_inner()).await?;
     transaction.has_permission_or_error(user.get_id(), Permissions::READ).await?;
@@ -106,12 +109,13 @@ pub(crate) async fn create_recurring_transaction(
     security(
         ("bearer_token" = [])
     ),
+    params(("recurring_transaction_id" = Snowflake,)),
     path = "/api/v1/transaction/recurring/{recurring_transaction_id}",
     tag = "Recurring-Transaction")]
 #[delete("/{recurring_transaction_id}")]
 pub(crate) async fn delete_recurring_transaction(
     user: Phantom<User>,
-    recurring_transaction_id: Path<i32>,
+    recurring_transaction_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let transaction = RecurringTransaction::find_by_id(recurring_transaction_id.into_inner()).await?;
     transaction.has_permission_or_error(user.get_id(), Permissions::DELETE).await?;
@@ -130,13 +134,14 @@ InternalServerError,
 security(
 ("bearer_token" = [])
 ),
+params(("recurring_transaction_id" = Snowflake,)),
 path = "/api/v1/transaction/recurring/{recurring_transaction_id}",
 request_body = RecurringTransactionDTO,
 tag = "Recurring-Transaction")]
 #[patch("/{recurring_transaction_id}")]
 pub(crate) async fn update_recurring_transaction(
     user: Phantom<User>,
-    recurring_transaction_id: Path<i32>,
+    recurring_transaction_id: Path<Snowflake>,
     recurring_transaction_dto: RecurringTransactionDTO,
 ) -> Result<impl Responder, ApiError> {
     let transaction = RecurringTransaction::find_by_id(recurring_transaction_id.into_inner()).await?;

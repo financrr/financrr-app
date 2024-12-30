@@ -27,7 +27,7 @@ jobs:
       - name: Prepare for build
         run: bash bin/install.bash
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/docker/rust/Dockerfile
@@ -45,7 +45,7 @@ jobs:
       - name: Prepare for build
         run: bash bin/install.bash
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/docker/rust/Dockerfile

@@ -22,8 +22,12 @@ entity = { path = "../entity" }
 
 # Sea-orm
 sea-orm.workspace = true
-sea-orm-migration = { version = "1.0.0-rc.5", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
+sea-orm-migration = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
 tracing.workspace = true
 
 # Date/Time
 time.workspace = true
+
+# Utils
+dotenvy.workspace = true
+utility.workspace = true

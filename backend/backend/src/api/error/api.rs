@@ -13,10 +13,11 @@ use utoipa::ToSchema;
 use validator::{ValidationError, ValidationErrors};
 
 use entity::error::EntityError;
+use utility::datetime::error::TimeError;
+use utility::snowflake::error::SnowflakeGeneratorError;
 
 use crate::api::error::api_codes::ApiCode;
-use crate::api::error::validation;
-use crate::util::validation::ValidationErrorJsonPayload;
+use crate::api::error::validation::ValidationCode;
 
 #[derive(Debug, Display, Error, Serialize, ToSchema)]
 #[display("{}", serde_json::to_string(self).expect("Failed to serialize ApiError"))]
@@ -119,6 +120,12 @@ impl ResponseError for ApiError {
     }
 }
 
+impl From<ApiError> for ValidationError {
+    fn from(_: ApiError) -> Self {
+        ValidationCode::INTERNAL_SERVER_ERROR.into()
+    }
+}
+
 impl From<EntityError> for ApiError {
     fn from(error: EntityError) -> Self {
         Self {
@@ -152,33 +159,14 @@ impl From<RedisError> for ApiError {
     }
 }
 
-impl From<ValidationErrorJsonPayload> for ApiError {
-    fn from(value: ValidationErrorJsonPayload) -> Self {
-        let serializable_struct = SerializableStruct::new(&value).ok();
-        Self {
-            status_code: StatusCode::BAD_REQUEST,
-            api_code: ApiCode::JSON_PAYLOAD_VALIDATION_ERROR,
-            details: value.message,
-            reference: serializable_struct,
-        }
-    }
-}
-
-impl From<ValidationError> for ApiError {
-    fn from(value: ValidationError) -> Self {
-        Self::from(ValidationErrorJsonPayload::from(value))
-    }
-}
-
 impl From<ValidationErrors> for ApiError {
     fn from(value: ValidationErrors) -> Self {
-        Self::from(ValidationErrorJsonPayload::from(&value))
-    }
-}
-
-impl From<validation::ValidationError> for ApiError {
-    fn from(value: validation::ValidationError) -> Self {
-        Self::from(value.get_error().to_owned())
+        Self {
+            status_code: StatusCode::BAD_REQUEST,
+            api_code: ApiCode::VALIDATION_ERROR,
+            details: "Validation error!".to_string(),
+            reference: SerializableStruct::new(value.errors()).ok(),
+        }
     }
 }
 
@@ -186,6 +174,17 @@ impl From<serde_json::Error> for ApiError {
     fn from(value: serde_json::Error) -> Self {
         Self {
             status_code: StatusCode::BAD_REQUEST,
+            api_code: ApiCode::SERIALIZATION_ERROR,
+            details: value.to_string(),
+            reference: None,
+        }
+    }
+}
+
+impl From<serde_yml::Error> for ApiError {
+    fn from(value: serde_yml::Error) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
             api_code: ApiCode::SERIALIZATION_ERROR,
             details: value.to_string(),
             reference: None,
@@ -222,6 +221,28 @@ impl From<BuilderConfigBuilderError> for ApiError {
             api_code: ApiCode::CRON_BUILDER_ERROR,
             details: value.to_string(),
             reference: None,
+        }
+    }
+}
+
+impl From<TimeError> for ApiError {
+    fn from(value: TimeError) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            api_code: ApiCode::TIME_ERROR,
+            details: value.to_string(),
+            reference: SerializableStruct::new(&value).ok(),
+        }
+    }
+}
+
+impl From<SnowflakeGeneratorError> for ApiError {
+    fn from(value: SnowflakeGeneratorError) -> Self {
+        Self {
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            api_code: ApiCode::SNOWFLAKE_ERROR,
+            details: value.to_string(),
+            reference: SerializableStruct::new(&value).ok(),
         }
     }
 }

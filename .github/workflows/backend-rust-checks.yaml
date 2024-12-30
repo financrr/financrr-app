@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features
+        run: RUSTFLAGS="-Dwarnings" cargo clippy
 
   formatting:
     runs-on: ubuntu-latest
@@ -50,3 +50,10 @@ jobs:
           flags: --all
           args: --config-path=./backend/rustfmt.toml
           working-directory: ./backend
+
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run benchmarks
+        run: cargo bench

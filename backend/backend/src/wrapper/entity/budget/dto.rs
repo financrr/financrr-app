@@ -15,7 +15,7 @@ pub(crate) struct BudgetDTO {
     #[validate(length(min = 0, max = 255))]
     pub(crate) description: Option<String>,
     #[serde(with = "time::serde::rfc3339")]
-    #[validate(custom(function = validate_datetime_not_in_future))]
+    #[validate(custom(function = "validate_datetime_not_in_future"))]
     pub(crate) created_at: OffsetDateTime,
 }
 

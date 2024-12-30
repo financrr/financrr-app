@@ -1,8 +1,7 @@
-use std::future::Future;
-
 use tracing::info;
 
-use crate::api::error::validation::ValidationError;
+use utility::snowflake::entity::Snowflake;
+
 use crate::wrapper::entity::transaction::recurring::RecurringTransaction;
 
 pub(crate) mod account;
@@ -17,12 +16,8 @@ pub(crate) async fn start_wrapper() {
     RecurringTransaction::init().await
 }
 
-pub(crate) trait DbValidator {
-    fn validate_against_db(&self) -> impl Future<Output = Result<(), ValidationError>> + Send;
-}
-
 pub(crate) trait WrapperEntity: TableName {
-    fn get_id(&self) -> i32;
+    fn get_id(&self) -> Snowflake;
 }
 
 pub(crate) trait TableName {

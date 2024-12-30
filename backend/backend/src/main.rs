@@ -1,5 +1,6 @@
 use std::io::Result;
-use std::sync::OnceLock;
+use std::sync::LazyLock;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use actix_cors::Cors;
@@ -8,28 +9,32 @@ use actix_web::middleware::{Compress, DefaultHeaders, NormalizePath, TrailingSla
 use actix_web::web::Data;
 use actix_web::{
     web::{self},
-    App, HttpServer,
+    App, HttpRequest, HttpServer,
 };
 use actix_web_prom::{PrometheusMetrics, PrometheusMetricsBuilder};
-use actix_web_validator5::{Error, JsonConfig, PathConfig, QueryConfig};
 use dotenvy::dotenv;
+// When enabled use MiMalloc as malloc instead of the default malloc
+#[cfg(feature = "enable_mimalloc")]
+use mimalloc::MiMalloc;
 use redis::Client;
 use sea_orm::DatabaseConnection;
 use tracing::info;
 use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
 use utoipa::openapi::OpenApi as OpenApiStruct;
 use utoipa::{Modify, OpenApi};
-use utoipa_swagger_ui::SwaggerUi;
 use utoipauto::utoipauto;
 
+use actix_web_validation::validator::ValidatorErrorHandlerExt;
 use entity::utility::loading::load_schema;
 use migration::Migrator;
 use migration::MigratorTrait;
+use utility::snowflake::generator::SnowflakeGenerator;
 
 use crate::api::error::api::ApiError;
 use crate::api::routes::account::controller::account_controller;
 use crate::api::routes::budget::controller::budget_controller;
 use crate::api::routes::currency::controller::currency_controller;
+use crate::api::routes::openapi::controller::configure_openapi;
 use crate::api::routes::session::controller::session_controller;
 use crate::api::routes::transaction::controller::transaction_controller;
 use crate::api::routes::user::controller::user_controller;
@@ -38,7 +43,6 @@ use crate::config::{logger, Config};
 use crate::database::connection::{create_redis_client, establish_database_connection, get_database_connection};
 use crate::database::redis::clear_redis;
 use crate::util::panic::install_panic_hook;
-use crate::util::validation::ValidationErrorJsonPayload;
 use crate::wrapper::entity::session::Session;
 use crate::wrapper::entity::start_wrapper;
 use crate::wrapper::permission::cleanup::schedule_clean_up_task;
@@ -51,11 +55,17 @@ pub(crate) mod scheduling;
 pub(crate) mod util;
 pub(crate) mod wrapper;
 
+#[cfg(feature = "enable_mimalloc")]
+#[cfg_attr(feature = "enable_mimalloc", global_allocator)]
+static GLOBAL: MiMalloc = MiMalloc;
+
 pub(crate) static DB: OnceLock<DatabaseConnection> = OnceLock::new();
 pub(crate) static REDIS: OnceLock<Client> = OnceLock::new();
 pub(crate) static CONFIG: OnceLock<Config> = OnceLock::new();
+pub(crate) static SNOWFLAKE_GENERATOR: LazyLock<SnowflakeGenerator> =
+    LazyLock::new(|| SnowflakeGenerator::new_from_env().expect("Could not create snowflake generator!"));
 
-#[utoipauto(paths = "./backend/src")]
+#[utoipauto(paths = "./backend/src, ./utility/src from utility")]
 #[derive(OpenApi)]
 #[openapi(
     schemas(
@@ -63,6 +73,7 @@ pub(crate) static CONFIG: OnceLock<Config> = OnceLock::new();
     ),
     tags(
         (name = "Status", description = "Endpoints that contain information about the health status of the server."),
+        (name = "OpenAPI", description = "Endpoints for OpenAPI documentation."),
         (name = "Metrics", description = "Endpoints for prometheus metrics."),
         (name = "Session", description = "Endpoints for session management."),
         (name = "User", description = "Endpoints for user management."),
@@ -122,9 +133,6 @@ async fn main() -> Result<()> {
     info!("[*] Scheduling clean up task...");
     schedule_clean_up_task();
 
-    // Make instance variable of ApiDoc so all worker threads gets the same instance.
-    let openapi = ApiDoc::openapi();
-
     info!("\t[*] Initializing rate limiter...");
     let limiter = Data::new(build_rate_limiter());
 
@@ -137,42 +145,32 @@ async fn main() -> Result<()> {
     info!("Starting server... Listening on: {}", Config::get_config().address);
 
     HttpServer::new(move || {
+        let default_headers =
+            DefaultHeaders::new().add(("Content-Type", "application/json")).add(("Accept", "application/json"));
+
         App::new()
             .wrap(Compress::default())
             .wrap(build_cors())
             .wrap(prometheus_metrics.clone())
-            .app_data(JsonConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
-            .app_data(QueryConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
-            .app_data(PathConfig::default().error_handler(|err, _| handle_validation_error(err).into()))
+            .validator_error_handler(Arc::new(validation_error_handler))
             .app_data(limiter.clone())
+            .wrap(RateLimiter::default())
+            .wrap(default_headers)
             .configure(configure_api)
-            .service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()))
+            .configure(configure_openapi)
     })
     .bind(&Config::get_config().address)?
     .run()
     .await
 }
 
-fn handle_validation_error(err: Error) -> ApiError {
-    let json_error = match &err {
-        Error::Validate(error) => ValidationErrorJsonPayload::from(error),
-        _ => ValidationErrorJsonPayload {
-            message: err.to_string(),
-            fields: Vec::new(),
-        },
-    };
-
-    ApiError::from(json_error)
+fn validation_error_handler(errors: validator::ValidationErrors, _req: &HttpRequest) -> actix_web::Error {
+    ApiError::from(errors).into()
 }
 
 fn configure_api(cfg: &mut web::ServiceConfig) {
-    let default_headers =
-        DefaultHeaders::new().add(("Content-Type", "application/json")).add(("Accept", "application/json"));
-
     cfg.service(
         web::scope("/api")
-            .wrap(RateLimiter::default())
-            .wrap(default_headers)
             .wrap(NormalizePath::new(TrailingSlash::Trim))
             .configure(configure_api_v1)
             .configure(status_controller),

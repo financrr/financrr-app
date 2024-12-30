@@ -1,7 +1,8 @@
 use actix_web::http::Uri;
-use actix_web::web::Path;
+use actix_web::web::{Json, Path};
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
-use actix_web_validator5::Json;
+use actix_web_validation::Validated;
+use utility::snowflake::entity::Snowflake;
 
 use crate::api::documentation::response::{InternalServerError, ResourceNotFound, Unauthorized, ValidationError};
 use crate::api::error::api::ApiError;
@@ -65,15 +66,16 @@ pub(crate) async fn get_all_currencies(
     security(
         ("bearer_token" = [])
     ),
+    params(("currency_id" = Snowflake,)),
     path = "/api/v1/currency/{currency_id}",
     tag = "Currency")]
 #[get("/{currency_id}")]
 pub(crate) async fn get_one_currency(
     user: Option<Phantom<User>>,
-    currency_id: Path<i32>,
+    currency_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let currency_id = currency_id.into_inner();
-    let user_id = user.map_or(-1, |user| user.get_id());
+    let user_id = user.map_or(Snowflake::from(-1), |user| user.get_id());
 
     Ok(HttpResponse::Ok().json(Currency::find_by_id_include_user(currency_id, user_id).await?))
 }
@@ -93,9 +95,9 @@ tag = "Currency")]
 #[post("")]
 pub(crate) async fn create_currency(
     user: Phantom<User>,
-    currency: Json<CurrencyDTO>,
+    currency: Validated<Json<CurrencyDTO>>,
 ) -> Result<impl Responder, ApiError> {
-    Ok(HttpResponse::Created().json(Currency::new(currency.into_inner(), user.get_id()).await?))
+    Ok(HttpResponse::Created().json(Currency::new(currency.into_inner().into_inner(), user.get_id()).await?))
 }
 
 #[utoipa::path(delete,
@@ -108,10 +110,14 @@ pub(crate) async fn create_currency(
     security(
         ("bearer_token" = [])
     ),
+    params(("currency_id" = Snowflake,)),
     path = "/api/v1/currency/{currency_id}",
     tag = "Currency")]
 #[delete("/{currency_id}")]
-pub(crate) async fn delete_currency(user: Phantom<User>, currency_id: Path<i32>) -> Result<impl Responder, ApiError> {
+pub(crate) async fn delete_currency(
+    user: Phantom<User>,
+    currency_id: Path<Snowflake>,
+) -> Result<impl Responder, ApiError> {
     let currency = Currency::find_by_id(currency_id.into_inner()).await?;
     currency.has_permission_or_error(user.get_id(), Permissions::READ_DELETE).await?;
 
@@ -129,6 +135,7 @@ InternalServerError,
 security(
 ("bearer_token" = [])
 ),
+params(("currency_id" = Snowflake,)),
 path = "/api/v1/currency/{currency_id}",
 request_body = CurrencyDTO,
 tag = "Currency")]
@@ -136,7 +143,7 @@ tag = "Currency")]
 pub(crate) async fn update_currency(
     user: Phantom<User>,
     update_currency: CurrencyDTO,
-    currency_id: Path<i32>,
+    currency_id: Path<Snowflake>,
 ) -> Result<impl Responder, ApiError> {
     let currency = Currency::find_by_id(currency_id.into_inner()).await?;
     currency.has_permission_or_error(user.get_id(), Permissions::READ_WRITE).await?;

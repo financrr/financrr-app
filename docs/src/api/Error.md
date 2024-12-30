@@ -40,18 +40,20 @@ We call these custom error codes `Api Codes`.
 
 ### Validation errors
 
-| Code | Description                   |
-|------|-------------------------------|
-| 1200 | JSON payload validation error | 
+| Code | Description       |
+|------|-------------------|
+| 1200 | Validation error! | 
 
 ### Internal server errors
 
-| Code | Description        |
-|------|--------------------|
-| 1300 | DB-Entitiy error   |
-| 1301 | Database error     |
-| 1302 | Redis error        |
-| 1303 | Cron builder error |
+| Code | Description                                                            |
+|------|------------------------------------------------------------------------|
+| 1300 | DB-Entitiy error                                                       |
+| 1301 | Database error                                                         |
+| 1302 | Redis error                                                            |
+| 1303 | Cron builder error                                                     |
+| 1304 | An internal time-error                                                 |
+| 1305 | An internal error that occurs when a snowflake could not be generated! |
 
 ### Misc errors
 
@@ -59,3 +61,8 @@ We call these custom error codes `Api Codes`.
 |------|---------------|
 | 9000 | Actix error   |
 | 9999 | Unknown error |
+
+## Validation Codes
+
+Validation codes are just like `Api Codes` but instead of just a number, they contain String code and a message.  
+They are used to provide more detailed information about the validation-error that occurred.

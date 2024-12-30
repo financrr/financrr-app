@@ -11,12 +11,12 @@ use crate::util::validation::{validate_password, validate_unique_username};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Validate, ToSchema)]
 pub(crate) struct UserRegistration {
-    #[validate(length(min = 1))]
+    #[validate(length(min = 1), custom(function = "validate_unique_username"))]
     pub(crate) username: String,
     #[validate(email)]
     pub(crate) email: Option<String>,
     pub(crate) display_name: Option<String>,
-    #[validate(custom(function = validate_password))]
+    #[validate(custom(function = "validate_password"))]
     pub(crate) password: String,
 }
 
@@ -44,7 +44,6 @@ impl FromRequest for UserRegistration {
             let registration = registration.await?;
             let dto = registration.into_inner();
             dto.validate()?;
-            validate_unique_username(dto.username.as_str()).await?;
 
             Ok(dto)
         })

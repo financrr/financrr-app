@@ -1,4 +1,4 @@
-FROM rust:1.78.0-alpine3.20 AS builder
+FROM rust:1.80.1-alpine3.20 AS builder
 
 RUN apk add --no-cache \
     musl-dev \
@@ -10,10 +10,10 @@ RUN apk update
 WORKDIR /usr/src/financrr
 COPY . .
 
-RUN cargo build --release
+RUN cargo build --release --features "mimalloc"
 
 # Final stage: create a minimal runtime image
-FROM alpine:3.20.0
+FROM alpine:3.20.2
 
 # Update package repositories
 RUN apk add --no-cache curl
@@ -36,6 +36,9 @@ RUN chmod +x /home/financrr/migrator
 
 RUN mkdir "./logs"
 RUN chown -R financrr:financrr "./logs"
+
+# Expose the port
+EXPOSE 8080
 
 # Switch to non-root user
 USER financrr

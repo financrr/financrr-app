@@ -9,6 +9,7 @@ use utoipa::ToSchema;
 use entity::permissions;
 use entity::permissions::Model;
 use entity::utility::table::{does_entity_exist, does_table_exists};
+use utility::snowflake::entity::Snowflake;
 
 use crate::api::error::api::ApiError;
 use crate::api::pagination::PageSizeParam;
@@ -45,9 +46,9 @@ impl ToSchema<'static> for Permissions {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, ToSchema)]
 pub(crate) struct PermissionsEntity {
-    pub(crate) user_id: i32,
+    pub(crate) user_id: Snowflake,
     pub(crate) entity_type: String,
-    pub(crate) entity_id: i32,
+    pub(crate) entity_id: Snowflake,
     pub(crate) permissions: Permissions,
 }
 
@@ -61,7 +62,7 @@ impl PermissionsEntity {
     }
 
     pub(crate) async fn delete(self) -> Result<(), ApiError> {
-        delete(permissions::Entity::delete_by_id((self.user_id, self.entity_type, self.entity_id))).await
+        delete(permissions::Entity::delete_by_id((self.user_id.id, self.entity_type, self.entity_id.id))).await
     }
 
     pub(crate) async fn should_be_cleaned_up(&self) -> Result<bool, ApiError> {
@@ -79,7 +80,10 @@ impl PermissionsEntity {
         Ok(false)
     }
 
-    pub(crate) async fn find_all_by_type_and_id(entity_type: &str, entity_id: i32) -> Result<Vec<Self>, ApiError> {
+    pub(crate) async fn find_all_by_type_and_id(
+        entity_type: &str,
+        entity_id: Snowflake,
+    ) -> Result<Vec<Self>, ApiError> {
         Ok(find_all(permissions::Entity::find_all_by_type_and_id(entity_type, entity_id))
             .await?
             .into_iter()
@@ -88,24 +92,24 @@ impl PermissionsEntity {
     }
 }
 
-impl From<permissions::Model> for PermissionsEntity {
+impl From<Model> for PermissionsEntity {
     fn from(value: Model) -> Self {
         Self {
-            user_id: value.user_id,
+            user_id: Snowflake::from(value.user_id),
             entity_type: value.entity_type,
-            entity_id: value.entity_id,
+            entity_id: Snowflake::from(value.entity_id),
             permissions: Permissions::from_bits(value.permissions as u32).unwrap_or(Permissions::empty()),
         }
     }
 }
 
-impl From<permissions::Model> for Permissions {
+impl From<Model> for Permissions {
     fn from(value: Model) -> Self {
         Self::from_bits(value.permissions as u32).unwrap_or(Self::empty())
     }
 }
 
-impl From<Option<permissions::Model>> for Permissions {
+impl From<Option<Model>> for Permissions {
     fn from(value: Option<Model>) -> Self {
         value.map_or(Self::empty(), |v| v.into())
     }
@@ -126,19 +130,31 @@ macro_rules! permission_impl {
 
 #[allow(unused)] //TODO remove once multiple users per account has been implemented
 pub(crate) trait Permission: PermissionByIds + WrapperEntity {
-    fn get_permissions(&self, user_id: i32) -> impl Future<Output = Result<Permissions, ApiError>> {
+    fn get_permissions(&self, user_id: Snowflake) -> impl Future<Output = Result<Permissions, ApiError>> {
         async move { Self::get_permissions_by_id(self.get_id(), user_id).await }
     }
 
-    fn has_permission(&self, user_id: i32, permissions: Permissions) -> impl Future<Output = Result<bool, ApiError>> {
+    fn has_permission(
+        &self,
+        user_id: Snowflake,
+        permissions: Permissions,
+    ) -> impl Future<Output = Result<bool, ApiError>> {
         async move { Self::has_permission_by_id(self.get_id(), user_id, permissions).await }
     }
 
-    fn add_permission(&self, user_id: i32, permissions: Permissions) -> impl Future<Output = Result<(), ApiError>> {
+    fn add_permission(
+        &self,
+        user_id: Snowflake,
+        permissions: Permissions,
+    ) -> impl Future<Output = Result<(), ApiError>> {
         async move { Self::add_permission_by_id(self.get_id(), user_id, permissions).await }
     }
 
-    fn remove_permission(&self, user_id: i32, permissions: Permissions) -> impl Future<Output = Result<(), ApiError>> {
+    fn remove_permission(
+        &self,
+        user_id: Snowflake,
+        permissions: Permissions,
+    ) -> impl Future<Output = Result<(), ApiError>> {
         async move { Self::remove_permission_by_id(self.get_id(), user_id, permissions).await }
     }
 }
@@ -146,7 +162,7 @@ pub(crate) trait Permission: PermissionByIds + WrapperEntity {
 pub(crate) trait HasPermissionOrError: Permission {
     fn has_permission_or_error(
         &self,
-        user_id: i32,
+        user_id: Snowflake,
         permissions: Permissions,
     ) -> impl Future<Output = Result<(), ApiError>> {
         async move {
@@ -159,7 +175,10 @@ pub(crate) trait HasPermissionOrError: Permission {
 
 #[allow(unused)]
 pub(crate) trait PermissionByIds: TableName {
-    fn get_permissions_by_id(entity_id: i32, user_id: i32) -> impl Future<Output = Result<Permissions, ApiError>> {
+    fn get_permissions_by_id(
+        entity_id: Snowflake,
+        user_id: Snowflake,
+    ) -> impl Future<Output = Result<Permissions, ApiError>> {
         async move {
             Ok(Permissions::from(
                 find_one(permissions::Entity::find_permission(user_id, Self::table_name(), entity_id)).await?,
@@ -168,8 +187,8 @@ pub(crate) trait PermissionByIds: TableName {
     }
 
     fn has_permission_by_id(
-        entity_id: i32,
-        user_id: i32,
+        entity_id: Snowflake,
+        user_id: Snowflake,
         permissions: Permissions,
     ) -> impl Future<Output = Result<bool, ApiError>> {
         async move {
@@ -181,8 +200,8 @@ pub(crate) trait PermissionByIds: TableName {
     }
 
     fn add_permission_by_id(
-        entity_id: i32,
-        user_id: i32,
+        entity_id: Snowflake,
+        user_id: Snowflake,
         permissions: Permissions,
     ) -> impl Future<Output = Result<(), ApiError>> {
         async move {
@@ -194,8 +213,8 @@ pub(crate) trait PermissionByIds: TableName {
     }
 
     fn remove_permission_by_id(
-        entity_id: i32,
-        user_id: i32,
+        entity_id: Snowflake,
+        user_id: Snowflake,
         permissions: Permissions,
     ) -> impl Future<Output = Result<(), ApiError>> {
         async move {
@@ -209,8 +228,8 @@ pub(crate) trait PermissionByIds: TableName {
 
 pub(crate) trait HasPermissionByIdOrError: PermissionByIds {
     fn has_permission_by_id_or_error(
-        entity_id: i32,
-        user_id: i32,
+        entity_id: Snowflake,
+        user_id: Snowflake,
         permissions: Permissions,
     ) -> impl Future<Output = Result<(), ApiError>> {
         async move {
@@ -237,15 +256,15 @@ fn has_permission_or_error_raw(
 }
 
 async fn save_permission_active_model(
-    entity_id: i32,
+    entity_id: Snowflake,
     table_name: &str,
-    user_id: i32,
+    user_id: Snowflake,
     permissions: Permissions,
 ) -> Result<(), ApiError> {
     let active_model = permissions::ActiveModel {
-        user_id: Set(user_id),
+        user_id: Set(user_id.id),
         entity_type: Set(table_name.to_string()),
-        entity_id: Set(entity_id),
+        entity_id: Set(entity_id.id),
         permissions: Set(permissions.bits() as i32),
     };
     if count(permissions::Entity::find_permission(user_id, table_name, entity_id)).await? > 0 {

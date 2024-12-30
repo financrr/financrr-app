@@ -8,7 +8,7 @@ macro_rules! lifecycle_event {
     ) => {
         paste::paste! {
             #[allow(non_upper_case_globals)]
-            static [< $name EventBus >]: once_cell::sync::OnceCell<$crate::event::EventBus<$name>> = once_cell::sync::OnceCell::new();
+            static [< $name EventBus >]: std::sync::OnceLock<$crate::event::EventBus<$name>> = std::sync::OnceLock::new();
         }
 
         $(#[$meta])*

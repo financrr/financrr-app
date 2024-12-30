@@ -1,133 +1,82 @@
-use std::borrow::Cow;
-use std::collections::HashMap;
-
-use actix_web_validator5::error::flatten_errors;
 use iban::Iban;
-use regex::Regex;
+use lazy_regex::regex;
 use sea_orm::EntityTrait;
-use serde::Serialize;
-use serde_json::Value;
 use time::OffsetDateTime;
-use utoipa::ToSchema;
+use tokio::runtime::Handle;
 use validator::ValidationError;
 
 use entity::currency;
 use entity::prelude::User;
 use entity::utility::time::get_now;
+use utility::snowflake::entity::Snowflake;
 
+use crate::api::error::validation::ValidationCode;
 use crate::database::connection::get_database_connection;
 
-pub(crate) const MIN_PASSWORD_LENGTH: usize = 16;
-pub(crate) const MAX_PASSWORD_LENGTH: usize = 128;
-
-#[derive(Debug, Serialize, ToSchema)]
-pub(crate) struct ValidationErrorJsonPayload {
-    pub(crate) message: String,
-    pub(crate) fields: Vec<FieldError>,
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub(crate) struct FieldError {
-    pub(crate) field_name: String,
-    pub(crate) code: String,
-    pub(crate) params: HashMap<String, Value>,
-}
-
-impl From<&validator::ValidationErrors> for ValidationErrorJsonPayload {
-    fn from(error: &validator::ValidationErrors) -> Self {
-        let errors = flatten_errors(error);
-        let mut field_errors: Vec<FieldError> = Vec::new();
-        for (_, field, error) in errors {
-            field_errors.push(map_field_error(field.as_str(), error))
-        }
-
-        Self {
-            message: "Validation error".to_owned(),
-            fields: field_errors,
-        }
-    }
-}
-
-impl From<ValidationError> for ValidationErrorJsonPayload {
-    fn from(error: ValidationError) -> Self {
-        let mut field_errors: Vec<FieldError> = Vec::new();
-        field_errors.insert(0, map_field_error("", &error));
-        Self {
-            message: "Validation error".to_owned(),
-            fields: field_errors,
-        }
-    }
-}
-
-fn map_field_error(field: &str, error: &ValidationError) -> FieldError {
-    FieldError {
-        field_name: field.to_owned(),
-        code: error.code.clone().into_owned(),
-        params: error.params.clone().into_iter().map(|(key, value)| (key.into_owned(), value)).collect(),
-    }
-}
+pub(crate) const MIN_PASSWORD_LENGTH: usize = 8;
+pub(crate) const MAX_PASSWORD_LENGTH: usize = 255;
 
 pub(crate) fn validate_password(password: &str) -> Result<(), ValidationError> {
-    let mut error = ValidationError::new("Password is invalid");
     if password.len() < MIN_PASSWORD_LENGTH {
-        error.add_param(Cow::from("min"), &MIN_PASSWORD_LENGTH);
+        return ValidationCode::PASSWORD_TOO_SHORT.into();
     }
     if password.len() > MAX_PASSWORD_LENGTH {
-        error.add_param(Cow::from("max"), &MAX_PASSWORD_LENGTH);
+        return ValidationCode::PASSWORD_TOO_LONG.into();
     }
 
-    let uppercase = Regex::new(r"[A-Z]").expect("Failed to compile regex");
+    let uppercase = regex!(r"[A-Z]");
     if !uppercase.is_match(password) {
-        error.add_param(Cow::from("uppercase"), &"Must contain at least one uppercase letter");
+        return ValidationCode::MISSING_UPPERCASE_LETTER.into();
     }
 
-    let lowercase = Regex::new(r"[a-z]").expect("Failed to compile regex");
+    let lowercase = regex!(r"[a-z]");
     if !lowercase.is_match(password) {
-        error.add_param(Cow::from("lowercase"), &"Must contain at least one lowercase letter");
+        return ValidationCode::MISSING_LOWERCASE_LETTER.into();
     }
 
-    let digit = Regex::new(r"\d").expect("Failed to compile regex");
+    let digit = regex!(r"\d");
     if !digit.is_match(password) {
-        error.add_param(Cow::from("digit"), &"Must contain at least one digit");
+        return ValidationCode::MISSING_DIGIT.into();
     }
 
-    let special_character = Regex::new("[€§!@#$%^&*(),.?\":{}|<>]").expect("Failed to compile regex");
+    let special_character = regex!("[€§!@#$%^&*(),.?\":{}|<>]");
     if !special_character.is_match(password) {
-        error.add_param(Cow::from("special_character"), &"Must contain at least one special character");
-    }
-
-    if !error.params.is_empty() {
-        return Err(error);
+        return ValidationCode::MISSING_SPECIAL_CHARACTER.into();
     }
 
     Ok(())
 }
 
-pub(crate) async fn validate_unique_username(username: &str) -> Result<(), ValidationError> {
-    match User::find_by_username(username).one(get_database_connection()).await {
-        Ok(Some(_)) => Err(ValidationError::new("Username is not unique")),
-        Err(_) => Err(ValidationError::new("Internal server error")),
-        _ => Ok(()),
-    }
+pub(crate) fn validate_unique_username(username: &str) -> Result<(), ValidationError> {
+    Handle::current().block_on(async {
+        match User::find_by_username(username).one(get_database_connection()).await {
+            Ok(Some(_)) => ValidationCode::USERNAME_NOT_UNIQUE.into(),
+            Err(_) => ValidationCode::INTERNAL_SERVER_ERROR.into(),
+            _ => Ok(()),
+        }
+    })
 }
 
 pub(crate) fn validate_iban(iban: &str) -> Result<(), ValidationError> {
     match iban.parse::<Iban>() {
         Ok(_) => Ok(()),
-        Err(_) => Err(ValidationError::new("IBAN is invalid")),
+        Err(_) => ValidationCode::IBAN_INVALID.into(),
     }
 }
 
 pub(crate) fn validate_datetime_not_in_future(datetime: &OffsetDateTime) -> Result<(), ValidationError> {
     if datetime > &get_now() {
-        return Err(ValidationError::new("Date and time cannot be in the future"));
+        return ValidationCode::DATETIME_IN_PAST.into();
     }
+
     Ok(())
 }
 
-pub(crate) async fn validate_currency_exists(id: i32) -> Result<(), ValidationError> {
-    match currency::Entity::find_by_id(id).one(get_database_connection()).await {
-        Ok(Some(_)) => Ok(()),
-        _ => Err(ValidationError::new("Currency does not exist")),
-    }
+pub(crate) fn validate_currency_exists(id: &Snowflake) -> Result<(), ValidationError> {
+    Handle::current().block_on(async {
+        match currency::Entity::find_by_id(id).one(get_database_connection()).await {
+            Ok(Some(_)) => Ok(()),
+            _ => ValidationCode::ENTITY_NOT_FOUND.into(),
+        }
+    })
 }

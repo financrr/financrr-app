@@ -14,7 +14,7 @@ impl ToSchema<'static> for ApiCode {
             "ApiCode",
             schema!(
                 #[inline]
-                i32
+                u16
             )
             .nullable(false)
             .into(),
@@ -57,7 +57,7 @@ api_codes!(
 
 //validation errors
 api_codes!(
-    (1200, JSON_PAYLOAD_VALIDATION_ERROR, "JSON payload validation error!");
+    (1200, VALIDATION_ERROR, "Validation error!");
 );
 
 // internal server-errors
@@ -66,6 +66,8 @@ api_codes!(
     (1301, DB_ERROR, "Database error!");
     (1302, REDIS_ERROR, "Redis error!");
     (1303, CRON_BUILDER_ERROR, "Cron builder error!");
+    (1304, TIME_ERROR, "An internal time-error!");
+    (1305, SNOWFLAKE_ERROR, "An internal error that occurs when a snowflake could not be generated!");
 );
 
 // misc

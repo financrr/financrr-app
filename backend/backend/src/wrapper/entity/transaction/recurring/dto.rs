@@ -7,28 +7,17 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::api::error::api::ApiError;
-use crate::api::error::validation::ValidationError;
 use crate::wrapper::entity::transaction::recurring::recurring_rule::dto::RecurringRuleDTO;
+use crate::wrapper::entity::transaction::recurring::validation::assert_template_exists;
 use crate::wrapper::entity::transaction::template::TransactionTemplate;
-use crate::wrapper::entity::DbValidator;
-use crate::wrapper::types::phantom::{Identifiable, Phantom};
+use crate::wrapper::types::phantom::Phantom;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema, Validate)]
 pub(crate) struct RecurringTransactionDTO {
+    #[validate(custom(function = "assert_template_exists"))]
     pub(crate) template_id: Phantom<TransactionTemplate>,
     #[validate(nested)]
     pub(crate) recurring_rule: RecurringRuleDTO,
-}
-
-impl DbValidator for RecurringTransactionDTO {
-    async fn validate_against_db(&self) -> Result<(), ValidationError> {
-        let mut errors = ValidationError::new("RecurringTransactionDTO");
-        if TransactionTemplate::find_by_id(self.template_id.get_id()).await.is_err() {
-            errors.add("template_id", "Template does not exist");
-        }
-
-        errors.return_result()
-    }
 }
 
 impl FromRequest for RecurringTransactionDTO {
@@ -42,7 +31,6 @@ impl FromRequest for RecurringTransactionDTO {
             let dto = dto.into_inner();
 
             dto.validate().map_err(ApiError::from)?;
-            dto.validate_against_db().await.map_err(ApiError::from)?;
 
             Ok(dto)
         })
