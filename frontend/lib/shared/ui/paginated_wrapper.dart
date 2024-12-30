@@ -57,7 +57,7 @@ class PaginatedWrapperState<T> extends State<PaginatedWrapper<T>> {
             AsyncSnapshot<PaginatedDataResult<T>>.withData(
                 ConnectionState.done,
                 PaginatedDataResult<T>(
-                    total: _pages[_currentPage]!.total,
+                    total: _pages[_currentPage]?.total ?? 0,
                     items: _pages.entries.map((e) => e.value.items).expand((e) => e).toList(),
                     nextPage: hasNext ? nextPage : null,
                     previousPage: hasPrevious ? previousPage : null)));

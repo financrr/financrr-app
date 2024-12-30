@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:financrr_frontend/utils/extensions.dart';
+import 'package:financrr_frontend/utils/text_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 enum L10nKey {
   // account
@@ -41,6 +43,7 @@ enum L10nKey {
   commonLogin('common_login'),
   commonLogout('common_logout'),
   commonNext('common_next'),
+  commonNotAvailable('common_not_available'),
   commonPassword('common_password'),
   commonPasswordNoMatch('common_password_no_match'),
   commonPasswordRepeat('common_password_repeat'),
@@ -115,9 +118,29 @@ enum L10nKey {
   settingsItemLocalStorage('settings_item_local_storage'),
   settingsItemLogs('settings_item_logs'),
   settingsItemSessions('settings_item_sessions'),
+  settingsItemTransactionTemplates('settings_item_transaction_templates'),
   // startup
   startupErrorSubtitle('startup_error_subtitle'),
   startupErrorTitle('startup_error_title'),
+  // template
+  templateCreateTransaction('template_create_transaction'),
+  templateDelete('template_delete'),
+  templateEdit('template_edit'),
+  templateNotFound('template_not_found'),
+  templatePropertiesAmount('template_properties_amount'),
+  templatePropertiesCreatedAt('template_properties_created_at'),
+  templatePropertiesDescription('template_properties_description'),
+  templatePropertiesFrom('template_properties_from'),
+  templatePropertiesName('template_properties_name'),
+  templatePropertiesTo('template_properties_to'),
+  templateSchedule('template_schedule'),
+  templateScheduled('template_scheduled'),
+  templateScheduledAmount('template_scheduled_amount', hasParams: true),
+  templateScheduledLastExecuted('template_scheduled_last_executed', hasParams: true),
+  templateScheduledNextExecution('template_scheduled_next_execution', hasParams: true),
+  templateTitleTransfer('template_title_transfer', hasParams: true),
+  templateNoneFoundBody('template_none_found_body'),
+  templateNoneFoundTitle('template_none_found_title'),
   // theme
   themeDark('theme_dark'),
   themeLight('theme_light'),
@@ -125,6 +148,7 @@ enum L10nKey {
   // transaction
   transactionCreate('transaction_create'),
   transactionCreateDeposit('transaction_create_deposit'),
+  transactionCreateTemplate('transaction_create_template'),
   transactionCreateTransfer('transaction_create_transfer'),
   transactionCreateTransferTo('transaction_create_transfer_to'),
   transactionCreateWithdrawal('transaction_create_withdrawal'),
@@ -142,17 +166,34 @@ enum L10nKey {
   transactionPropertiesType('transaction_properties_type'),
   ;
 
+  static final Logger _log = Logger('L10nKeyLogger');
+
   final String key;
   final bool hasParams;
   const L10nKey(this.key, {this.hasParams = false});
 
-  Text toText({Map<String, String>? namedArgs, TextStyle? style, TextAlign? textAlign, bool? softWrap}) {
+  Text toText(
+      {Map<String, String>? namedArgs,
+      Map<String, TextStyle Function(TextStyle)>? namedStyles,
+      TextStyle? style,
+      TextAlign? textAlign,
+      bool? softWrap}) {
+    if (hasParams && namedArgs == null) {
+      _log.warning('L10nKey $key has params, but namedArgs is null');
+    }
+    final String localized = key.tr(namedArgs: namedArgs);
+    if (namedStyles != null) {
+      // don't pass namedArgs here, we want to keep the placeholders
+      return Text.rich(TextSpan(
+          children:
+              TextUtils.richFormatL10nText(key.tr(), localized, style: style, namedStyles: namedStyles, namedArgs: namedArgs)));
+    }
     return Text(
-      key,
+      localized,
       style: style,
       textAlign: textAlign,
       softWrap: softWrap,
-    ).tr(namedArgs: namedArgs);
+    );
   }
 
   void showSnack(BuildContext context, {Map<String, String>? namedArgs}) {
@@ -161,6 +202,9 @@ enum L10nKey {
 
   @override
   String toString({Map<String, String>? namedArgs}) {
+    if (hasParams && namedArgs == null) {
+      _log.warning('L10nKey $key has params, but namedArgs is null');
+    }
     return key.tr(namedArgs: namedArgs);
   }
 

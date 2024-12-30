@@ -121,6 +121,7 @@ class ServerConfigPageState extends ConsumerState<ServerConfigPage> {
       if (mounted) {
         context.showSnackBar(e.message ?? 'err');
       }
+      return;
     }
     setState(() {
       _isLoading = false;

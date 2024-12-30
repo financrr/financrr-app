@@ -16,7 +16,6 @@ import '../../../shared/ui/custom_replacements/custom_text_button.dart';
 import '../../../shared/ui/notice_card.dart';
 import '../../../shared/ui/paginated_wrapper.dart';
 import '../../../shared/ui/cards/transaction_card.dart';
-import '../../../utils/text_utils.dart';
 import '../../settings/providers/l10n.provider.dart';
 import '../../transactions/views/transaction_create_page.dart';
 import 'account_edit_page.dart';
@@ -114,8 +113,13 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 children: [
                   Column(
                     children: [
-                      Text(TextUtils.formatBalanceWithCurrency(l10n, account.balance, account.currencyId.get()!),
-                          style: theme.textTheme.titleLarge?.copyWith(color: theme.themeData.primaryColor)),
+                      Text(
+                          account.balance.formatWithCurrency(account.currencyId.get()!, l10n.decimalSeparator,
+                              thousandsSeparator: l10n.thousandSeparator),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                              color: account.balance.rawAmount < 0
+                                  ? theme.financrrExtension.error
+                                  : theme.financrrExtension.primary)),
                       Text(account.name),
                     ],
                   ),

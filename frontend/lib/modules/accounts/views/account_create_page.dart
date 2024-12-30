@@ -35,7 +35,7 @@ class _AccountCreatePageState extends ConsumerState<AccountCreatePage> {
   late final TextEditingController _ibanController = TextEditingController();
   late final TextEditingController _originalBalanceController = TextEditingController();
 
-  int _originalBalance = 0;
+  UnformattedAmount _originalBalance = UnformattedAmount.zero;
   Currency? _selectedCurrency;
 
   bool _isValid = false;

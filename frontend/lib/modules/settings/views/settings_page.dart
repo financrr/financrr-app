@@ -5,6 +5,7 @@ import 'package:financrr_frontend/modules/settings/ui/settings_category.dart';
 import 'package:financrr_frontend/modules/settings/views/local_storage_settings_page.dart';
 import 'package:financrr_frontend/modules/settings/views/l10n_settings_page.dart';
 import 'package:financrr_frontend/modules/settings/views/session_settings_page.dart';
+import 'package:financrr_frontend/modules/settings/views/template_overview_settings_page.dart';
 import 'package:financrr_frontend/modules/settings/views/theme_settings_page.dart';
 import 'package:financrr_frontend/routing/router_extensions.dart';
 import 'package:financrr_frontend/shared/ui/async_wrapper.dart';
@@ -39,6 +40,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: L10nKey.settingsItemCurrencies,
             iconData: Icons.currency_exchange_rounded,
             onTap: () => context.goPath(CurrencySettingsPage.pagePath.build()),
+          ),
+          SettingsItem(
+            title: L10nKey.settingsItemTransactionTemplates,
+            iconData: Icons.insert_page_break_outlined,
+            onTap: () => context.goPath(TemplateOverviewSettingsPage.pagePath.build()),
           ),
           SettingsItem(
             title: L10nKey.settingsItemSessions,

@@ -38,7 +38,7 @@ enum StoreKey<T> {
   void write(T value) => KeyValueStore._instance.write(this, value);
   Future<void> delete() => KeyValueStore._instance.delete(this);
 
-  static DateFormat _defaultDateFormat() => DateFormat.yMd();
+  static DateFormat _defaultDateFormat() => DateFormat('dd/MM/yyyy HH:mm');
   static DateFormat? _dateFormatFromValue(String? value) => value == null ? null : DateFormat(value);
   static String? _dateFormatToValue(dynamic format) => format is DateFormat? ? format?.pattern : null;
 

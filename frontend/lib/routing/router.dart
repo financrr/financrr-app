@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:financrr_frontend/modules/settings/views/local_storage_settings_page.dart';
 import 'package:financrr_frontend/modules/settings/views/l10n_settings_page.dart';
+import 'package:financrr_frontend/modules/settings/views/template_inspect_settings_page.dart';
 import 'package:financrr_frontend/shared/views/splash_page.dart';
 import 'package:financrr_frontend/modules/accounts/views/account_create_page.dart';
 import 'package:financrr_frontend/modules/settings/views/currency_create_page.dart';
@@ -15,6 +16,7 @@ import 'package:financrr_frontend/routing/guards/login_auth_guard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:restrr/restrr.dart';
 
 import '../modules/accounts/views/account_edit_page.dart';
 import '../modules/accounts/views/account_page.dart';
@@ -25,6 +27,7 @@ import '../modules/auth/views/server_config_page.dart';
 import '../modules/settings/views/currency_edit_page.dart';
 import '../modules/settings/views/currency_settings_page.dart';
 import '../modules/settings/views/log_settings_page.dart';
+import '../modules/settings/views/template_overview_settings_page.dart';
 import '../modules/transactions/views/transaction_create_page.dart';
 import '../modules/transactions/views/transaction_edit_page.dart';
 import '../modules/transactions/views/transaction_page.dart';
@@ -85,19 +88,22 @@ class AppRouter {
                               path: AccountEditPage.pagePath.path,
                               pageBuilder: (context, state) {
                                 final String accountId = state.pathParameters['accountId']!;
-                                return _buildDefaultPageTransition(context, state,
-                                    AccountEditPage(key: ValueKey('account-$accountId-edit'), accountId: accountId));
+                                return _buildDefaultPageTransition(context, state, AccountEditPage(accountId: accountId));
                               },
                               redirect: guards([_coreAuthGuard])),
                           GoRoute(
                               path: TransactionCreatePage.pagePath.path,
                               pageBuilder: (context, state) {
                                 final String accountId = state.pathParameters['accountId']!;
+                                final TransactionTemplate? template =
+                                    state.extra == null ? null : state.extra as TransactionTemplate;
                                 return _buildDefaultPageTransition(
                                     context,
                                     state,
                                     TransactionCreatePage(
-                                        key: ValueKey('account-$accountId-create-transaction'), accountId: accountId));
+                                      accountId: accountId,
+                                      template: template,
+                                    ));
                               },
                               redirect: guards([_coreAuthGuard])),
                           GoRoute(
@@ -120,13 +126,8 @@ class AppRouter {
                                     pageBuilder: (context, state) {
                                       final String accountId = state.pathParameters['accountId']!;
                                       final String transactionId = state.pathParameters['transactionId']!;
-                                      return _buildDefaultPageTransition(
-                                          context,
-                                          state,
-                                          TransactionEditPage(
-                                              key: ValueKey('account-$accountId-transaction-$transactionId-edit'),
-                                              accountId: accountId,
-                                              transactionId: transactionId));
+                                      return _buildDefaultPageTransition(context, state,
+                                          TransactionEditPage(accountId: accountId, transactionId: transactionId));
                                     },
                                     redirect: guards([_coreAuthGuard]))
                               ]),
@@ -164,10 +165,24 @@ class AppRouter {
                               path: CurrencyEditPage.pagePath.path,
                               pageBuilder: (context, state) {
                                 final String currencyId = state.pathParameters['currencyId']!;
-                                return _buildDefaultPageTransition(context, state,
-                                    CurrencyEditPage(key: ValueKey('currency-$currencyId-edit'), currencyId: currencyId));
+                                return _buildDefaultPageTransition(context, state, CurrencyEditPage(currencyId: currencyId));
                               },
                               redirect: guards([_coreAuthGuard]))
+                        ]),
+                    GoRoute(
+                        path: TemplateOverviewSettingsPage.pagePath.path,
+                        pageBuilder: _defaultPageBuilder(const TemplateOverviewSettingsPage()),
+                        redirect: guards([_coreAuthGuard]),
+                        routes: [
+                          GoRoute(
+                            path: TemplateInspectSettingsPage.pagePath.path,
+                            pageBuilder: (context, state) {
+                              final String templateId = state.pathParameters['templateId']!;
+                              return _buildDefaultPageTransition(context, state,
+                                  TemplateInspectSettingsPage(key: ValueKey('template-$templateId'), templateId: templateId));
+                            },
+                            redirect: guards([_coreAuthGuard]),
+                          )
                         ]),
                     GoRoute(
                       path: LocalStorageSettingsPage.pagePath.path,

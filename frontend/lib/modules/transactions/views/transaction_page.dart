@@ -16,7 +16,6 @@ import '../../../shared/models/store.dart';
 import '../../../shared/ui/adaptive_scaffold.dart';
 import '../../../../../routing/page_path.dart';
 import '../../../shared/ui/async_wrapper.dart';
-import '../../../utils/text_utils.dart';
 import '../../accounts/views/account_page.dart';
 import '../../settings/providers/l10n.provider.dart';
 
@@ -77,24 +76,17 @@ class TransactionPageState extends ConsumerState<TransactionPage> {
             style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
-        if (value is Account) ...[
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: AccountLink(account: value),
-          ),
-        ] else
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(value),
-          ),
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: value is Account ? AccountLink(account: value) : Text(value),
+        ),
       ]);
     }
 
     buildVerticalLayout(Account account, Transaction transaction, Size size) {
-      final bool isMoneyIn =
-          transaction.getType(account) == TransactionType.deposit || transaction.getType(account) == TransactionType.transferIn;
-      final String amountStr =
-          (isMoneyIn ? '+' : '-') + TextUtils.formatBalanceWithCurrency(l10n, transaction.amount, account.currencyId.get()!);
+      final UnformattedAmount displayAmount = transaction.getDisplayAmount(account);
+      final String amountStr = displayAmount.formatWithCurrency(account.currencyId.get()!, l10n.decimalSeparator,
+          thousandsSeparator: l10n.thousandSeparator);
       return Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 20),
         child: Align(
@@ -112,7 +104,9 @@ class TransactionPageState extends ConsumerState<TransactionPage> {
                       children: [
                         Text(amountStr,
                             style: theme.textTheme.titleLarge?.copyWith(
-                                color: isMoneyIn ? theme.themeData.primaryColor : theme.themeData.colorScheme.error)),
+                                color: displayAmount.rawAmount > 0
+                                    ? theme.themeData.primaryColor
+                                    : theme.themeData.colorScheme.error)),
                         Text(transaction.description ?? StoreKey.dateTimeFormat.readSync()!.format(transaction.executedAt)),
                       ],
                     ),
@@ -142,9 +136,12 @@ class TransactionPageState extends ConsumerState<TransactionPage> {
                           buildTableRow(L10nKey.transactionPropertiesType, transaction.getType(account).name),
                           buildTableRow(L10nKey.transactionPropertiesAmount, amountStr),
                           buildTableRow(L10nKey.transactionPropertiesName, transaction.name),
-                          buildTableRow(L10nKey.transactionPropertiesDescription, transaction.description ?? 'N/A'),
-                          buildTableRow(L10nKey.transactionPropertiesFrom, transaction.sourceId?.get() ?? 'N/A'),
-                          buildTableRow(L10nKey.transactionPropertiesTo, transaction.destinationId?.get() ?? 'N/A'),
+                          buildTableRow(L10nKey.transactionPropertiesDescription,
+                              transaction.description ?? L10nKey.commonNotAvailable.toString()),
+                          buildTableRow(L10nKey.transactionPropertiesFrom,
+                              transaction.sourceId?.get() ?? L10nKey.commonNotAvailable.toString()),
+                          buildTableRow(L10nKey.transactionPropertiesTo,
+                              transaction.destinationId?.get() ?? L10nKey.commonNotAvailable.toString()),
                           buildTableRow(L10nKey.transactionPropertiesExecutedAt,
                               StoreKey.dateTimeFormat.readSync()!.format(transaction.executedAt)),
                           buildTableRow(L10nKey.transactionPropertiesCreatedAt,
