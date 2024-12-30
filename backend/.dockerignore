@@ -10,3 +10,4 @@ logs
 .editorconfig
 .env
 .env.dist
+rust-toolchain.toml

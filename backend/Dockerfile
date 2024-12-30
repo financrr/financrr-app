@@ -1,8 +1,9 @@
-FROM rust:1.83.0-alpine3.21 as builder
+FROM rust:1.83.0-alpine3.21 AS builder
 
 RUN apk add --no-cache \
     musl-dev \
-    openssl-dev
+    openssl-dev \
+    curl
 
 RUN apk update
 
