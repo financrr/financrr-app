@@ -1,7 +1,7 @@
 <p align="center">
 <img src="/resources/Logo/banner_light_bg.png" width="2500">
 </p>
-<h3 align="center">financrr — Know your money</h3>
+<h3 align="center">financrr — Finance tracking.  Easy and open source.</h3>
 <br/>
 
 > [!IMPORTANT]
