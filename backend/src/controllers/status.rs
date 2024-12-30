@@ -21,7 +21,7 @@ async fn health(Extension(status_service): Extension<StatusService>) -> (StatusC
     )
 }
 
-/// Version of the API. DOESN'T CURRENTLY WORK!
+/// Version of the API.
 ///
 /// This endpoint is used to get the version of the API.
 /// This endpoint is not versioned so we try to keep it as simple as possible and not

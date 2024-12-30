@@ -1,6 +1,7 @@
 use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
+use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::session_used::SessionUsedWorker;
 use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
@@ -51,11 +52,10 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
-        // TODO fix AppRoutes somehow.
+        // TODO fix AppRoutes somehow and remove custom ExtendedAppRoutes
         // Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
-        // The following should work:
-        /*
-        AppRoutes::with_default_routes() // controller routes below
+
+        ExtendedAppRoutes::empty()
             .prefix("/api")
             .add_route(controllers::status::non_versioned_routes())
             .prefix("/v1")
@@ -63,14 +63,7 @@ impl Hooks for App {
             .add_route(controllers::session::routes())
             .add_route(controllers::openapi::routes())
             .add_route(controllers::status::routes())
-         */
-
-        AppRoutes::with_default_routes()
-            .prefix("/api/v1")
-            .add_route(controllers::user::routes())
-            .add_route(controllers::session::routes())
-            .add_route(controllers::openapi::routes())
-            .add_route(controllers::status::routes())
+            .into()
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
