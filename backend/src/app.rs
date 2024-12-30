@@ -51,11 +51,26 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
+        // TODO fix AppRoutes somehow.
+        // Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
+        // The following should work:
+        /*
         AppRoutes::with_default_routes() // controller routes below
+            .prefix("/api")
+            .add_route(controllers::status::non_versioned_routes())
+            .prefix("/v1")
+            .add_route(controllers::user::routes())
+            .add_route(controllers::session::routes())
+            .add_route(controllers::openapi::routes())
+            .add_route(controllers::status::routes())
+         */
+
+        AppRoutes::with_default_routes()
             .prefix("/api/v1")
             .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
             .add_route(controllers::openapi::routes())
+            .add_route(controllers::status::routes())
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {

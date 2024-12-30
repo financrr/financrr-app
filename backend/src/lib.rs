@@ -1,4 +1,5 @@
 pub mod app;
+pub mod constants;
 pub mod controllers;
 pub mod error;
 pub mod initializers;

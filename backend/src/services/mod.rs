@@ -1,5 +1,6 @@
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
+use crate::services::status_service::StatusServiceInner;
 use crate::services::user_verification::UserVerificationServiceInner;
 use axum::{Extension, Router as AxumRouter};
 use loco_rs::app::AppContext;
@@ -11,6 +12,7 @@ use std::sync::{Arc, OnceLock};
 pub mod instance_handler;
 pub mod secret_generator;
 pub mod snowflake_generator;
+pub mod status_service;
 pub mod user_verification;
 
 pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
@@ -18,7 +20,8 @@ pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<
         .layer(InstanceHandlerInner::get_extension(ctx).await?)
         .layer(SecretGeneratorInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)
-        .layer(SnowflakeGeneratorInner::get_extension(ctx).await?))
+        .layer(SnowflakeGeneratorInner::get_extension(ctx).await?)
+        .layer(StatusServiceInner::get_extension(ctx).await?))
 }
 
 pub trait Service
