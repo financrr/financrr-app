@@ -19,7 +19,7 @@ pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedIn
 
     //Creating a new user
     request.post("/api/auth/register").json(&register_payload).await;
-    let user = users::Model::find_by_email(&ctx.db, USER_EMAIL).await.unwrap();
+    let user = users::Model::find_by_email(&ctx.db, USER_EMAIL).await.unwrap().unwrap();
 
     let verify_payload = serde_json::json!({
         "token": user.email_verification_token,
@@ -38,7 +38,7 @@ pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedIn
     let login_response: LoginResponse = serde_json::from_str(&response.text()).unwrap();
 
     LoggedInUser {
-        user: users::Model::find_by_email(&ctx.db, USER_EMAIL).await.unwrap(),
+        user: users::Model::find_by_email(&ctx.db, USER_EMAIL).await.unwrap().unwrap(),
         token: login_response.token,
     }
 }

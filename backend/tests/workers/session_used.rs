@@ -13,7 +13,7 @@ async fn test_run_session_used_worker() {
 
     // Execute the worker ensuring that it operates in 'ForegroundBlocking' mode, which prevents the addition of your worker to the background
     assert!(
-        SessionUsedWorker::perform_later(&boot.app_context, SessionUsedWorkerArgs {})
+        SessionUsedWorker::perform_later(&boot.app_context, SessionUsedWorkerArgs { session_id: 0 })
             .await
             .is_ok()
     );

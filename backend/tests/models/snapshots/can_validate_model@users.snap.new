@@ -1,0 +1,45 @@
+---
+source: tests/models/users.rs
+assertion_line: 51
+expression: res
+snapshot_kind: text
+---
+Err(
+    Query(
+        SqlxError(
+            Database(
+                PgDatabaseError {
+                    severity: Error,
+                    code: "23502",
+                    message: "null value in column \"id\" of relation \"users\" violates not-null constraint",
+                    detail: Some(
+                        "Failing row contains (null, invalid-email, 1, null, null, null, null, null, null, null, 2024-12-31 00:37:09.016696+00, 2024-12-31 00:37:09.016692+00).",
+                    ),
+                    hint: None,
+                    position: None,
+                    where: None,
+                    schema: Some(
+                        "public",
+                    ),
+                    table: Some(
+                        "users",
+                    ),
+                    column: Some(
+                        "id",
+                    ),
+                    data_type: None,
+                    constraint: None,
+                    file: Some(
+                        "execMain.c",
+                    ),
+                    line: Some(
+                        1987,
+                    ),
+                    routine: Some(
+                        "ExecConstraints",
+                    ),
+                },
+            ),
+        ),
+    ),
+)

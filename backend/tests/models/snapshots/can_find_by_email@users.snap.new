@@ -1,0 +1,9 @@
+---
+source: tests/models/users.rs
+assertion_line: 108
+expression: existing_user
+snapshot_kind: text
+---
+Ok(
+    None,
+)

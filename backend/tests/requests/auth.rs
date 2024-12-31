@@ -67,7 +67,7 @@ async fn can_login_with_verify(#[case] test_name: &str, #[case] password: &str) 
         //Creating a new user
         _ = request.post("/api/auth/register").json(&register_payload).await;
 
-        let user = users::Model::find_by_email(&ctx.db, email).await.unwrap();
+        let user = users::Model::find_by_email(&ctx.db, email).await.unwrap().unwrap();
         let verify_payload = serde_json::json!({
             "token": user.email_verification_token,
         });
@@ -85,6 +85,7 @@ async fn can_login_with_verify(#[case] test_name: &str, #[case] password: &str) 
         // Make sure email_verified_at is set
         assert!(users::Model::find_by_email(&ctx.db, email)
             .await
+            .unwrap()
             .unwrap()
             .email_verified_at
             .is_some());
@@ -148,6 +149,7 @@ async fn can_reset_password() {
 
         let user = users::Model::find_by_email(&ctx.db, &login_data.user.email)
             .await
+            .unwrap()
             .unwrap();
         assert!(user.reset_token.is_some());
         assert!(user.reset_sent_at.is_some());
@@ -160,7 +162,10 @@ async fn can_reset_password() {
 
         let reset_response = request.post("/api/auth/reset").json(&reset_payload).await;
 
-        let user = users::Model::find_by_email(&ctx.db, &user.email).await.unwrap();
+        let user = users::Model::find_by_email(&ctx.db, &user.email)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert!(user.reset_token.is_none());
         assert!(user.reset_sent_at.is_none());
