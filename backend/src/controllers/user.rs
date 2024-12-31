@@ -7,6 +7,7 @@ use crate::models::users::Model;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::services::user_verification::UserVerificationService;
 use crate::utils::context::AdditionalAppContextMethods;
+use crate::validation::user::validate_email_uniqueness;
 use crate::views::user::UserResponse;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -17,7 +18,7 @@ use loco_rs::prelude::Routes;
 use sea_orm::IntoActiveModel;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use validator::{Validate, ValidationError, ValidationErrors};
+use validator::{Validate, ValidateArgs};
 
 pub const MIN_PASSWORD_LENGTH: u64 = 8;
 pub const MAX_PASSWORD_LENGTH: u64 = 10240;
@@ -44,8 +45,10 @@ pub struct ResetParams {
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
+#[validate(context = AppContext)]
 pub struct RegisterParams {
     #[validate(email)]
+    #[validate(custom(function = "validate_email_uniqueness", use_context))]
     pub email: String,
     #[validate(length(min = "MIN_PASSWORD_LENGTH", max = "MAX_PASSWORD_LENGTH"))]
     pub password: String,
@@ -70,13 +73,7 @@ async fn register(
     Extension(snowflake_generator): Extension<SnowflakeGenerator>,
     Json(params): Json<RegisterParams>,
 ) -> Result<(StatusCode, Json<UserResponse>), AppError> {
-    params.validate()?;
-    if !Model::is_email_unique(&ctx.db, &params.email).await? {
-        let mut errors = ValidationErrors::new();
-        errors.add("email", ValidationError::new("Email already exists."));
-
-        return Err(errors.into());
-    }
+    params.validate_with_args(&ctx)?;
 
     let res = Model::create_with_password(&ctx.db, &snowflake_generator, &params).await?;
     let active_model = res.into_active_model();

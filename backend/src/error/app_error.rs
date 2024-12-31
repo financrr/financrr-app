@@ -8,7 +8,7 @@ use sea_orm::DbErr;
 use serde::Serialize;
 use tracing::{error, warn};
 use utoipa::{IntoResponses, ToSchema};
-use validator::ValidationErrors;
+use validator::{ValidationError, ValidationErrors};
 
 pub type AppResult<T> = Result<T, AppError>;
 
@@ -79,6 +79,7 @@ app_errors!(
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_HEADER_NAME, InvalidHeaderName, argument=String);
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_HTTP_METHOD, InvalidHttpMethod, argument=String);
     (StatusCode::BAD_REQUEST, ErrorCode::INVALID_EMAIL_OR_PASSWORD, InvalidEmailOrPassword);
+    (StatusCode::BAD_REQUEST, ErrorCode::EMAIL_NOT_VERIFIED, EmailNotVerified);
 );
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -279,5 +280,14 @@ impl IntoResponse for AppError {
 impl From<AppError> for LocoError {
     fn from(value: AppError) -> Self {
         LocoError::Any(value.into())
+    }
+}
+
+/// This is the worst case scenario error handler.
+impl From<AppError> for ValidationError {
+    fn from(value: AppError) -> Self {
+        error!("An error occurred in custom validation function: {:?}", value);
+
+        ValidationError::new("INTERNAL_SERVER_ERROR")
     }
 }

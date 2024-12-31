@@ -56,6 +56,10 @@ async fn create(
         Some(user) => user,
     };
 
+    if user.email_verified_at.is_none() {
+        return Err(AppError::EmailNotVerified())?;
+    }
+
     if !user.verify_password(&params.password) {
         return Err(AppError::InvalidEmailOrPassword())?;
     }

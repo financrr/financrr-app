@@ -56,6 +56,7 @@ error_codes!(
     (2009, INVALID_HEADER_NAME, "A invalid header name was given");
     (2010, INVALID_HTTP_METHOD, "A invalid http method was used.");
     (2011, INVALID_EMAIL_OR_PASSWORD, "Invalid E-Mail or Password given.");
+    (2012, EMAIL_NOT_VERIFIED, "Email has not been verified yet.");
 );
 
 // User errors

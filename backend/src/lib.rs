@@ -10,5 +10,6 @@ pub mod services;
 pub mod tasks;
 pub mod types;
 pub mod utils;
+pub mod validation;
 pub mod views;
 pub mod workers;

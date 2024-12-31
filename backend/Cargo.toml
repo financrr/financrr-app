@@ -118,10 +118,16 @@ required-features = []
 loco-rs = { workspace = true, features = ["testing"] }
 serial_test = "3.2.0"
 rstest = "0.23.0"
-insta = { version = "1.41.1", features = ["redactions", "yaml", "filters"] }
+insta = { version = "1.41.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 [profile.release]
 lto = true
 codegen-units = 1
 panic = "abort"
 strip = "debuginfo"
+
+[profile.dev.package.insta]
+opt-level = 3
+
+[profile.dev.package.similar]
+opt-level = 3

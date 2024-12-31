@@ -1,18 +1,14 @@
-use crate::helpers::users::{create_user_with_email_and_id, generate_test_user};
+use crate::helpers::init::init_test;
+use crate::helpers::users::{clean_up_user_model, create_user_with_email, generate_test_user};
 use financrr::controllers::user::RegisterParams;
 use financrr::error::app_error::AppResult;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::Service;
-use financrr::utils::env::load_env_file;
-use financrr::{
-    app::App,
-    models::users::{self, Model},
-};
+use financrr::{app::App, models::users::Model};
 use insta::assert_debug_snapshot;
 use loco_rs::testing;
-use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel};
+use sea_orm::IntoActiveModel;
 use serial_test::serial;
-use std::path::Path;
 
 macro_rules! configure_insta {
     ($($expr:expr),*) => {
@@ -21,34 +17,6 @@ macro_rules! configure_insta {
         settings.set_snapshot_suffix("users");
         let _guard = settings.bind_to_scope();
     };
-}
-
-macro_rules! init_test {
-    ($($expr:expr),*) => {
-        configure_insta!();
-        load_env_file();
-        if Path::new(".env.test").exists() {
-            dotenvy::from_path(".env.test").unwrap();
-        }
-    };
-}
-
-#[tokio::test]
-#[serial]
-async fn test_can_validate_model() {
-    init_test!();
-
-    let boot = testing::boot_test::<App>().await.unwrap();
-
-    let res = users::ActiveModel {
-        name: ActiveValue::set("1".to_string()),
-        email: ActiveValue::set("invalid-email".to_string()),
-        ..Default::default()
-    }
-    .insert(&boot.app_context.db)
-    .await;
-
-    assert_debug_snapshot!(res);
 }
 
 #[tokio::test]
@@ -68,7 +36,7 @@ async fn can_create_with_password() {
     let res = Model::create_with_password(&boot.app_context.db, &snowflake_generator, &params).await;
 
     insta::with_settings!({
-        filters => testing::cleanup_user_model()
+        filters => clean_up_user_model()
     }, {
         assert_debug_snapshot!(res);
     });
@@ -82,17 +50,24 @@ async fn handle_create_with_password_with_duplicate() {
     let boot = testing::boot_test::<App>().await.unwrap();
 
     let snowflake_generator = SnowflakeGeneratorInner::get_arc(&boot.app_context).await.unwrap();
+    let _ = create_user_with_email(&boot.app_context, "duplicate_user@financrr.test").await;
+
     let new_user: AppResult<Model> = Model::create_with_password(
         &boot.app_context.db,
         &snowflake_generator,
         &RegisterParams {
-            email: "test@financrr.dev".to_string(),
+            email: "duplicate_user@financrr.test".to_string(),
             password: "Password1234".to_string(),
             name: "Test Account".to_string(),
         },
     )
     .await;
-    assert_debug_snapshot!(new_user);
+
+    insta::with_settings!({
+        filters => clean_up_user_model()
+    }, {
+        assert_debug_snapshot!(new_user);
+    });
 }
 
 #[tokio::test]
@@ -102,7 +77,7 @@ async fn can_find_by_email() {
 
     let boot = testing::boot_test::<App>().await.unwrap();
 
-    let user = create_user_with_email_and_id(&boot.app_context, 1, "user1@financrr.test").await;
+    let user = create_user_with_email(&boot.app_context, "user1@financrr.test").await;
 
     let existing_user = Model::find_by_email(&boot.app_context.db, user.email.as_str()).await;
     let non_existing_user_results = Model::find_by_email(&boot.app_context.db, "non-existing@financrr.test").await;

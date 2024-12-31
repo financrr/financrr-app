@@ -50,7 +50,7 @@ impl super::_entities::users::Model {
         Ok(user)
     }
 
-    pub async fn is_email_unique(db: &DatabaseConnection, email: &str) -> ModelResult<bool> {
+    pub async fn is_email_unique(db: &DatabaseConnection, email: &str) -> AppResult<bool> {
         let user = users::Entity::find()
             .select_only()
             .column(users::Column::Email)

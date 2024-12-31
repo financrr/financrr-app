@@ -1,10 +1,10 @@
+use super::prepare_data;
+use crate::helpers::init::init_test;
 use financrr::{app::App, models::users};
 use insta::{assert_debug_snapshot, with_settings};
 use loco_rs::testing;
 use rstest::rstest;
 use serial_test::serial;
-
-use super::prepare_data;
 
 // TODO: see how to dedup / extract this to app-local test utils
 // not to framework, because that would require a runtime dep on insta
@@ -20,7 +20,7 @@ macro_rules! configure_insta {
 #[tokio::test]
 #[serial]
 async fn can_register() {
-    configure_insta!();
+    init_test!();
 
     testing::request::<App, _, _>(|request, ctx| async move {
         let email = "test@loco.com";
@@ -54,7 +54,7 @@ async fn can_register() {
 #[tokio::test]
 #[serial]
 async fn can_login_with_verify(#[case] test_name: &str, #[case] password: &str) {
-    configure_insta!();
+    init_test!();
 
     testing::request::<App, _, _>(|request, ctx| async move {
         let email = "test@loco.com";
@@ -102,13 +102,13 @@ async fn can_login_with_verify(#[case] test_name: &str, #[case] password: &str) 
 #[tokio::test]
 #[serial]
 async fn can_login_without_verify() {
-    configure_insta!();
+    init_test!();
 
     testing::request::<App, _, _>(|request, _ctx| async move {
-        let email = "test@loco.com";
-        let password = "12341234";
+        let email = "test@financrr.test";
+        let password = "Password123456";
         let register_payload = serde_json::json!({
-            "name": "loco",
+            "name": "Test User",
             "email": email,
             "password": password
         });
@@ -137,7 +137,7 @@ async fn can_login_without_verify() {
 #[tokio::test]
 #[serial]
 async fn can_reset_password() {
-    configure_insta!();
+    init_test!();
 
     testing::request::<App, _, _>(|request, ctx| async move {
         let login_data = prepare_data::init_user_login(&request, &ctx).await;
@@ -194,7 +194,7 @@ async fn can_reset_password() {
 #[tokio::test]
 #[serial]
 async fn can_get_current_user() {
-    configure_insta!();
+    init_test!();
 
     testing::request::<App, _, _>(|request, ctx| async move {
         let user = prepare_data::init_user_login(&request, &ctx).await;
