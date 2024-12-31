@@ -3,7 +3,7 @@ import 'package:financrr_frontend/routing/router_extensions.dart';
 import 'package:financrr_frontend/shared/ui/custom_replacements/custom_card.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 import '../../../modules/settings/providers/l10n.provider.dart';
 import '../../../modules/transactions/views/transaction_page.dart';

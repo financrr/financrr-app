@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 class MoneyInputFormatter extends TextInputFormatter {
   final String symbol;

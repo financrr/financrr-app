@@ -1,4 +1,4 @@
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 

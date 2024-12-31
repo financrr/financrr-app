@@ -5,7 +5,7 @@ import 'package:financrr_frontend/utils/l10n_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 import '../shared/models/store.dart';
 import 'input_utils.dart';

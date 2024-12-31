@@ -4,7 +4,7 @@ import 'package:financrr_frontend/shared/ui/custom_replacements/custom_card.dart
 import 'package:financrr_frontend/utils/l10n_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 import '../../../modules/settings/views/currency_edit_page.dart';
 import '../custom_replacements/custom_circle_avatar.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 class PaginatedDataResult<T> {
   final int total;

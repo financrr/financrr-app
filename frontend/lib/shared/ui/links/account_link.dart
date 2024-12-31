@@ -1,7 +1,7 @@
 import 'package:financrr_frontend/routing/router_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:restrr/restrr.dart';
+import 'package:financrr_api/financrr_api.dart';
 
 import '../../../modules/accounts/views/account_page.dart';
 import '../../../modules/settings/providers/theme.provider.dart';
