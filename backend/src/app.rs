@@ -1,5 +1,6 @@
 use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::services::ServicesInitializer;
+use crate::models::_entities::instances;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::session_used::SessionUsedWorker;
@@ -53,7 +54,7 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         // TODO fix AppRoutes somehow and remove custom ExtendedAppRoutes
-        // Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
+        //  Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
 
         ExtendedAppRoutes::empty()
             .prefix("/api")
@@ -88,6 +89,7 @@ impl Hooks for App {
     async fn truncate(db: &DatabaseConnection) -> Result<()> {
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
+        truncate_table(db, instances::Entity).await?;
         Ok(())
     }
 

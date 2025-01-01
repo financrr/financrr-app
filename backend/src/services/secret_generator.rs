@@ -31,6 +31,7 @@ impl Service for SecretGeneratorInner {
 }
 
 impl SecretGeneratorInner {
+    /// Generates a random token with a default length of 64 characters
     pub fn generate_token(&self) -> String {
         self.generate_token_with_length(DEFAULT_TOKEN_LENGTH)
     }

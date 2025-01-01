@@ -6,17 +6,25 @@ use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::Service;
 use loco_rs::app::AppContext;
 
-pub async fn create_user_with_email(ctx: &AppContext, email: &str) -> Model {
+pub async fn create_user_with_email_and_password(ctx: &AppContext, email: &str, password: &str) -> Model {
     let snowflake_generator = SnowflakeGeneratorInner::get_arc(ctx).await.unwrap();
     let register_params = RegisterParams {
         email: email.to_string(),
-        password: "Password1234".to_string(),
+        password: password.to_string(),
         name: "Test Account".to_string(),
     };
 
     users::Model::create_with_password(&ctx.db, &snowflake_generator, &register_params)
         .await
         .unwrap()
+}
+
+pub async fn create_user_with_email(ctx: &AppContext, email: &str) -> Model {
+    create_user_with_email_and_password(ctx, email, "Password1234").await
+}
+
+pub async fn create_user_with_password(ctx: &AppContext, password: &str) -> Model {
+    create_user_with_email_and_password(ctx, &generate_random_email(), password).await
 }
 
 pub async fn generate_test_user(ctx: &AppContext) -> Model {

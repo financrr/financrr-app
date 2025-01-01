@@ -25,7 +25,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: cargo build --release
+      - name: Run installation script
+        run: bin/install.bash
+      - name: Start Docker Container
+        run: docker compose up -d
       - name: Run tests
-        run: cargo test --release --workspace
+        run: cargo test --workspace

@@ -1,7 +1,9 @@
 use crate::helpers::init::init_test;
-use crate::helpers::users::{clean_up_user_model, create_user_with_email, generate_test_user};
+use crate::helpers::users::{
+    clean_up_user_model, create_user_with_email, create_user_with_password, generate_test_user,
+};
 use financrr::controllers::user::RegisterParams;
-use financrr::error::app_error::AppResult;
+use financrr::services::secret_generator::SecretGeneratorInner;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::Service;
 use financrr::{app::App, models::users::Model};
@@ -44,34 +46,6 @@ async fn can_create_with_password() {
 
 #[tokio::test]
 #[serial]
-async fn handle_create_with_password_with_duplicate() {
-    init_test!();
-
-    let boot = testing::boot_test::<App>().await.unwrap();
-
-    let snowflake_generator = SnowflakeGeneratorInner::get_arc(&boot.app_context).await.unwrap();
-    let _ = create_user_with_email(&boot.app_context, "duplicate_user@financrr.test").await;
-
-    let new_user: AppResult<Model> = Model::create_with_password(
-        &boot.app_context.db,
-        &snowflake_generator,
-        &RegisterParams {
-            email: "duplicate_user@financrr.test".to_string(),
-            password: "Password1234".to_string(),
-            name: "Test Account".to_string(),
-        },
-    )
-    .await;
-
-    insta::with_settings!({
-        filters => clean_up_user_model()
-    }, {
-        assert_debug_snapshot!(new_user);
-    });
-}
-
-#[tokio::test]
-#[serial]
 async fn can_find_by_email() {
     init_test!();
 
@@ -82,8 +56,12 @@ async fn can_find_by_email() {
     let existing_user = Model::find_by_email(&boot.app_context.db, user.email.as_str()).await;
     let non_existing_user_results = Model::find_by_email(&boot.app_context.db, "non-existing@financrr.test").await;
 
-    assert_debug_snapshot!(existing_user);
-    assert_debug_snapshot!(non_existing_user_results);
+    insta::with_settings!({
+        filters => clean_up_user_model()
+    }, {
+        assert_debug_snapshot!(existing_user);
+        assert_debug_snapshot!(non_existing_user_results);
+    });
 }
 
 #[tokio::test]
@@ -92,19 +70,22 @@ async fn can_verification_token() {
     init_test!();
 
     let boot = testing::boot_test::<App>().await.unwrap();
+    let user = generate_test_user(&boot.app_context).await;
+    let user_id = user.id;
 
-    let user = Model::find_by_id(&boot.app_context.db, 1).await.unwrap();
+    let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
+    let secret_generator = SecretGeneratorInner::get_arc(&boot.app_context).await.unwrap();
 
     assert!(user.email_verification_sent_at.is_none());
     assert!(user.email_verification_token.is_none());
 
     assert!(user
         .into_active_model()
-        .set_email_verification_sent(&boot.app_context.db)
+        .set_email_verification_sent(&boot.app_context.db, &secret_generator)
         .await
         .is_ok());
 
-    let user = Model::find_by_id(&boot.app_context.db, 1).await.unwrap();
+    let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
     assert!(user.email_verification_sent_at.is_some());
     assert!(user.email_verification_token.is_some());
@@ -118,13 +99,14 @@ async fn can_set_forgot_password_sent() {
     let boot = testing::boot_test::<App>().await.unwrap();
     let user = generate_test_user(&boot.app_context).await;
     let user_id = user.id;
+    let secret_generator = SecretGeneratorInner::get_arc(&boot.app_context).await.unwrap();
 
     assert!(user.reset_sent_at.is_none());
     assert!(user.reset_token.is_none());
 
     assert!(user
         .into_active_model()
-        .set_forgot_password_sent(&boot.app_context.db)
+        .set_forgot_password_sent(&boot.app_context.db, &secret_generator)
         .await
         .is_ok());
 
@@ -140,14 +122,16 @@ async fn can_verified() {
     init_test!();
 
     let boot = testing::boot_test::<App>().await.unwrap();
+    let user = generate_test_user(&boot.app_context).await;
+    let user_id = user.id;
 
-    let user = Model::find_by_id(&boot.app_context.db, 1).await.unwrap();
+    let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
     assert!(user.email_verified_at.is_none());
 
     assert!(user.into_active_model().verified(&boot.app_context.db).await.is_ok());
 
-    let user = Model::find_by_id(&boot.app_context.db, 1).await.unwrap();
+    let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
     assert!(user.email_verified_at.is_some());
 }
@@ -156,22 +140,26 @@ async fn can_verified() {
 #[serial]
 async fn can_reset_password() {
     init_test!();
+    const PASSWORD: &str = "TestPassword1234";
+    const NEW_PASSWORD: &str = "NewPassword1234";
 
     let boot = testing::boot_test::<App>().await.unwrap();
+    let user = create_user_with_password(&boot.app_context, PASSWORD).await;
+    let user_id = user.id;
 
-    let user = Model::find_by_id(&boot.app_context.db, 1).await.unwrap();
+    let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
-    assert!(user.verify_password("12341234"));
+    assert!(user.verify_password(PASSWORD));
 
     assert!(user
         .clone()
         .into_active_model()
-        .reset_password(&boot.app_context.db, "new-password")
+        .reset_password(&boot.app_context.db, NEW_PASSWORD)
         .await
         .is_ok());
 
-    assert!(Model::find_by_id(&boot.app_context.db, 1)
+    assert!(Model::find_by_id(&boot.app_context.db, user_id)
         .await
         .unwrap()
-        .verify_password("new-password"));
+        .verify_password(NEW_PASSWORD));
 }

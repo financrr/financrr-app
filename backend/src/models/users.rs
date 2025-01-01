@@ -2,6 +2,7 @@ pub use super::_entities::users::{self, ActiveModel, Entity, Model};
 use crate::controllers::user::RegisterParams;
 use crate::error::app_error::{AppError, AppResult};
 use crate::models::_entities::sessions;
+use crate::services::secret_generator::SecretGenerator;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use chrono::offset::Local;
 use enumflags2::_internal::RawBitFlags;
@@ -10,7 +11,6 @@ use loco_rs::{hash, prelude::*};
 use sea_orm::prelude::Expr;
 use sea_orm::sea_query::IntoCondition;
 use sea_orm::{JoinType, PaginatorTrait, QuerySelect, RelationTrait};
-use uuid::Uuid;
 
 #[bitflags(default = User)]
 #[repr(u8)]
@@ -176,10 +176,16 @@ impl super::_entities::users::ActiveModel {
     /// # Errors
     ///
     /// when has DB query error
-    pub async fn set_email_verification_sent(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
+    pub async fn set_email_verification_sent(
+        mut self,
+        db: &DatabaseConnection,
+        secret_generator: &SecretGenerator,
+    ) -> ModelResult<Model> {
+        const EMAIL_VERIFICATION_TOKEN_LENGTH: usize = 8;
         self.email_verification_sent_at = ActiveValue::set(Some(Local::now().into()));
-        // TODO: generate a more unique and secure token based on the instance id
-        self.email_verification_token = ActiveValue::Set(Some(Uuid::new_v4().to_string()));
+        self.email_verification_token = ActiveValue::Set(Some(
+            secret_generator.generate_token_with_length(EMAIL_VERIFICATION_TOKEN_LENGTH),
+        ));
         Ok(self.update(db).await?)
     }
 
@@ -195,10 +201,14 @@ impl super::_entities::users::ActiveModel {
     /// # Errors
     ///
     /// when has DB query error
-    pub async fn set_forgot_password_sent(mut self, db: &DatabaseConnection) -> ModelResult<Model> {
+    pub async fn set_forgot_password_sent(
+        mut self,
+        db: &DatabaseConnection,
+        secret_generator: &SecretGenerator,
+    ) -> ModelResult<Model> {
+        const RESET_TOKEN_LENGTH: usize = 8;
         self.reset_sent_at = ActiveValue::set(Some(Local::now().into()));
-        // TODO generate more unique and secure token based on the instance id
-        self.reset_token = ActiveValue::Set(Some(Uuid::new_v4().to_string()));
+        self.reset_token = ActiveValue::Set(Some(secret_generator.generate_token_with_length(RESET_TOKEN_LENGTH)));
         Ok(self.update(db).await?)
     }
 
