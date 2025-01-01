@@ -288,6 +288,12 @@ impl From<AppError> for ValidationError {
     fn from(value: AppError) -> Self {
         error!("An error occurred in custom validation function: {:?}", value);
 
+        // TODO somehow fix this?
+        //  - serialize the error into json
+        //  - Create custom extractor that validates
+        //      and converts error in GeneralValidationError or the given AppError
+        //      if one is serialized into the field
+        //  - This requires ValidationError to take non 'static strings
         ValidationError::new("INTERNAL_SERVER_ERROR")
     }
 }
