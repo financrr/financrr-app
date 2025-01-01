@@ -1,4 +1,5 @@
 use crate::error::error_code::ErrorCode;
+use axum::http::header::InvalidHeaderValue;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use derive_more::{Display, Error};
@@ -6,6 +7,7 @@ use financrr_macros::app_errors;
 use loco_rs::prelude::{Error as LocoError, ModelError};
 use sea_orm::DbErr;
 use serde::Serialize;
+use serde_yaml::Error as YamlError;
 use tracing::{error, warn};
 use utoipa::{IntoResponses, ToSchema};
 use validator::{ValidationError, ValidationErrors};
@@ -268,6 +270,18 @@ impl From<DbErr> for AppError {
 impl From<ValidationErrors> for AppError {
     fn from(value: ValidationErrors) -> Self {
         AppError::GeneralValidationError(JsonReference::new_with_default_none(&value))
+    }
+}
+
+impl From<YamlError> for AppError {
+    fn from(value: YamlError) -> Self {
+        AppError::YamlError(value.to_string())
+    }
+}
+
+impl From<InvalidHeaderValue> for AppError {
+    fn from(value: InvalidHeaderValue) -> Self {
+        AppError::InvalidHeaderValue(value.to_string())
     }
 }
 

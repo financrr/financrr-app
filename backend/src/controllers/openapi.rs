@@ -1,9 +1,11 @@
+use crate::error::app_error::AppResult;
 use axum::body::Body;
-use axum::debug_handler;
+use axum::http::StatusCode;
 use axum::routing::get;
-use loco_rs::prelude::{format, Response};
-use loco_rs::prelude::{Result, Routes};
-use loco_rs::Error;
+use axum::{debug_handler, Json};
+use loco_rs::prelude::Response;
+use loco_rs::prelude::Routes;
+use utoipa::openapi::OpenApi as OpenApiStruct;
 use utoipa::OpenApi;
 
 #[utoipa::path(get,
@@ -15,10 +17,10 @@ responses(
 tag = "OpenAPI",
 )]
 #[debug_handler]
-async fn openapi_json() -> Result<Response> {
+async fn openapi_json() -> AppResult<(StatusCode, Json<OpenApiStruct>)> {
     let doc = crate::initializers::openapi::ApiDocs::openapi();
 
-    format::json(doc)
+    Ok((StatusCode::OK, Json(doc)))
 }
 
 #[utoipa::path(get,
@@ -30,16 +32,14 @@ responses(
 tag = "OpenAPI",
 )]
 #[debug_handler]
-async fn openapi_yaml() -> Result<Response> {
-    let doc = crate::initializers::openapi::ApiDocs::openapi()
-        .to_yaml()
-        .map_err(Error::YAML)?;
+async fn openapi_yaml() -> AppResult<(StatusCode, Response)> {
+    let doc = crate::initializers::openapi::ApiDocs::openapi().to_yaml()?;
 
     let mut res = Response::new(Body::new(doc));
     let headers = res.headers_mut();
     headers.insert("Content-Type", "application/yaml".parse()?);
 
-    Ok(res)
+    Ok((StatusCode::OK, res))
 }
 
 pub fn routes() -> Routes {
