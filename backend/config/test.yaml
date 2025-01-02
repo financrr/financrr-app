@@ -34,18 +34,7 @@ workers:
 # Mailer Configuration.
 mailer:
   # SMTP mailer configuration.
-  smtp:
-    # Enable/Disable smtp mailer.
-    enable: {{get_env(name="SMTP_ENABLE", default="false")}}
-    # SMTP server host. e.x localhost, smtp.gmail.com
-    host: {{get_env(name="SMTP_HOST", default="localhost")}}
-    # SMTP server port
-    port: {{get_env(name="SMTP_PORT", default="1025")}}
-    # Use secure connection (SSL/TLS).
-    secure: {{get_env(name="SMTP_SECURE", default="false")}}
-    auth:
-      user: {{get_env(name="SMTP_USER", default="")}}
-      password: {{get_env(name="SMTP_PASSWORD", default="")}}
+  stub: true
 
 # Initializers Configuration
 # initializers:
@@ -65,9 +54,9 @@ database:
   # Set the idle duration before closing a connection.
   idle_timeout: {{get_env(name="DATABASE_IDLE_TIMEOUT", default="500")}}
   # Minimum number of connections for a pool.
-  min_connections: {{get_env(name="DATABASE_MIN_CONNECTIONS", default="1")}}
+  min_connections: {{get_env(name="DATABASE_MIN_CONNECTIONS", default="0")}}
   # Maximum number of connections for a pool.
-  max_connections: {{get_env(name="DATABASE_MAX_CONNECTIONS", default="5")}}
+  max_connections: {{get_env(name="DATABASE_MAX_CONNECTIONS", default="15")}}
   # Run migration up when application loaded
   auto_migrate: true
   # Truncate database when application loaded. This is a dangerous operation, make sure that you using this flag only on dev environments or test mode

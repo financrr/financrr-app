@@ -66,10 +66,15 @@ impl super::_entities::users::Model {
     /// # Errors
     ///
     /// When could not find user by the given token or DB query error
-    pub async fn find_by_verification_token(db: &DatabaseConnection, token: &str) -> Result<Option<Self>, AppError> {
+    pub async fn find_by_verification_token(
+        db: &DatabaseConnection,
+        email: &str,
+        token: &str,
+    ) -> Result<Option<Self>, AppError> {
         Ok(users::Entity::find()
             .filter(
                 query::condition()
+                    .eq(users::Column::Email, email)
                     .eq(users::Column::EmailVerificationToken, token)
                     .build(),
             )
@@ -82,9 +87,14 @@ impl super::_entities::users::Model {
     /// # Errors
     ///
     /// When could not find user by the given token or DB query error
-    pub async fn find_by_reset_token(db: &DatabaseConnection, token: &str) -> ModelResult<Self> {
+    pub async fn find_by_reset_token(db: &DatabaseConnection, email: &str, token: &str) -> ModelResult<Self> {
         let user = users::Entity::find()
-            .filter(query::condition().eq(users::Column::ResetToken, token).build())
+            .filter(
+                query::condition()
+                    .eq(users::Column::Email, email)
+                    .eq(users::Column::ResetToken, token)
+                    .build(),
+            )
             .one(db)
             .await?;
         user.ok_or_else(|| ModelError::EntityNotFound)

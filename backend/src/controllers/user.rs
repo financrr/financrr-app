@@ -12,7 +12,7 @@ use crate::views::user::UserResponse;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
-use axum::{debug_handler, Extension, Json};
+use axum::{debug_handler, Extension, Form, Json};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Routes;
 use sea_orm::IntoActiveModel;
@@ -26,8 +26,11 @@ pub const MAX_PASSWORD_LENGTH: u64 = 10240;
 pub const MIN_NAME_LENGTH: u64 = 2;
 pub const MAX_NAME_LENGTH: u64 = 512;
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
 pub struct VerifyParams {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 1))]
     pub token: String,
 }
 
@@ -39,6 +42,9 @@ pub struct ForgotParams {
 
 #[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct ResetParams {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 1))]
     pub token: String,
     #[validate(length(min = "MIN_PASSWORD_LENGTH", max = "MAX_PASSWORD_LENGTH"))]
     pub password: String,
@@ -102,9 +108,11 @@ async fn register(
 #[debug_handler]
 async fn verify(
     State(ctx): State<AppContext>,
-    Json(params): Json<VerifyParams>,
+    Form(params): Form<VerifyParams>,
 ) -> Result<(StatusCode, Json<UserResponse>), AppError> {
-    let user = Model::find_by_verification_token(&ctx.db, &params.token).await?;
+    params.validate()?;
+
+    let user = Model::find_by_verification_token(&ctx.db, &params.email, &params.token).await?;
     match user {
         None => Err(AppError::InvalidVerificationToken()),
         Some(user) => {
@@ -132,9 +140,10 @@ async fn verify(
 async fn forgot_password(
     State(ctx): State<AppContext>,
     Extension(user_service): Extension<UserVerificationService>,
-    Json(params): Json<ForgotParams>,
+    Form(params): Form<ForgotParams>,
 ) -> AppResult<StatusCode> {
     params.validate()?;
+
     let Some(user) = Model::find_by_email(&ctx.db, &params.email).await? else {
         // Return success to not expose registered users.
         return Ok(StatusCode::OK);
@@ -164,9 +173,9 @@ async fn forgot_password(
 #[debug_handler]
 async fn reset_password(
     State(ctx): State<AppContext>,
-    Json(params): Json<ResetParams>,
+    Form(params): Form<ResetParams>,
 ) -> AppResult<(StatusCode, Json<UserResponse>)> {
-    let user = users::Model::find_by_reset_token(&ctx.db, &params.token).await?;
+    let user = users::Model::find_by_reset_token(&ctx.db, &params.email, &params.token).await?;
 
     let user = user
         .into_active_model()

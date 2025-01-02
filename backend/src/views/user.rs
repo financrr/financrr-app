@@ -1,10 +1,10 @@
 use crate::models::users::Model;
 use crate::types::snowflake::Snowflake;
 use chrono::{DateTime, FixedOffset};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UserResponse {
     pub id: Snowflake,
     pub email: String,

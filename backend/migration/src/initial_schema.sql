@@ -19,13 +19,15 @@ CREATE TABLE users
     name                       TEXT                     NOT NULL,
     flags                      INTEGER                  NOT NULL,
     password                   TEXT                     NOT NULL,
-    reset_token                TEXT UNIQUE,
+    reset_token                TEXT,
     reset_sent_at              timestamp with time zone,
-    email_verification_token   TEXT UNIQUE,
+    email_verification_token   TEXT,
     email_verification_sent_at timestamp with time zone,
     email_verified_at          timestamp with time zone,
     created_at                 timestamp with time zone NOT NULL,
-    updated_at                 timestamp with time zone NOT NULL
+    updated_at                 timestamp with time zone NOT NULL,
+    UNIQUE (email, email_verification_token),
+    UNIQUE (email, reset_token)
 );
 
 CREATE TABLE user_permissions
