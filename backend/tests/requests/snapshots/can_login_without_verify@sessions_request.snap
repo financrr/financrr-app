@@ -1,0 +1,25 @@
+---
+source: tests/requests/session.rs
+assertion_line: 79
+expression: session_response
+snapshot_kind: text
+---
+{
+  "id": ID,
+  "user": {
+    "id": ID,
+    "email": "can.login.without.verify@financrr.test",
+    "name": "Test Account",
+    "flags": 2,
+    "email_verification_sent_at": "DATEZ",
+    "email_verified_at": "DATEZ",
+    "created_at": "DATEZ",
+    "updated_at": "DATEZ"
+  },
+  "api_key": KEY,
+  "name": null,
+  "user_agent": null,
+  "last_accessed_at": null,
+  "created_at": "DATEZ",
+  "updated_at": "DATEZ"
+}

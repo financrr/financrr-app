@@ -1,6 +1,7 @@
 use crate::helpers::init::init_test;
 use crate::helpers::users::{
     clean_up_user_model, create_user_with_email, create_user_with_password, generate_test_user,
+    generate_unactivated_user,
 };
 use financrr::controllers::user::RegisterParams;
 use financrr::services::secret_generator::SecretGeneratorInner;
@@ -122,7 +123,7 @@ async fn can_verified() {
     init_test!();
 
     let boot = testing::boot_test::<App>().await.unwrap();
-    let user = generate_test_user(&boot.app_context).await;
+    let user = generate_unactivated_user(&boot.app_context).await;
     let user_id = user.id;
 
     let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();

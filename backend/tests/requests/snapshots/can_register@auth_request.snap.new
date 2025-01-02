@@ -1,9 +1,0 @@
----
-source: tests/requests/auth.rs
-assertion_line: 39
-expression: saved_user
-snapshot_kind: text
----
-Ok(
-    None,
-)

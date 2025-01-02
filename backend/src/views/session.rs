@@ -4,19 +4,19 @@ use crate::models::users;
 use crate::types::snowflake::Snowflake;
 use crate::views::user::UserResponse;
 use chrono::{DateTime, FixedOffset};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct SessionResponse {
-    id: Snowflake,
-    user: UserResponse,
-    api_key: String,
-    name: Option<String>,
-    user_agent: Option<String>,
-    last_accessed_at: Option<DateTime<FixedOffset>>,
-    created_at: DateTime<FixedOffset>,
-    updated_at: DateTime<FixedOffset>,
+    pub id: Snowflake,
+    pub user: UserResponse,
+    pub api_key: String,
+    pub name: Option<String>,
+    pub user_agent: Option<String>,
+    pub last_accessed_at: Option<DateTime<FixedOffset>>,
+    pub created_at: DateTime<FixedOffset>,
+    pub updated_at: DateTime<FixedOffset>,
 }
 
 impl From<(sessions::Model, users::Model)> for SessionResponse {

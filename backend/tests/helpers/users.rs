@@ -42,6 +42,10 @@ pub async fn create_user_with_email(ctx: &AppContext, email: &str) -> Model {
     create_user(ctx, email, DEFAULT_PASSWORD, true).await
 }
 
+pub async fn create_unverified_user_with_email(ctx: &AppContext, email: &str) -> Model {
+    create_user(ctx, email, DEFAULT_PASSWORD, false).await
+}
+
 pub async fn create_user_with_password(ctx: &AppContext, password: &str) -> Model {
     create_user(ctx, &generate_random_email(), password, true).await
 }
