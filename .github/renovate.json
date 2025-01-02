@@ -6,6 +6,7 @@
     "ignorePaths": [
         "frontend/android/",
         "frontend/macos/",
-        "frontend/ios/"
+        "frontend/ios/",
+        "old-backend/"
     ]
 }
