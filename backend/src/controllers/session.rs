@@ -18,13 +18,21 @@ use serde::Deserialize;
 use utoipa::ToSchema;
 use validator::Validate;
 
+pub const MIN_SESSION_NAME: u64 = 1;
+pub const MAX_SESSION_NAME: u64 = 512;
+
+pub const MIN_USER_AGENT: u64 = 1;
+pub const MAX_USER_AGENT: u64 = 255;
+
 #[derive(Debug, Deserialize, ToSchema, Validate)]
 pub struct CreateSessionParams {
     #[validate(email)]
     pub email: String,
     #[validate(length(min = "MIN_PASSWORD_LENGTH", max = "MAX_PASSWORD_LENGTH"))]
     pub password: String,
+    #[validate(length(min = "MIN_SESSION_NAME", max = "MAX_SESSION_NAME"))]
     pub name: Option<String>,
+    #[validate(length(min = "MIN_USER_AGENT", max = "MAX_USER_AGENT"))]
     pub user_agent: Option<String>,
 }
 

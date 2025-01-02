@@ -34,13 +34,13 @@ pub struct VerifyParams {
     pub token: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
 pub struct ForgotParams {
     #[validate(email)]
     pub email: String,
 }
 
-#[derive(Debug, Deserialize, ToSchema, Validate)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Validate)]
 pub struct ResetParams {
     #[validate(email)]
     pub email: String,

@@ -33,7 +33,7 @@ async fn can_create_with_password() {
         password: "Password1234".to_string(),
         name: "Test Account".to_string(),
     };
-    let snowflake_generator = SnowflakeGeneratorInner::new_arc(&boot.app_context).await.unwrap();
+    let snowflake_generator = SnowflakeGeneratorInner::get_arc(&boot.app_context).await.unwrap();
 
     let res = Model::create_with_password(&boot.app_context.db, &snowflake_generator, &params).await;
 
