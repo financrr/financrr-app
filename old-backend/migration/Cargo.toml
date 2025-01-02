@@ -1,0 +1,33 @@
+[package]
+name = "migration"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# Async runtime
+tokio.workspace = true
+
+# Entity
+entity = { path = "../domain_model" }
+
+# Sea-orm
+sea-orm.workspace = true
+sea-orm-migration = { version = "1.1.0-rc.1", features = ["sqlx-sqlite", "sqlx-mysql", "sqlx-postgres", "runtime-tokio-rustls"] }
+tracing.workspace = true
+
+# Date/Time
+time.workspace = true
+
+# Utils
+dotenvy.workspace = true
+utility.workspace = true

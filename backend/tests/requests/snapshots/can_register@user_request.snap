@@ -1,0 +1,24 @@
+---
+source: tests/requests/user.rs
+assertion_line: 49
+expression: db_user
+snapshot_kind: text
+---
+Model {
+    id: ID,
+    email: "can.register@financrr.test",
+    name: "TestUer",
+    flags: 2,
+    password: "PASSWORD",
+    reset_token: None,
+    reset_sent_at: None,
+    email_verification_token: Some(
+        "TOKEN",
+    ),
+    email_verification_sent_at: Some(
+        DATE,
+    ),
+    email_verified_at: None,
+    created_at: DATE,
+    updated_at: DATE,
+}

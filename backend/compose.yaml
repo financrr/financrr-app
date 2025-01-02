@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17.2-alpine3.21
+    init: true
+    environment:
+      TZ: ${TZ}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  mailpit:
+    image: axllent/mailpit:latest
+    init: true
+    volumes:
+      - mailpit-data:/data
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "1025:1025"
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+  postgres-data: ~
+  mailpit-data: ~
