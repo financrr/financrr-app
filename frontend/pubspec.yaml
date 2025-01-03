@@ -48,7 +48,7 @@ dependencies:
   logging: ^1.3.0
   device_info_plus: ^11.2.0
   package_info_plus: ^8.1.2
-  url_launcher: ^6.2.6
+  url_launcher: ^6.3.1
   go_router: ^14.6.2
 
 dev_dependencies:
