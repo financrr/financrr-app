@@ -1,0 +1,15 @@
+[package]
+name = "financrr_macros"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# Implementations
+financrr_macros_impl = { path = "../financrr_macros_impl" }
+
+# Rust code parsing
+syn = "2.0.94"

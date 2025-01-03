@@ -20,12 +20,25 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Build
-        run: cargo build --release --verbose
+        run: cargo build --release
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instal nextst
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+      - name: Run installation script
+        run: bash bin/install.bash
+      - name: Start Docker Container
+        run: docker compose up -d
+      - name: Build tests
+        run: cargo nextest run --workspace --no-run
       - name: Run tests
-        run: cargo test --release --verbose --workspace
+        run: bash bin/test.bash

@@ -1,0 +1,15 @@
+[package]
+name = "financrr_macros_impl"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+# Rust code parsing
+syn = { version = "2.0.94", features = ["full"] }
+
+# Proc macro
+proc-macro2 = "1.0.92"
+
+# utils
+quote = "1.0.38"

@@ -1,0 +1,9 @@
+---
+source: tests/models/users.rs
+assertion_line: 60
+expression: non_existing_user_results
+snapshot_kind: text
+---
+Ok(
+    None,
+)

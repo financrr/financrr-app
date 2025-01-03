@@ -1,18 +1,12 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
-        "config:recommended"
+        "github>DenuxPlays/renovate-config:rust.json5"
     ],
-    "rangeStrategy": "bump",
     "ignorePaths": [
         "frontend/android/",
         "frontend/macos/",
-        "frontend/ios/"
-    ],
-    "prHourlyLimit": 0,
-    "updateLockFiles": true,
-    "lockFileMaintenance": { 
-        "enabled": true,
-        "schedule": ["before 4am on monday"]
-    }
+        "frontend/ios/",
+        "old-backend/"
+    ]
 }

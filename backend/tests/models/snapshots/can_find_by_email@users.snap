@@ -1,0 +1,26 @@
+---
+source: tests/models/users.rs
+assertion_line: 62
+expression: existing_user
+snapshot_kind: text
+---
+Ok(
+    Some(
+        Model {
+            id: ID,
+            email: "user1@financrr.test",
+            name: "Test Account",
+            flags: 2,
+            password: "PASSWORD",
+            reset_token: None,
+            reset_sent_at: None,
+            email_verification_token: None,
+            email_verification_sent_at: None,
+            email_verified_at: Some(
+                DATE,
+            ),
+            created_at: DATE,
+            updated_at: DATE,
+        },
+    ),
+)

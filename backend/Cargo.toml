@@ -1,77 +1,143 @@
 [workspace]
 members = [
-    "entity",
     "migration",
-    "backend",
-    "utility",
-]
-default-members = [
-    "backend"
+    "financrr_macros",
+    "financrr_macros_impl"
 ]
 resolver = "2"
 
 [workspace.package]
 version = "0.1.0"
-authors = ["Timon Klinkert <DenuxPlays@users.noreply.github.com>"]
-description = "Your personal finance manager"
-license = "AGPL-3"
-repository = "https://github.com/financrr/backend"
-homepage = "https://github.com/financrr/backend"
-readme = "README.md"
 edition = "2021"
-rust-version = "1.80.0"
+publish = false
 
+[package]
+name = "financrr"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+default-run = "financrr-cli"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace.lints.rust]
 # Forbid
 unsafe_code = "forbid"
 non_ascii_idents = "forbid"
 
-[workspace.lints.clippy]
-# Restriction
-absolute_paths = "warn"
-unwrap_used = "warn"
-
-# Pedantic
-wildcard-imports = "deny"
-cloned_instead_of_copied = "warn"
-explicit_iter_loop = "warn"
-unnecessary_wraps = "warn"
-unused_self = "warn"
-
-# Nursey
-cognitive_complexity = "deny"
-use_self = "warn"
+[package.metadata.cargo-machete]
+ignored = ["include_dir"]
 
 [workspace.dependencies]
-# Async runtime
-tokio = { version = "1.39.3", features = ["macros", "rt", "rt-multi-thread", "sync", "time", "parking_lot"] }
+loco-rs = { version = "0.13.2", features = ["with-db", "cache_inmem"] }
+financrr_macros = { path = "financrr_macros" }
 
-# OpenApi
-utoipa = { version = "5.0.0-alpha.2", features = ["actix_extras", "openapi_extensions", "time", "preserve_order", "preserve_path_order", "non_strict_integers"] }
+[dependencies]
+# Loco Framework
+loco-rs = { workspace = true }
+async-trait = "0.1.84"
 
-# Serialization/Deserialization
-serde = { version = "1.0.209", features = ["derive"] }
-serde_json = "1.0.127"
+# Axum
+axum = { version = "0.7.9", features = ["json", "tokio"] }
 
-# ORM
-sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "mock"] }
+# Database and ORM
+sea-orm = { version = "1.1.3", features = [
+    "sqlx-sqlite",
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros",
+] }
+migration = { path = "migration" }
 
-# Date/Time
-time = { version = "0.3.36", features = ["serde-human-readable", "local-offset"] }
-chrono = { version = "0.4.38", features = ["clock"] }
+# Async runtime and scheduler
+tokio = { version = "1.42.0", default-features = false, features = [
+    "rt-multi-thread",
+    "parking_lot"
+] }
+tokio-cron-scheduler = { version = "0.13.0", features = ["signal"] }
 
-# Error handling
-thiserror = "1.0.63"
+# Serialization
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.134"
+serde_yaml = "0.9.34"
+
+# Utoipa / OpenApi
+utoipa = { version = "5.3.0", features = [
+    "axum_extras",
+    "openapi_extensions",
+    "yaml",
+    "preserve_order",
+    "preserve_path_order",
+    "non_strict_integers",
+    "chrono"
+] }
+utoipa-scalar = { version = "0.2.0", features = ["axum"] }
+utoipa-swagger-ui = { version = "8.1.0", features = ["axum", "debug-embed"] }
+utoipauto = "0.2.0"
 
 # Logging
-tracing = "0.1.40"
+tracing = "0.1.41"
 
-# Utilities
+# Time
+chrono = { version = "0.4.39", features = ["clock"] }
+
+# Flags
+enumflags2 = { version = "0.7.10", features = ["std", "serde"] }
+
+# Validation
+validator = { version = "0.18.1" }
+
+# Env loading
 dotenvy = "0.15.7"
-utility = { path = "utility" }
+
+# Mimalloc for better performance (eg. Alpine)
+mimalloc = "0.1.43"
+
+# Derive and Error utils
+thiserror = "2.0.9"
+derive_more = { version = "1.0.0", features = ["display", "error"] }
+
+# File utils
+include_dir = "0.7.4"
+bytes = "1.9.0"
+
+# Tokene genration
+rand = "0.8.5"
+sha2 = "0.10.8"
+base64 = "0.22.1"
+
+# Code generation/custom macros
+financrr_macros.workspace = true
+
+[[bin]]
+name = "financrr-cli"
+path = "src/bin/main.rs"
+required-features = []
+
+[[bin]]
+name = "tool"
+path = "src/bin/tool.rs"
+required-features = []
+
+[dev-dependencies]
+loco-rs = { workspace = true, features = ["testing"] }
+serial_test = "3.2.0"
+rstest = "0.24.0"
+insta = { version = "1.41.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 [profile.release]
 lto = true
 codegen-units = 1
 panic = "abort"
 strip = "debuginfo"
+
+[profile.dev.package.insta]
+opt-level = 3
+
+[profile.dev.package.similar]
+opt-level = 3
+
+[profile.test.package.insta]
+opt-level = 3
+
+[profile.test.package.similar]
+opt-level = 3

@@ -1,0 +1,100 @@
+[package]
+name = "backend"
+publish = false
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+# Enable mimalloc memory allocator to replace the default malloc
+# This can improve performance for Alpine builds
+enable_mimalloc = ["mimalloc"]
+
+[dependencies]
+# Actix
+actix-web = { version = "4.9.0", features = ["rustls-0_23"] }
+actix-cors = "0.7.0"
+actix-limitation = "0.5.1"
+actix-web-prom = "0.9.0"
+
+# Async runtime/Event handeling
+tokio.workspace = true
+
+# Scheduling
+deschuler = "0.4.1"
+croner = "2.0.5"
+
+# Validation
+validator = { version = "0.18.1", features = ["derive"] }
+actix-web-validation = { version = "0.5.1", features = ["validator"] }
+iban = "0.1.7"
+
+# Database / ORM
+sea-orm.workspace = true
+entity = { path = "../domain_model" }
+migration = { path = "../migration" }
+# Redis
+redis = { version = "0.27.1", features = ["aio", "tokio-comp"] }
+
+# Serialization and deserialization
+serde.workspace = true
+serde_json.workspace = true
+serde_yml = "0.0.12"
+serde_with = "3.9.0"
+
+# Generating openapi spec
+utoipa.workspace = true
+utoipa-swagger-ui = { version = "7.1.1-beta.0", features = ["actix-web", "debug-embed", "reqwest"] }
+utoipa-scalar = { version = "0.2.0-beta.0", features = ["actix-web"] }
+utoipauto = { version = "0.1.14", features = ["generic_full_path"] }
+
+# Logging
+tracing.workspace = true
+tracing-log = "0.2.0"
+tracing-subscriber = { version = "0.3.18", features = ["time", "fmt"] }
+tracing-appender = "0.2.3"
+
+# Date/Time
+time.workspace = true
+chrono.workspace = true
+
+# Regex
+lazy-regex = { version = "3.3.0", features = ["std", "perf", "unicode"] }
+regex = { version = "1.10.6", features = ["std", "perf", "unicode"] }
+
+# Error handling
+thiserror.workspace = true
+
+# Dervies
+derive_more = { version = "1.0.0", features = ["display", "error"] }
+
+# Utils
+dotenvy.workspace = true
+itertools = "0.13.0"
+bitflags = { version = "2.6.0", features = ["std", "serde"] }
+paste = "1.0.15"
+utility.workspace = true
+const_format = "0.2.33"
+
+# Future Utils
+futures-util = "0.3.30"
+
+# Security & Encryption utils
+uuid = { version = "1.10.0", features = ["v4"] }
+rand = "0.8.5"
+rust-argon2 = { version = "2.1.0", features = ["serde"] }
+
+# mimalloc
+# Replaces musl malloc since it is very slow
+mimalloc = { version = "0.1.43", optional = true }
