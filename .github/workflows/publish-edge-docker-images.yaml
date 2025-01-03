@@ -48,8 +48,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha
             type=edge
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
