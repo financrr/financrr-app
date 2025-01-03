@@ -1,4 +1,4 @@
-use crate::constants::{ALL_API_VERSIONS, CURRENT_API_VERSION};
+use crate::constants::{ApiVersions, ALL_API_VERSIONS, CURRENT_API_VERSION};
 use serde::Serialize;
 use std::sync::LazyLock;
 use utoipa::ToSchema;
@@ -11,19 +11,19 @@ pub struct HealthResponse {
     pub storage_status: HealthReport,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Clone, Copy, Serialize, ToSchema)]
 pub enum HealthStatus {
     Healthy,
     Unhealthy,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct HealthReport {
     pub status: HealthStatus,
     pub failed_components: Option<Vec<StatusComponents>>,
 }
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Clone, Copy, Serialize, ToSchema)]
 pub enum StatusComponents {
     Database,
     CacheInsertion,
@@ -36,14 +36,14 @@ pub enum StatusComponents {
 
 #[derive(Debug, Copy, Clone, Serialize, ToSchema)]
 pub struct VersionResponse {
-    api_version: &'static str,
-    all_api_versions: [&'static str; 1],
+    api_version: &'static ApiVersions,
+    all_api_versions: [&'static ApiVersions; 1],
 }
 
 impl Default for VersionResponse {
     fn default() -> Self {
         static INSTANCE: LazyLock<VersionResponse> = LazyLock::new(|| VersionResponse {
-            api_version: CURRENT_API_VERSION,
+            api_version: &CURRENT_API_VERSION,
             all_api_versions: ALL_API_VERSIONS,
         });
 
