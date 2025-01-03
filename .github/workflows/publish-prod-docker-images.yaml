@@ -6,8 +6,6 @@ on:
       - main
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-    paths:
-      - 'backend/**'
 
 concurrency:
   group: "prod-docker-images"
@@ -19,6 +17,7 @@ env:
 
 jobs:
   backend-image:
+    if: github.ref_type == 'tag' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
