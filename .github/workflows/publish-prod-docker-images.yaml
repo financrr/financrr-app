@@ -15,17 +15,14 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: jt-foss/backend
+  IMAGE_NAME: financrr/backend
 
 jobs:
   backend-image:
-    if: github.event_name == 'create' && github.event.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    env:
-      IMAGE_NAME: jt-foss/backend
     # Set default working directory
     defaults:
       run:
