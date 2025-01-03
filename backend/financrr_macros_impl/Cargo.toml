@@ -12,4 +12,4 @@ syn = { version = "2.0.90", features = ["full"] }
 proc-macro2 = "1.0.92"
 
 # utils
-quote = "1.0.37"
+quote = "1.0.38"
