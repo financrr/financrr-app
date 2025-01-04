@@ -27,8 +27,10 @@ logger:
 server:
   # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
   port: {{get_env(name="PORT", default="8080")}}
+  # The actual IP-Binding that is used by the server
+  binding: {{get_env(name="BINDING", default="127.0.0.1")}}
   # The UI hostname or IP address that mailers will point to.
-  host: {{get_env(name="HOST", default="localhost")}}
+  host: {{get_env(name="EXTERNAL_HOST", default="http://localhost:8080")}}
   ident: ""
   # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
   middlewares:
