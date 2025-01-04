@@ -45,6 +45,8 @@ impl Hooks for App {
     }
 
     async fn boot(mode: StartMode, environment: &Environment) -> Result<BootResult> {
+        create_necessary_folders()?;
+
         create_app::<Self, Migrator>(mode, environment).await
     }
 
@@ -57,19 +59,19 @@ impl Hooks for App {
         //  Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
 
         ExtendedAppRoutes::empty()
+            // All routes MUST be prefixed with /api
+            // This helps with routing between the api and the frontend
             .prefix("/api")
             .add_route(controllers::status::non_versioned_routes())
+            .add_route(controllers::openapi::non_versioned_routes())
             .prefix("/v1")
             .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
-            .add_route(controllers::openapi::routes())
             .add_route(controllers::status::routes())
             .into()
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
-        create_necessary_folders()?;
-
         Ok(AppContext {
             cache: Cache::new(cache::drivers::inmem::new()).into(),
             storage: Storage::single(storage::drivers::local::new_with_prefix(STORAGE_FOLDER)?).into(),

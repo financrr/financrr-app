@@ -6,6 +6,10 @@ WORK_DIR="$(pwd)"
 cd "$(dirname "$0")"
 cd ..
 
+cd_into_work_dir() {
+    cd "${WORK_DIR}"
+}
+
 # Check if cargo nextest exists
 if ! command -v cargo-nextest &> /dev/null; then
     echo "cargo-nextest could not be found. Please install it by following the instructions at: https://nexte.st/docs/installation/pre-built-binaries/"
@@ -19,4 +23,4 @@ else
     cargo nextest run "$@" --workspace --test-threads 1
 fi
 
-cd "${WORK_DIR}"
+trap cd_into_work_dir EXIT
