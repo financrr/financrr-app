@@ -44,8 +44,8 @@ impl Initializer for OpenApiInitializer {
         let doc = ApiDocs::openapi();
 
         let routes = AxumRouter::new()
-            .merge(SwaggerUi::new("/api/v1/openapi/swagger-ui").url("/api/v1/openapi/openapi.json", doc.clone()))
-            .merge(Scalar::with_url("/api/v1/openapi/scalar", doc));
+            .merge(SwaggerUi::new("/api/openapi/swagger-ui").url("/api/openapi/openapi.json", doc.clone()))
+            .merge(Scalar::with_url("/api/openapi/scalar", doc));
 
         Ok(router.merge(routes))
     }

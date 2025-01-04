@@ -6,6 +6,10 @@ WORK_DIR="$(pwd)"
 cd "$(dirname "$0")"
 cd ..
 
+cd_into_work_dir() {
+    cd "${WORK_DIR}"
+}
+
 echo "Creating .env file..."
 set +e
 cp -n .env.dist .env
@@ -15,4 +19,8 @@ echo "Creating logs directory..."
 mkdir -p logs
 chmod +rw logs
 
-cd "${WORK_DIR}"
+echo "Creating data directory..."
+mkdir -p data
+chmod +rw data
+
+trap cd_into_work_dir EXIT
