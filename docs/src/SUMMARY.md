@@ -12,3 +12,4 @@ Everything here is still work in progress and subject to change!
   - [Api Error](api/Error.md)
   - [Recurring Rule](api/RecurringRule.md)
 - [Database](db/README.md) 
+- [Developers](developers/README.md)

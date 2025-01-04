@@ -24,9 +24,8 @@ With its intuitive interface and powerful features, Financrr empowers users to t
 
 ## 🌐 Links
 
-- [Docs](https://jt-foss.github.io/financrr-app/docs/)
-- [Frontend stage](https://jt-foss.github.io/financrr-app/frontend-stage/)
-- [Backend stage](https://api-stage.financrr.app/openapi/swagger-ui/)
+- [Docs](https://financrr.github.io/financrr-app/docs/)
+- [Stage system](https://financrr.github.io/financrr-app/docs/developers/index.html#stage-system)
 
 ## 🔧 Contributing
 
