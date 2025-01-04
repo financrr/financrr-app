@@ -1249,6 +1249,8 @@ dependencies = [
  "thiserror 2.0.9",
  "tokio",
  "tokio-cron-scheduler 0.13.0",
+ "tower 0.5.2",
+ "tower-http",
  "tracing",
  "utoipa",
  "utoipa-scalar",

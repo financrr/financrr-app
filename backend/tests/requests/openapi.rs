@@ -13,7 +13,7 @@ macro_rules! configure_insta {
     };
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_get_openapi_json() {
     init_test!();
@@ -26,7 +26,7 @@ async fn can_get_openapi_json() {
     .await
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_get_openapi_yaml() {
     init_test!();

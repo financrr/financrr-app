@@ -1,4 +1,5 @@
 use crate::initializers::openapi::OpenApiInitializer;
+use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::instances;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
@@ -51,7 +52,11 @@ impl Hooks for App {
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![Box::new(OpenApiInitializer), Box::new(ServicesInitializer)])
+        Ok(vec![
+            Box::new(PathNormalizationInitializer),
+            Box::new(OpenApiInitializer),
+            Box::new(ServicesInitializer),
+        ])
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
