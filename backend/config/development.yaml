@@ -36,6 +36,9 @@ server:
   middlewares:
     compression:
       enable: true
+    timeout_request:
+      enable: {{get_env(name="TIMEOUT_ENABLED", default="true")}}
+      timeout: {{get_env(name="TIMEOUT_REQUEST", default="5000")}}
 
 # Worker Configuration
 workers:
