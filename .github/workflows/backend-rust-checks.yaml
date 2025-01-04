@@ -50,10 +50,3 @@ jobs:
           flags: --all
           args: --config-path=./backend/rustfmt.toml
           working-directory: ./backend
-
-  benchmarks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run benchmarks
-        run: cargo bench
