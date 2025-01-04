@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Financrr Documentation</title>
+        <title>Developers - Financrr Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../goals/index.html"><strong aria-hidden="true">1.</strong> Goals</a></li><li class="chapter-item expanded "><a href="../features/index.html"><strong aria-hidden="true">2.</strong> Features</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../features/frontend.html"><strong aria-hidden="true">2.1.</strong> Frontend</a></li><li class="chapter-item expanded "><a href="../features/backend.html"><strong aria-hidden="true">2.2.</strong> Backend</a></li></ol></li><li class="chapter-item expanded "><a href="../api/index.html"><strong aria-hidden="true">3.</strong> API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../api/Error.html"><strong aria-hidden="true">3.1.</strong> Api Error</a></li><li class="chapter-item expanded "><a href="../api/RecurringRule.html"><strong aria-hidden="true">3.2.</strong> Recurring Rule</a></li></ol></li><li class="chapter-item expanded "><a href="../db/index.html" class="active"><strong aria-hidden="true">4.</strong> Database</a></li><li class="chapter-item expanded "><a href="../developers/index.html"><strong aria-hidden="true">5.</strong> Developers</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../goals/index.html"><strong aria-hidden="true">1.</strong> Goals</a></li><li class="chapter-item expanded "><a href="../features/index.html"><strong aria-hidden="true">2.</strong> Features</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../features/frontend.html"><strong aria-hidden="true">2.1.</strong> Frontend</a></li><li class="chapter-item expanded "><a href="../features/backend.html"><strong aria-hidden="true">2.2.</strong> Backend</a></li></ol></li><li class="chapter-item expanded "><a href="../api/index.html"><strong aria-hidden="true">3.</strong> API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../api/Error.html"><strong aria-hidden="true">3.1.</strong> Api Error</a></li><li class="chapter-item expanded "><a href="../api/RecurringRule.html"><strong aria-hidden="true">3.2.</strong> Recurring Rule</a></li></ol></li><li class="chapter-item expanded "><a href="../db/index.html"><strong aria-hidden="true">4.</strong> Database</a></li><li class="chapter-item expanded "><a href="../developers/index.html" class="active"><strong aria-hidden="true">5.</strong> Developers</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -173,84 +173,24 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
-<h2 id="model"><a class="header" href="#model">Model</a></h2>
-<pre class="mermaid">
-erDiagram
-    User {
-        int id PK
-        string username UK
-        string email UK &quot;Nullable&quot;
-        string password UK &quot;Hashed and salted Password&quot;
-        timestamp created_at
-        bool is_admin
-    }
-
-    Currency {
-        int id PK
-        string name
-        string symbol
-        string iso_code
-        int decimal_places
-        User user FK &quot;Nullable&quot;
-    }
-    Currency }|--|| User: &quot;many to one&quot;
-
-    Account {
-        int id PK
-        string name
-        string description &quot;Nullable&quot;
-        string iban UK &quot;Nullable&quot;
-        int balance
-        Currency currency FK
-        timestamp created_at
-    }
-
-    UserAccount {
-        User user PK &quot;References User.id&quot;
-        Account account PK &quot;References Account.id&quot;
-    }
-    UserAccount ||--|{ User: &quot;one to many&quot;
-    UserAccount ||--|{ Account: &quot;one to many&quot;
-
-    Transaction {
-        int id PK
-        Account source FK &quot;Nullable&quot;
-        Account destination FK &quot;Nullable&quot;
-        int amount
-        Currency currency FK
-        string description &quot;Nullable&quot;
-        Budget budget FK &quot;Nullable&quot;
-        timestamp created_at
-        timestamp executed_at
-    }
-    Transaction ||--|| Account: &quot;one to one&quot;
-    Transaction ||--|| Budget: &quot;one to one&quot;
-
-    Budget {
-        int id PK
-        User user FK
-        int amount
-        string name
-        string description &quot;Nullable&quot;
-        timestamp created_at
-    }
-    Budget ||--|| User: &quot;one to one&quot; 
-</pre>
-<h2 id="sql"><a class="header" href="#sql">SQL</a></h2>
-<p>You can find the SQL script <a href="https://github.com/financrr/backend/blob/main/entity/src/utility/schema.sql">here</a>.</p>
+                        <h1 id="developers"><a class="header" href="#developers">Developers</a></h1>
+<p>This section is intended for contributors or developers.</p>
+<h2 id="stage-system"><a class="header" href="#stage-system">Stage system</a></h2>
+<p>We provide a stage system for testing purposes.</p>
+<ul>
+<li>Backend Stage: <a href="https://backend.stage.financrr.denux.dev/api/openapi/scalar">https://backend.stage.financrr.denux.dev/api/openapi/scalar</a></li>
+<li>Frontend Stage: Still in development</li>
+</ul>
+<p>Please note that this system is not intended for production use and may be reset at any time.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../api/RecurringRule.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../db/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../developers/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -258,13 +198,10 @@ erDiagram
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../api/RecurringRule.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../db/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../developers/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>
