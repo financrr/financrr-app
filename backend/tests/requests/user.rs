@@ -7,7 +7,7 @@ use financrr::models::users;
 use financrr::utils::context::AdditionalAppContextMethods;
 use financrr::views::user::UserResponse;
 use insta::{assert_debug_snapshot, assert_json_snapshot, with_settings};
-use loco_rs::testing;
+use loco_rs::testing::request::request;
 use serde_json::json;
 use serial_test::serial;
 
@@ -25,7 +25,7 @@ macro_rules! configure_insta {
 async fn can_register() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         assert!(ctx.is_mailer_enabled());
         const EMAIL: &str = "can.register@financrr.test";
         let payload = json!({
@@ -65,7 +65,7 @@ async fn can_register() {
 async fn can_verify() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         assert!(ctx.is_mailer_enabled());
         let user = generate_unactivated_user(&ctx).await;
         let token = user.email_verification_token.clone().unwrap();
@@ -94,7 +94,7 @@ async fn can_verify() {
 async fn can_reset_password() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         assert!(ctx.is_mailer_enabled());
         const EMAIL: &str = "can.reset.password@financrr.test";
         let user = create_user_with_email(&ctx, EMAIL).await;

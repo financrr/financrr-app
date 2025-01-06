@@ -123,11 +123,11 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::PARSE_VALUE_AS_TARGET_TYPE, ParseValueAsTargetType, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_PARSE_JSON, DbParseJson, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::MIGRATION_ERROR, MigrationError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_MESSAGE_ERROR, DbMessageError, argument=String);
 );
 
 // Auth errors
 app_errors!(
-    (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_JWT, InvalidJwt, argument=Option<JsonReference>);
     (StatusCode::BAD_REQUEST, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
     (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_BEARER_TOKEN, InvalidBearerToken);
 );
@@ -176,6 +176,8 @@ impl From<LocoError> for AppError {
             LocoError::Generators(err) => AppError::GeneratorError(err.to_string()),
             LocoError::VersionCheck(err) => AppError::VersionCheckError(err.to_string()),
             LocoError::Any(err) => AppError::GeneralInternalServerError(err.to_string()),
+            LocoError::RequestError(err) => AppError::GeneralInternalServerError(err.to_string()),
+            LocoError::SemVer(err) => AppError::VersionCheckError(err.to_string()),
         }
     }
 }
@@ -188,13 +190,14 @@ impl From<ModelError> for AppError {
             ModelError::ModelValidation { errors } => {
                 AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors))
             }
-            ModelError::Jwt(err) => AppError::InvalidJwt(JsonReference::new_with_default_none(&err.to_string())),
+            ModelError::Jwt(err) => AppError::GeneralInternalServerError(err.to_string()),
             ModelError::DbErr(err) => AppError::from(err),
             ModelError::Any(err) => {
                 error!("An general model error occurred: {:?}", err);
 
                 AppError::GeneralInternalServerError("An unknown model error occurred.".to_string())
             }
+            ModelError::Message(err) => AppError::DbMessageError(err.to_string()),
         }
     }
 }

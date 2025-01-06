@@ -73,13 +73,6 @@ mailer:
       user: {{get_env(name="SMTP_USER", default="")}}
       password: {{get_env(name="SMTP_PASSWORD", default="")}}
 
-# Initializers Configuration
-# initializers:
-#  oauth2:
-#    authorization_code: # Authorization code grant type
-#      - client_identifier: google # Identifier for the OAuth2 provider. Replace 'google' with your provider's name if different, must be unique within the oauth2 config.
-#        ... other fields
-
 # Database Configuration
 database:
   # Database connection URI
@@ -100,12 +93,3 @@ database:
   dangerously_truncate: false
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_recreate: false
-
-# Authentication Configuration
-auth:
-  # JWT authentication
-  jwt:
-    # Secret key for token generation and verification
-    secret: {{get_env(name="JWT_SECRET")}}
-    # Token expiration time in seconds
-    expiration: {{get_env(name="JWT_EXPIRATION")}} # 7 days

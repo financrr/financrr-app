@@ -1,6 +1,5 @@
 use financrr::app::App;
 use loco_rs::prelude::*;
-use loco_rs::testing;
 
 use crate::helpers::init::load_envs;
 use crate::helpers::session::generate_session;
@@ -15,7 +14,7 @@ use serial_test::serial;
 async fn test_run_session_used_worker() {
     load_envs();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
 
     const EMAIL: &str = "run.session.used.worker@financrr.test";
     let user = create_user_with_email(&boot.app_context, EMAIL).await;

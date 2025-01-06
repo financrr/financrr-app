@@ -9,7 +9,7 @@ use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::Service;
 use financrr::{app::App, models::users::Model};
 use insta::assert_debug_snapshot;
-use loco_rs::testing;
+use loco_rs::prelude::boot_test;
 use sea_orm::IntoActiveModel;
 use serial_test::serial;
 
@@ -27,7 +27,7 @@ macro_rules! configure_insta {
 async fn can_create_with_password() {
     init_test!();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
 
     let params = RegisterParams {
         email: "test@financrr.dev".to_string(),
@@ -50,7 +50,7 @@ async fn can_create_with_password() {
 async fn can_find_by_email() {
     init_test!();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
 
     let user = create_user_with_email(&boot.app_context, "user1@financrr.test").await;
 
@@ -70,7 +70,7 @@ async fn can_find_by_email() {
 async fn can_verification_token() {
     init_test!();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
     let user = generate_test_user(&boot.app_context).await;
     let user_id = user.id;
 
@@ -97,7 +97,7 @@ async fn can_verification_token() {
 async fn can_set_forgot_password_sent() {
     init_test!();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
     let user = generate_test_user(&boot.app_context).await;
     let user_id = user.id;
     let secret_generator = SecretGeneratorInner::get_arc(&boot.app_context).await.unwrap();
@@ -122,7 +122,7 @@ async fn can_set_forgot_password_sent() {
 async fn can_verified() {
     init_test!();
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
     let user = generate_unactivated_user(&boot.app_context).await;
     let user_id = user.id;
 
@@ -144,7 +144,7 @@ async fn can_reset_password() {
     const PASSWORD: &str = "TestPassword1234";
     const NEW_PASSWORD: &str = "NewPassword1234";
 
-    let boot = testing::boot_test::<App>().await.unwrap();
+    let boot = boot_test::<App>().await.unwrap();
     let user = create_user_with_password(&boot.app_context, PASSWORD).await;
     let user_id = user.id;
 

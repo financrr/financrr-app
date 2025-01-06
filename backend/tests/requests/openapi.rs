@@ -1,7 +1,7 @@
 use crate::helpers::init::init_test;
 use axum::http::StatusCode;
 use financrr::app::App;
-use loco_rs::testing;
+use loco_rs::prelude::request;
 use serial_test::serial;
 
 macro_rules! configure_insta {
@@ -18,7 +18,7 @@ macro_rules! configure_insta {
 async fn can_get_openapi_json() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, _| async move {
+    request::<App, _, _>(|request, _| async move {
         let response = request.get("/api/v1/openapi.json").await;
 
         assert_eq!(response.status_code(), StatusCode::OK)
@@ -31,7 +31,7 @@ async fn can_get_openapi_json() {
 async fn can_get_openapi_yaml() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, _| async move {
+    request::<App, _, _>(|request, _| async move {
         let response = request.get("/api/v1/openapi.yaml").await;
 
         assert_eq!(response.status_code(), StatusCode::OK)

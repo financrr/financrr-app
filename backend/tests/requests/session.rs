@@ -5,7 +5,7 @@ use axum::http::StatusCode;
 use financrr::app::App;
 use financrr::views::session::SessionResponse;
 use insta::{assert_json_snapshot, with_settings};
-use loco_rs::testing;
+use loco_rs::prelude::request;
 use rstest::rstest;
 use sea_orm::IntoActiveModel;
 use serde_json::json;
@@ -28,7 +28,7 @@ macro_rules! configure_insta {
 async fn can_login(#[case] test_name: &str, #[case] password: &str, #[case] expected_status_code: StatusCode) {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         const EMAIL: &str = "can.login@financrr.test";
         let _ = create_user_with_email(&ctx, EMAIL).await;
 
@@ -57,7 +57,7 @@ async fn can_login(#[case] test_name: &str, #[case] password: &str, #[case] expe
 async fn can_login_without_verify() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         const EMAIL: &str = "can.login.without.verify@financrr.test";
         let user = create_unverified_user_with_email(&ctx, EMAIL).await;
 
@@ -87,7 +87,7 @@ async fn can_login_without_verify() {
 async fn can_get_current_session() {
     init_test!();
 
-    testing::request::<App, _, _>(|request, ctx| async move {
+    request::<App, _, _>(|request, ctx| async move {
         const EMAIL: &str = "can.get.current.session@financrr.test";
         let user = create_user_with_email(&ctx, EMAIL).await;
 

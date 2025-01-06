@@ -8,6 +8,7 @@ use crate::workers::session_used::SessionUsedWorker;
 use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
+use loco_rs::config::Config;
 use loco_rs::storage::Storage;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
@@ -45,10 +46,18 @@ impl Hooks for App {
         env!("CARGO_CRATE_NAME")
     }
 
-    async fn boot(mode: StartMode, environment: &Environment) -> Result<BootResult> {
-        create_necessary_folders()?;
+    async fn boot(mode: StartMode, environment: &Environment, config: Config) -> Result<BootResult> {
+        create_app::<Self, Migrator>(mode, environment, config).await
+    }
 
-        create_app::<Self, Migrator>(mode, environment).await
+    async fn load_config(env: &Environment) -> Result<Config> {
+        if let Err(err) = create_necessary_folders() {
+            eprintln!("Could not create necessary directories. Error: {}", err);
+
+            return Err(err);
+        }
+
+        env.load()
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
@@ -86,6 +95,7 @@ impl Hooks for App {
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
         queue.register(SessionUsedWorker::build(ctx)).await?;
+
         Ok(())
     }
     fn register_tasks(tasks: &mut Tasks) {
@@ -97,11 +107,13 @@ impl Hooks for App {
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
         truncate_table(db, instances::Entity).await?;
+
         Ok(())
     }
 
     async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
         db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
+
         Ok(())
     }
 }
