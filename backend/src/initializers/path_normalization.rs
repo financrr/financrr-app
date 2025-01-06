@@ -15,6 +15,6 @@ impl Initializer for PathNormalizationInitializer {
     async fn after_routes(&self, router: AxumRouter, _ctx: &AppContext) -> loco_rs::Result<AxumRouter> {
         let router = NormalizePathLayer::trim_trailing_slash().layer(router);
 
-        Ok(AxumRouter::new().nest_service("", router))
+        Ok(AxumRouter::new().fallback_service(router))
     }
 }

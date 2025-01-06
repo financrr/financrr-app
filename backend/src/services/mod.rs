@@ -1,3 +1,4 @@
+use crate::services::custom_config::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
 use crate::services::status_service::StatusServiceInner;
@@ -9,6 +10,7 @@ use secret_generator::SecretGeneratorInner;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
+pub mod custom_config;
 pub mod instance_handler;
 pub mod secret_generator;
 pub mod snowflake_generator;
@@ -17,6 +19,7 @@ pub mod user_verification;
 
 pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
     Ok(router
+        .layer(CustomConfigInner::get_extension(ctx).await?)
         .layer(InstanceHandlerInner::get_extension(ctx).await?)
         .layer(SecretGeneratorInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)

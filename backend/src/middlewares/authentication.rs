@@ -1,5 +1,4 @@
 use crate::error::app_error::{AppError, AppResult};
-use async_trait::async_trait;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 use axum::http::HeaderMap;
@@ -15,11 +14,7 @@ pub trait Authenticate: Sized {
 
 pub struct Authenticated<T: Authenticate>(pub T);
 
-#[async_trait]
-impl<T> FromRequestParts<AppContext> for Authenticated<T>
-where
-    T: Authenticate,
-{
+impl<T: Authenticate> FromRequestParts<AppContext> for Authenticated<T> {
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &AppContext) -> AppResult<Self> {

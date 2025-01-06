@@ -95,11 +95,11 @@ error_codes!(
     (6013, MIGRATION_ERROR, "A migration error occurred.");
     (6014, RECORDS_NOT_INSERTED, "DB records could not get inserted.");
     (6015, RECORDS_NOT_UPDATED, "DB records could nto get updated.");
+    (6016, DB_MESSAGE_ERROR, "A error with the messaging system occurred.");
 );
 
 // Auth errors
 error_codes!(
-    (7001, INVALID_JWT, "An invalid JWT was provided.");
     (7002, AUTH_HEADER_MISSING, "Authorization header required but missing.");
     (7003, INVALID_BEARER_TOKEN, "Invalid bearer token.");
 );
