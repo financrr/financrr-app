@@ -71,7 +71,7 @@ serde_yaml = "0.9.34"
 tera = "1.20.0"
 
 # Utoipa / OpenApi
-utoipa = { version = "5.3.0", features = [
+utoipa = { version = "5.3.1", features = [
     "axum_extras",
     "openapi_extensions",
     "yaml",
