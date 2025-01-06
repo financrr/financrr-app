@@ -65,7 +65,7 @@ serde_json = "1.0.134"
 serde_yaml = "0.9.34"
 
 # Utoipa / OpenApi
-utoipa = { version = "5.3.0", features = [
+utoipa = { version = "5.3.1", features = [
     "axum_extras",
     "openapi_extensions",
     "yaml",
@@ -74,8 +74,8 @@ utoipa = { version = "5.3.0", features = [
     "non_strict_integers",
     "chrono"
 ] }
-utoipa-scalar = { version = "0.2.0", features = ["axum"] }
-utoipa-swagger-ui = { version = "8.1.0", features = ["axum", "debug-embed"] }
+utoipa-scalar = { version = "0.2.1", features = ["axum"] }
+utoipa-swagger-ui = { version = "8.1.1", features = ["axum", "debug-embed"] }
 utoipauto = "0.2.0"
 
 # Logging
