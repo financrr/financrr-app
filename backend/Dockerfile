@@ -13,7 +13,7 @@ COPY . .
 
 RUN cargo build --release
 
-FROM alpine:3.21.0
+FROM alpine:3.21.1
 
 ENV PORT=8080
 ENV UID=1000
