@@ -7,7 +7,7 @@ use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::session_used::SessionUsedWorker;
-use crate::{controllers, models::_entities::users, tasks};
+use crate::{controllers, models::_entities::users};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
 use loco_rs::config::Config;
@@ -18,7 +18,7 @@ use loco_rs::{
     boot::{create_app, BootResult, StartMode},
     cache,
     controller::AppRoutes,
-    db::{self, truncate_table},
+    db::truncate_table,
     environment::Environment,
     storage,
     task::Tasks,
@@ -107,8 +107,8 @@ impl Hooks for App {
 
         Ok(())
     }
-    fn register_tasks(tasks: &mut Tasks) {
-        tasks.register(tasks::seed::SeedData);
+
+    fn register_tasks(_tasks: &mut Tasks) {
         // tasks-inject (do not remove)
     }
 
@@ -120,9 +120,7 @@ impl Hooks for App {
         Ok(())
     }
 
-    async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
-        db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
-
+    async fn seed(_db: &DatabaseConnection, _path: &Path) -> Result<()> {
         Ok(())
     }
 }
