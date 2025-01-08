@@ -26,6 +26,7 @@ use loco_rs::{
 };
 use migration::Migrator;
 use mimalloc::MiMalloc;
+use sea_orm::DatabaseConnection;
 use std::path::Path;
 
 #[global_allocator]
@@ -111,8 +112,7 @@ impl Hooks for App {
         // tasks-inject (do not remove)
     }
 
-    async fn truncate(ctx: &AppContext) -> Result<()> {
-        let db = &ctx.db;
+    async fn truncate(db: &DatabaseConnection) -> Result<()> {
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
         truncate_table(db, instances::Entity).await?;
@@ -120,7 +120,7 @@ impl Hooks for App {
         Ok(())
     }
 
-    async fn seed(_ctx: &AppContext, _path: &Path) -> Result<()> {
+    async fn seed(_db: &DatabaseConnection, _path: &Path) -> Result<()> {
         Ok(())
     }
 }
