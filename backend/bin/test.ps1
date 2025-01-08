@@ -30,9 +30,9 @@ if (-Not (Get-Command "cargo-nextest" -ErrorAction SilentlyContinue))
 # Run cargo nextest with or without arguments
 if ($args.Count -eq 0)
 {
-    & cargo nextest run --workspace --test-threads 1
+    & cargo nextest run --workspace
 }
 else
 {
-    & cargo nextest run @args --workspace --test-threads 1
+    & cargo nextest run @args --workspace
 }
