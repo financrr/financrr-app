@@ -18,9 +18,9 @@ fi
 
 # Run cargo nextest with or without arguments
 if [ $# -eq 0 ]; then
-    cargo nextest run --workspace --test-threads 1
+    cargo nextest run --workspace
 else
-    cargo nextest run "$@" --workspace --test-threads 1
+    cargo nextest run "$@" --workspace
 fi
 
 trap cd_into_work_dir EXIT

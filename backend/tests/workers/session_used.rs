@@ -9,7 +9,7 @@ use financrr::workers::session_used::SessionUsedWorker;
 use financrr::workers::session_used::SessionUsedWorkerArgs;
 use serial_test::serial;
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn test_run_session_used_worker() {
     load_envs();
