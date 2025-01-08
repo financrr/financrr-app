@@ -22,7 +22,7 @@ macro_rules! configure_insta {
     };
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_create_with_password() {
     init_test!();
@@ -45,7 +45,7 @@ async fn can_create_with_password() {
     });
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_find_by_email() {
     init_test!();
@@ -65,7 +65,7 @@ async fn can_find_by_email() {
     });
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_verification_token() {
     init_test!();
@@ -92,7 +92,7 @@ async fn can_verification_token() {
     assert!(user.email_verification_token.is_some());
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_set_forgot_password_sent() {
     init_test!();
@@ -117,7 +117,7 @@ async fn can_set_forgot_password_sent() {
     assert!(user.reset_token.is_some());
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_verified() {
     init_test!();
@@ -137,7 +137,7 @@ async fn can_verified() {
     assert!(user.email_verified_at.is_some());
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn can_reset_password() {
     init_test!();
