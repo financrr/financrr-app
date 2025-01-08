@@ -47,7 +47,7 @@ impl Service for SnowflakeGeneratorInner {
 }
 
 impl SnowflakeGeneratorInner {
-    fn with_instance_handler(handler: InstanceHandler) -> Self {
+    pub fn with_instance_handler(handler: InstanceHandler) -> Self {
         Self {
             instance_handler: handler,
             last_timestamp: AtomicU64::new(0),

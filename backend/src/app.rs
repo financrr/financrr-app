@@ -2,6 +2,8 @@ use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::instances;
+use crate::services::custom_configs::base::CustomConfigInner;
+use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::session_used::SessionUsedWorker;
@@ -66,6 +68,13 @@ impl Hooks for App {
             Box::new(OpenApiInitializer),
             Box::new(ServicesInitializer),
         ])
+    }
+
+    async fn before_run(ctx: &AppContext) -> Result<()> {
+        // Load and parse CustomConfig
+        let _ = CustomConfigInner::get_arc(ctx).await?;
+
+        Ok(())
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
