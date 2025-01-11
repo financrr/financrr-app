@@ -8,7 +8,7 @@ use std::process::abort;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
-use tracing::{error, info};
+use tracing::error;
 
 pub const INSTANCE_HEARTBEAT_INTERVAL_SECONDS: u64 = 10;
 pub const INSTANCE_HEARTBEAT_TOLERANCE_SECONDS: u64 = INSTANCE_HEARTBEAT_INTERVAL_SECONDS * 3;
@@ -35,8 +35,6 @@ impl Service for InstanceHandlerInner {
             .start_heartbeat(ctx.db.clone())
             .await
             .map_err(|err| Error::Any(err.into()))?;
-
-        info!("Instance handler started with node id: {}", handler.get_instance_id());
 
         Ok(handler)
     }
