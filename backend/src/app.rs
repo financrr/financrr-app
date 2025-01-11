@@ -3,6 +3,7 @@ use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::instances;
 use crate::services::custom_configs::base::CustomConfigInner;
+use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
@@ -28,7 +29,6 @@ use migration::Migrator;
 use mimalloc::MiMalloc;
 use std::path::Path;
 use tracing::{debug, info};
-use crate::services::instance_handler::InstanceHandlerInner;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -74,7 +74,10 @@ impl Hooks for App {
     async fn before_run(ctx: &AppContext) -> Result<()> {
         // Load and parse CustomConfig
         let conf = CustomConfigInner::get_arc(ctx).await?;
-        debug!("Bank account linking configured: {}", conf.is_bank_account_linking_configured());
+        debug!(
+            "Bank account linking configured: {}",
+            conf.is_bank_account_linking_configured()
+        );
 
         let instance_handler = InstanceHandlerInner::get_arc(ctx).await?;
         info!("Instance started with id: {}", instance_handler.get_instance_id());
