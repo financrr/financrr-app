@@ -93,3 +93,11 @@ database:
   dangerously_truncate: false
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_recreate: false
+
+bank_account_linking:
+  enabled: true
+  implementations:
+    - !GoCardless
+      enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
+      secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
+      secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
