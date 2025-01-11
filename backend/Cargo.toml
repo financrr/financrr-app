@@ -28,8 +28,7 @@ non_ascii_idents = "forbid"
 ignored = ["include_dir"]
 
 [workspace.dependencies]
-#loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
-loco-rs = { git = "https://github.com/loco-rs/loco", branch = "master", features = ["with-db", "cache_inmem"] }
+loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
 financrr_macros = { path = "financrr_macros" }
 
 [dependencies]

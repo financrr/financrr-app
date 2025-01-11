@@ -27,6 +27,8 @@ use loco_rs::{
 use migration::Migrator;
 use mimalloc::MiMalloc;
 use std::path::Path;
+use tracing::{debug, info};
+use crate::services::instance_handler::InstanceHandlerInner;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -71,7 +73,11 @@ impl Hooks for App {
 
     async fn before_run(ctx: &AppContext) -> Result<()> {
         // Load and parse CustomConfig
-        let _ = CustomConfigInner::get_arc(ctx).await?;
+        let conf = CustomConfigInner::get_arc(ctx).await?;
+        debug!("Bank account linking configured: {}", conf.is_bank_account_linking_configured());
+
+        let instance_handler = InstanceHandlerInner::get_arc(ctx).await?;
+        info!("Instance started with id: {}", instance_handler.get_instance_id());
 
         Ok(())
     }
