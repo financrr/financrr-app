@@ -1,4 +1,5 @@
 pub mod app;
+pub mod bank_account_linking;
 pub mod constants;
 pub mod controllers;
 pub mod error;
