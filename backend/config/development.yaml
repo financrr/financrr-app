@@ -94,7 +94,7 @@ database:
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_recreate: false
 
-bank_account_linking:
+bank_data_linking:
   enabled: true
   implementations:
     - !GoCardless

@@ -76,7 +76,7 @@ impl Hooks for App {
         let conf = CustomConfigInner::get_arc(ctx).await?;
         debug!(
             "Bank account linking configured: {}",
-            conf.is_bank_account_linking_configured()
+            conf.is_bank_data_linking_configured()
         );
 
         let instance_handler = InstanceHandlerInner::get_arc(ctx).await?;

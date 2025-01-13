@@ -1,4 +1,4 @@
-use crate::services::custom_configs::bank_account_linking::BankAccountLinkingConfig;
+use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
 use crate::services::Service;
 use loco_rs::app::AppContext;
 use loco_rs::environment::Environment;
@@ -17,9 +17,9 @@ pub type CustomConfig = Arc<CustomConfigInner>;
 
 #[derive(Debug, Deserialize)]
 pub struct CustomConfigInner {
-    pub bank_account_linking: Option<BankAccountLinkingConfig>,
+    pub bank_data_linking: Option<BankDataLinkingConfig>,
     #[serde(skip)]
-    is_bank_account_configured: OnceLock<bool>,
+    is_bank_data_linking_configured: OnceLock<bool>,
 }
 
 impl Service for CustomConfigInner {
@@ -71,9 +71,9 @@ impl CustomConfigInner {
         })
     }
 
-    pub fn is_bank_account_linking_configured(&self) -> bool {
-        *self.is_bank_account_configured.get_or_init(move || {
-            let linking_config = match &self.bank_account_linking {
+    pub fn is_bank_data_linking_configured(&self) -> bool {
+        *self.is_bank_data_linking_configured.get_or_init(move || {
+            let linking_config = match &self.bank_data_linking {
                 Some(config) => config,
                 None => return false,
             };
@@ -96,7 +96,7 @@ impl CustomConfigInner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::custom_configs::bank_account_linking::{GoCardlessConfig, LinkingImplementation};
+    use crate::services::custom_configs::bank_data_linking::{GoCardlessConfig, LinkingImplementation};
     use loco_rs::environment::Environment;
     use std::fs::File;
     use std::io::Write;
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_deserialize_custom_config_inner() {
         let yaml = r#"
-    bank_account_linking:
+    bank_data_linking:
       enabled: true
       implementations:
         - !GoCardless
@@ -150,8 +150,8 @@ mod tests {
         assert!(result.is_ok());
 
         let config = result.unwrap();
-        assert!(config.bank_account_linking.is_some());
-        let bank_account_linking = config.bank_account_linking.unwrap();
+        assert!(config.bank_data_linking.is_some());
+        let bank_account_linking = config.bank_data_linking.unwrap();
         assert!(bank_account_linking.enabled);
         assert_eq!(bank_account_linking.implementations.len(), 1);
     }
@@ -160,7 +160,7 @@ mod tests {
     fn test_is_bank_account_linking_configured() {
         // Case 1: Bank account linking is configured and enabled
         let config_with_linking_enabled = CustomConfigInner {
-            bank_account_linking: Some(BankAccountLinkingConfig {
+            bank_data_linking: Some(BankDataLinkingConfig {
                 enabled: true,
                 implementations: vec![LinkingImplementation::GoCardless(GoCardlessConfig {
                     enabled: true,
@@ -168,13 +168,13 @@ mod tests {
                     secret_key: "test_key".to_string(),
                 })],
             }),
-            is_bank_account_configured: Default::default(),
+            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(config_with_linking_enabled.is_bank_account_linking_configured());
+        assert!(config_with_linking_enabled.is_bank_data_linking_configured());
 
         // Case 2: Bank account linking is configured but not enabled
         let config_with_linking_disabled = CustomConfigInner {
-            bank_account_linking: Some(BankAccountLinkingConfig {
+            bank_data_linking: Some(BankDataLinkingConfig {
                 enabled: false,
                 implementations: vec![LinkingImplementation::GoCardless(GoCardlessConfig {
                     enabled: true,
@@ -182,25 +182,25 @@ mod tests {
                     secret_key: "test_key".to_string(),
                 })],
             }),
-            is_bank_account_configured: Default::default(),
+            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(!config_with_linking_disabled.is_bank_account_linking_configured());
+        assert!(!config_with_linking_disabled.is_bank_data_linking_configured());
 
         // Case 3: Bank account linking is configured and enabled but no implementations
         let config_with_no_implementations = CustomConfigInner {
-            bank_account_linking: Some(BankAccountLinkingConfig {
+            bank_data_linking: Some(BankDataLinkingConfig {
                 enabled: true,
                 implementations: vec![],
             }),
-            is_bank_account_configured: Default::default(),
+            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(!config_with_no_implementations.is_bank_account_linking_configured());
+        assert!(!config_with_no_implementations.is_bank_data_linking_configured());
 
         // Case 4: Bank account linking is not configured
         let config_without_linking = CustomConfigInner {
-            bank_account_linking: None,
-            is_bank_account_configured: Default::default(),
+            bank_data_linking: None,
+            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(!config_without_linking.is_bank_account_linking_configured());
+        assert!(!config_without_linking.is_bank_data_linking_configured());
     }
 }
