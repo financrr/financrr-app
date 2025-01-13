@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
-pub struct BankAccountLinkingConfig {
+pub struct BankDataLinkingConfig {
     #[serde(default = "default_enabled")]
     pub enabled: bool,
     pub implementations: Vec<LinkingImplementation>,
