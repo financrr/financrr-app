@@ -18,8 +18,6 @@ pub type CustomConfig = Arc<CustomConfigInner>;
 #[derive(Debug, Deserialize)]
 pub struct CustomConfigInner {
     pub bank_data_linking: Option<BankDataLinkingConfig>,
-    #[serde(skip)]
-    is_bank_data_linking_configured: OnceLock<bool>,
 }
 
 impl Service for CustomConfigInner {
@@ -72,35 +70,31 @@ impl CustomConfigInner {
     }
 
     pub fn is_bank_data_linking_configured(&self) -> bool {
-        *self.is_bank_data_linking_configured.get_or_init(move || {
-            let linking_config = match &self.bank_data_linking {
-                Some(config) => config,
-                None => return false,
-            };
+        if let Some(conf) = &self.bank_data_linking {
+            return conf.enabled;
+        }
 
-            if !linking_config.enabled || linking_config.implementations.is_empty() {
-                return false;
-            }
-
-            for impls in &linking_config.implementations {
-                if impls.is_enabled() {
-                    return true;
-                }
-            }
-
-            false
-        })
+        false
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::custom_configs::bank_data_linking::{GoCardlessConfig, LinkingImplementation};
+    use insta::assert_debug_snapshot;
     use loco_rs::environment::Environment;
     use std::fs::File;
     use std::io::Write;
     use tempfile::tempdir;
+
+    macro_rules! configure_insta {
+        ($($expr:expr),*) => {
+            let mut settings = insta::Settings::clone_current();
+            settings.set_prepend_module_to_snapshot(false);
+            settings.set_snapshot_suffix("custom_config");
+            let _guard = settings.bind_to_scope();
+        };
+    }
 
     #[test]
     fn test_load_from_string() {
@@ -139,11 +133,8 @@ mod tests {
         let yaml = r#"
     bank_data_linking:
       enabled: true
-      implementations:
-        - !GoCardless
-          enabled: true
-          secret_id: test_id
-          secret_key: test_ke
+      secret_id: test_id
+      secret_key: test_ke
     "#;
 
         let result: Result<CustomConfigInner, _> = serde_yaml::from_str(yaml);
@@ -153,54 +144,76 @@ mod tests {
         assert!(config.bank_data_linking.is_some());
         let bank_account_linking = config.bank_data_linking.unwrap();
         assert!(bank_account_linking.enabled);
-        assert_eq!(bank_account_linking.implementations.len(), 1);
     }
 
     #[test]
     fn test_is_bank_account_linking_configured() {
-        // Case 1: Bank account linking is configured and enabled
-        let config_with_linking_enabled = CustomConfigInner {
+        let config = CustomConfigInner {
             bank_data_linking: Some(BankDataLinkingConfig {
                 enabled: true,
-                implementations: vec![LinkingImplementation::GoCardless(GoCardlessConfig {
-                    enabled: true,
-                    secret_id: "test_id".to_string(),
-                    secret_key: "test_key".to_string(),
-                })],
+                secret_id: "test".to_string(),
+                secret_key: "test".to_string(),
+                api_url: "https://test.test".to_string(),
             }),
-            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(config_with_linking_enabled.is_bank_data_linking_configured());
 
-        // Case 2: Bank account linking is configured but not enabled
-        let config_with_linking_disabled = CustomConfigInner {
+        assert!(config.is_bank_data_linking_configured());
+
+        let config = CustomConfigInner {
+            bank_data_linking: None,
+        };
+
+        assert!(!config.is_bank_data_linking_configured());
+
+        let config = CustomConfigInner {
             bank_data_linking: Some(BankDataLinkingConfig {
                 enabled: false,
-                implementations: vec![LinkingImplementation::GoCardless(GoCardlessConfig {
-                    enabled: true,
-                    secret_id: "test_id".to_string(),
-                    secret_key: "test_key".to_string(),
-                })],
+                secret_id: "test".to_string(),
+                secret_key: "test".to_string(),
+                api_url: "https://test.test".to_string(),
             }),
-            is_bank_data_linking_configured: Default::default(),
         };
-        assert!(!config_with_linking_disabled.is_bank_data_linking_configured());
 
-        // Case 3: Bank account linking is configured and enabled but no implementations
-        let config_with_no_implementations = CustomConfigInner {
-            bank_data_linking: Some(BankDataLinkingConfig {
-                enabled: true,
-                implementations: vec![],
-            }),
-            is_bank_data_linking_configured: Default::default(),
-        };
-        assert!(!config_with_no_implementations.is_bank_data_linking_configured());
+        assert!(!config.is_bank_data_linking_configured());
+    }
 
-        // Case 4: Bank account linking is not configured
-        let config_without_linking = CustomConfigInner {
-            bank_data_linking: None,
-            is_bank_data_linking_configured: Default::default(),
-        };
-        assert!(!config_without_linking.is_bank_data_linking_configured());
+    #[test]
+    fn test_default_values() {
+        configure_insta!();
+
+        let yaml = r#"
+    bank_data_linking:
+      enabled: true
+      secret_id: test_id
+      secret_key: test_key
+      api_url: https://test.test
+        "#;
+
+        assert_yaml_snapshot(yaml);
+
+        let yaml = r#"
+    bank_data_linking:
+      secret_id: test_id
+      secret_key: test_key
+      api_url: https://test.test
+        "#;
+
+        assert_yaml_snapshot(yaml);
+
+        let yaml = r#"
+    bank_data_linking:
+      secret_id: test_id
+      secret_key: test_key
+        "#;
+
+        assert_yaml_snapshot(yaml);
+    }
+
+    fn assert_yaml_snapshot(value: &str) {
+        let result: Result<CustomConfigInner, _> = serde_yaml::from_str(value);
+        assert!(result.is_ok());
+
+        let config = result.unwrap();
+        assert_debug_snapshot!(config);
     }
 }
