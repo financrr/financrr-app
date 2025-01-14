@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct BankDataLinkingConfig {
     #[serde(default = "default_enabled")]
     pub enabled: bool,

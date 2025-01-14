@@ -1,3 +1,4 @@
+use crate::services::bank_linking_data::BankLinkingDataInner;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
@@ -10,6 +11,7 @@ use secret_generator::SecretGeneratorInner;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
+mod bank_linking_data;
 pub mod custom_configs;
 pub mod instance_handler;
 pub mod secret_generator;
@@ -24,7 +26,8 @@ pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<
         .layer(SecretGeneratorInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)
         .layer(SnowflakeGeneratorInner::get_extension(ctx).await?)
-        .layer(StatusServiceInner::get_extension(ctx).await?))
+        .layer(StatusServiceInner::get_extension(ctx).await?)
+        .layer(BankLinkingDataInner::get_extension(ctx).await?))
 }
 
 pub trait Service
