@@ -1,0 +1,15 @@
+---
+source: src/services/custom_configs/base.rs
+assertion_line: 217
+expression: config
+---
+CustomConfigInner {
+    bank_data_linking: Some(
+        BankDataLinkingConfig {
+            enabled: true,
+            secret_id: "test_id",
+            secret_key: "test_key",
+            api_url: "https://bankaccountdata.gocardless.com/",
+        },
+    ),
+}
