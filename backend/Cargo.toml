@@ -120,6 +120,9 @@ reqwest = { version = "0.12.12", features = ["charset", "http2", "macos-system-c
 # Sync utils
 parking_lot = { version = "0.12.3", features = ["deadlock_detection"] }
 
+# String utils
+const_format = "0.2.34"
+
 # Code generation/custom macros
 financrr_macros.workspace = true
 
