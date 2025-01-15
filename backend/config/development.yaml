@@ -98,3 +98,9 @@ bank_data_linking:
   enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
   secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
   secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
+
+scheduler:
+  jobs:
+    sync_institutions:
+      run: "SyncInstitutions"
+      schedule: "every 24 hours"

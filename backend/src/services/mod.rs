@@ -11,7 +11,7 @@ use secret_generator::SecretGeneratorInner;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
 
-mod bank_linking_data;
+pub mod bank_linking_data;
 pub mod custom_configs;
 pub mod instance_handler;
 pub mod secret_generator;

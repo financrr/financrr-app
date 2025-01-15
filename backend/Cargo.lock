@@ -1334,6 +1334,7 @@ dependencies = [
  "include_dir",
  "insta",
  "loco-rs",
+ "log",
  "migration",
  "mimalloc",
  "parking_lot",

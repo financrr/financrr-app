@@ -109,7 +109,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let file_path = dir.path().join("test.yaml");
         let mut file = File::create(&file_path).unwrap();
-        writeln!(file, "").unwrap();
+        writeln!(file).unwrap();
 
         let result = CustomConfigInner::load_from_path(file_path.to_str().unwrap().to_string());
         assert!(result.is_ok());
@@ -120,7 +120,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let file_path = dir.path().join("development.yaml");
         let mut file = File::create(&file_path).unwrap();
-        writeln!(file, "").unwrap();
+        writeln!(file).unwrap();
 
         env::set_var(CONFIG_FOLDER_ENV, dir.path().to_str().unwrap());
         let env = Environment::Development;

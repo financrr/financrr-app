@@ -2,13 +2,16 @@ use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::instances;
+use crate::models::external_bank_institutions;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
+use crate::workers::clean_up_external_institutions::CleanUpExternalInstitutions;
 use crate::workers::session_used::SessionUsedWorker;
-use crate::{controllers, models::_entities::users};
+use crate::workers::sync_go_cardless_institutions::SyncGoCardlessInstitutionsWorker;
+use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
 use loco_rs::config::Config;
@@ -111,12 +114,15 @@ impl Hooks for App {
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
+        queue.register(CleanUpExternalInstitutions::build(ctx)).await?;
+        queue.register(SyncGoCardlessInstitutionsWorker::build(ctx)).await?;
         queue.register(SessionUsedWorker::build(ctx)).await?;
 
         Ok(())
     }
 
-    fn register_tasks(_tasks: &mut Tasks) {
+    fn register_tasks(tasks: &mut Tasks) {
+        tasks.register(tasks::sync_institutions::SyncInstitutions);
         // tasks-inject (do not remove)
     }
 
@@ -125,6 +131,7 @@ impl Hooks for App {
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
         truncate_table(db, instances::Entity).await?;
+        truncate_table(db, external_bank_institutions::Entity).await?;
 
         Ok(())
     }

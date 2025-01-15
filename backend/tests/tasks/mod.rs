@@ -1,1 +1,1 @@
-
+pub mod sync_go_cardless_institutions;
