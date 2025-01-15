@@ -102,5 +102,7 @@ bank_data_linking:
 scheduler:
   jobs:
     sync_institutions:
-      run: "SyncGoCardlessInstitutions"
+      run: "SyncInstitutions"
       schedule: "every 24 hours"
+  run_on_start:
+    - sync_institutions
