@@ -125,7 +125,6 @@ const_format = "0.2.34"
 
 # Code generation/custom macros
 financrr_macros.workspace = true
-log = "0.4.22"
 
 [[bin]]
 name = "financrr-cli"
