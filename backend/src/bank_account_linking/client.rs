@@ -14,9 +14,9 @@ pub const API_V2: &str = "/api/v2";
 
 #[derive(Debug)]
 pub struct GoCardlessClient {
-    config: BankDataLinkingConfig,
-    token: Arc<RwLock<JwtResponse>>,
-    client: Client,
+    pub(super) config: BankDataLinkingConfig,
+    pub(super) token: Arc<RwLock<JwtResponse>>,
+    pub(super) client: Client,
 }
 
 impl GoCardlessClient {
@@ -103,7 +103,11 @@ impl GoCardlessClient {
         Ok(response.json::<RefreshResponse>().await?)
     }
 
-    fn build_request_url(config: &BankDataLinkingConfig, endpoint: &str) -> String {
+    pub(super) fn get_token(&self) -> String {
+        self.token.read().access.clone()
+    }
+
+    pub(super) fn build_request_url(config: &BankDataLinkingConfig, endpoint: &str) -> String {
         let api_url = match config.api_url.strip_suffix("/") {
             None => config.api_url.to_owned(),
             Some(url) => url.to_owned(),
