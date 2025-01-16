@@ -80,7 +80,7 @@ utoipa = { version = "5.3.1", features = [
     "non_strict_integers",
     "chrono"
 ] }
-utoipa-scalar = { version = "0.2.1", features = ["axum"] }
+utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "debug-embed"] }
 utoipauto = "0.2.0"
 
