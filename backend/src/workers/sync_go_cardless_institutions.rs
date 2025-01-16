@@ -27,7 +27,7 @@ impl BackgroundWorker<WorkerArgs> for SyncGoCardlessInstitutionsWorker {
         info!("Syncing GoCardless institutions");
 
         let config = BankLinkingDataInner::get_arc(&self.ctx).await?;
-        if config.get_go_cardless_client().is_none() {
+        if !config.is_go_cardless_client_configured() {
             error!("Could not sync GoCardless institutions because the Client is not configured!");
 
             return Err(AppError::ConfigurationError("GoCardless client not configured.".to_string()).into());

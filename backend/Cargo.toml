@@ -140,6 +140,9 @@ serial_test = "3.2.0"
 rstest = "0.24.0"
 insta = { version = "1.42.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
+# Mocking
+mockito = "1.6.1"
+
 # Utils
 tempfile = "3.15.0"
 
