@@ -103,6 +103,10 @@ impl Entity {
         external_ids: Vec<String>,
         provider: String,
     ) -> AppResult<Vec<Model>> {
+        if external_ids.is_empty() {
+            return Self::find_all_by_provider(db, provider.as_str()).await;
+        }
+
         db.transaction::<_, _, AppError>(|txn| {
             Box::pin(async move {
                 // 1. Create new temporary table
@@ -164,5 +168,13 @@ impl Entity {
 
             AppError::GeneralInternalServerError(err.to_string())
         })
+    }
+
+    pub async fn find_all_by_provider(db: &impl ConnectionTrait, provider: &str) -> AppResult<Vec<Model>> {
+        Ok(Entity::find().filter(Column::Provider.eq(provider)).all(db).await?)
+    }
+
+    pub async fn count_all(db: &DatabaseConnection) -> AppResult<u64> {
+        Ok(Entity::find().count(db).await?)
     }
 }

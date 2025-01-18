@@ -7,7 +7,7 @@ use serial_test::serial;
 
 #[tokio::test(flavor = "multi_thread")]
 #[serial]
-async fn test_can_run_sync_go_cardless_institutions() {
+async fn test_can_run_sync_institutions() {
     load_envs();
 
     let boot = boot_test::<App>().await.unwrap();
