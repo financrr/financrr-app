@@ -102,6 +102,7 @@ impl Hooks for App {
             .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
             .add_route(controllers::status::routes())
+            .add_route(controllers::external_bank_institutions::routes())
             .into()
     }
 
