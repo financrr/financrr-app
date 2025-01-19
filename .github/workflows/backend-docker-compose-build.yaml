@@ -23,7 +23,7 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux/amd64
-          - os: ubuntu-latest
+          - os: ubuntu-latest-arm
             platform: linux/arm64
     steps:
       - uses: actions/checkout@v4
