@@ -129,7 +129,7 @@ app_errors!(
 
 // Auth errors
 app_errors!(
-    (StatusCode::BAD_REQUEST, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
+    (StatusCode::UNAUTHORIZED, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
     (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_BEARER_TOKEN, InvalidBearerToken);
 );
 
