@@ -94,7 +94,7 @@ chrono = { version = "0.4.39", features = ["clock"] }
 enumflags2 = { version = "0.7.11", features = ["std", "serde"] }
 
 # Validation
-validator = { version = "0.19.0" }
+validator = { version = "0.20.0" }
 
 # Env loading
 dotenvy = "0.15.7"
