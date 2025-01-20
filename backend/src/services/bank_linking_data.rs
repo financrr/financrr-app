@@ -40,4 +40,11 @@ impl BankLinkingDataInner {
     pub fn get_go_cardless_client(&self) -> Option<Arc<GoCardlessClient>> {
         self.go_cardless_client.clone()
     }
+
+    pub fn is_go_cardless_client_configured(&self) -> bool {
+        match self.get_go_cardless_client() {
+            None => false,
+            Some(client) => client.is_enabled(),
+        }
+    }
 }

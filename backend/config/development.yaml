@@ -104,5 +104,4 @@ scheduler:
     sync_institutions:
       run: "SyncInstitutions"
       schedule: "every 24 hours"
-  run_on_start:
-    - sync_institutions
+#      run_on_start: true

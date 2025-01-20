@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::models::_entities::users;
+use crate::types::snowflake::Snowflake;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginResponse {
@@ -24,7 +25,7 @@ impl LoginResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CurrentResponse {
-    pub pid: String,
+    pub id: Snowflake,
     pub name: String,
     pub email: String,
 }
@@ -33,7 +34,7 @@ impl CurrentResponse {
     #[must_use]
     pub fn new(user: &users::Model) -> Self {
         Self {
-            pid: user.id.to_string(),
+            id: Snowflake::new(user.id),
             name: user.name.clone(),
             email: user.email.clone(),
         }

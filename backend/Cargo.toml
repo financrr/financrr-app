@@ -90,7 +90,7 @@ tracing = "0.1.41"
 chrono = { version = "0.4.39", features = ["clock"] }
 
 # Flags
-enumflags2 = { version = "0.7.10", features = ["std", "serde"] }
+enumflags2 = { version = "0.7.11", features = ["std", "serde"] }
 
 # Validation
 validator = { version = "0.19.0" }
@@ -139,6 +139,9 @@ loco-rs = { workspace = true, features = ["testing"] }
 serial_test = "3.2.0"
 rstest = "0.24.0"
 insta = { version = "1.42.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
+
+# Mocking
+mockito = "1.6.1"
 
 # Utils
 tempfile = "3.15.0"

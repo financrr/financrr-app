@@ -64,11 +64,9 @@ database:
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_recreate: false
 
-# Authentication Configuration
-auth:
-  # JWT authentication
-  jwt:
-    # Secret key for token generation and verification
-    secret: QZTFYbbH0dw8fESXXvCC
-    # Token expiration time in seconds
-    expiration: 604800 # 7 days
+bank_data_linking:
+  enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
+  secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
+  secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
+  api_url: {{get_env(name="GO_CARDLESS_API_URL", default="https://financrr.test")}}
+

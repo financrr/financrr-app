@@ -125,4 +125,8 @@ impl GoCardlessClient {
 
         format!("{}{}", api_url, endpoint)
     }
+
+    pub fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
 }
