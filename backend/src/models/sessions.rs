@@ -10,7 +10,9 @@ use crate::workers::session_used::{SessionUsedWorker, SessionUsedWorkerArgs};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
 use sea_orm::entity::prelude::*;
+use sea_orm::ActiveValue;
 use sea_orm::ActiveValue::Set;
+use ActiveValue::Unchanged;
 
 pub type Sessions = Entity;
 
@@ -77,7 +79,21 @@ impl sessions::Model {
 
 impl sessions::ActiveModel {
     pub async fn update_last_accessed_at(mut self, db: &DatabaseConnection) -> AppResult<sessions::Model> {
-        self.last_accessed_at = Set(Some(chrono::Utc::now().into()));
+        let now = chrono::Utc::now();
+
+        match self.last_accessed_at {
+            Set(Some(last_accessed)) => {
+                if last_accessed > now {
+                    self.last_accessed_at = Set(Some(now.into()));
+                }
+            }
+            Unchanged(Some(last_accessed)) => {
+                if last_accessed > now {
+                    self.last_accessed_at = Set(Some(now.into()));
+                }
+            }
+            _ => self.last_accessed_at = Set(Some(now.into())),
+        }
 
         Ok(self.update(db).await?)
     }

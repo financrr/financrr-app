@@ -26,7 +26,10 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
     where
         C: ConnectionTrait,
     {
-        self.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+        if !self.updated_at.is_set() {
+            self.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+        }
+
         if insert {
             self.created_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
         }

@@ -40,6 +40,7 @@ error_codes!(
     (1010, CACHE_ERROR, "A general cache error occurred.");
     (1011, VERSION_CHECK_ERROR, "Could not complete version check");
     (1012, SMTP_ERROR, "A general smtp error occurred.");
+    (1013, CONFIGURATION_ERROR, "An error in the server configuration.");
 );
 
 // Validation/User errors

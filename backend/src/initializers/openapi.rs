@@ -17,7 +17,8 @@ use utoipauto::utoipauto;
         (name = "OpenAPI", description = "Endpoints for OpenAPI documentation."),
         (name = "Metrics", description = "Endpoints for prometheus metrics."),
         (name = "Session", description = "Endpoints for session management."),
-        (name = "User", description = "Endpoints for user management.")
+        (name = "User", description = "Endpoints for user management."),
+        (name = "External Bank Institutions", description = "Endpoints for external bank institutions."),
     ),
     modifiers(&ApiKeyModifier)
 )]

@@ -12,6 +12,7 @@ pub mod contracts;
 pub mod currencies;
 pub mod external_bank_account_ibans;
 pub mod external_bank_accounts;
+pub mod external_bank_institutions;
 pub mod file_attachments;
 pub mod inactive_contracts;
 pub mod instances;

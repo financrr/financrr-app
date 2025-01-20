@@ -65,6 +65,7 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CACHE_ERROR, CacheError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::VERSION_CHECK_ERROR, VersionCheckError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::SMTP_ERROR, SmtpError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CONFIGURATION_ERROR, ConfigurationError, argument=String);
 );
 
 // Validation errors
@@ -128,7 +129,7 @@ app_errors!(
 
 // Auth errors
 app_errors!(
-    (StatusCode::BAD_REQUEST, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
+    (StatusCode::UNAUTHORIZED, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
     (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_BEARER_TOKEN, InvalidBearerToken);
 );
 
@@ -285,6 +286,12 @@ impl From<YamlError> for AppError {
 impl From<InvalidHeaderValue> for AppError {
     fn from(value: InvalidHeaderValue) -> Self {
         AppError::InvalidHeaderValue(value.to_string())
+    }
+}
+
+impl From<reqwest::Error> for AppError {
+    fn from(value: reqwest::Error) -> Self {
+        AppError::GeneralInternalServerError(value.to_string())
     }
 }
 

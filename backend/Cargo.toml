@@ -4,7 +4,7 @@ members = [
     "financrr_macros",
     "financrr_macros_impl"
 ]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
@@ -28,8 +28,7 @@ non_ascii_idents = "forbid"
 ignored = ["include_dir"]
 
 [workspace.dependencies]
-#loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
-loco-rs = { git = "https://github.com/loco-rs/loco", branch = "master", features = ["with-db", "cache_inmem"] }
+loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
 financrr_macros = { path = "financrr_macros" }
 
 [dependencies]
@@ -115,6 +114,15 @@ rand = "0.8.5"
 sha2 = "0.10.8"
 base64 = "0.22.1"
 
+# HTTP client
+reqwest = { version = "0.12.12", features = ["charset", "http2", "macos-system-configuration", "rustls-tls", "json"], default-features = false }
+
+# Sync utils
+parking_lot = { version = "0.12.3", features = ["deadlock_detection"] }
+
+# String utils
+const_format = "0.2.34"
+
 # Code generation/custom macros
 financrr_macros.workspace = true
 
@@ -131,6 +139,9 @@ loco-rs = { workspace = true, features = ["testing"] }
 serial_test = "3.2.0"
 rstest = "0.24.0"
 insta = { version = "1.42.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
+
+# Mocking
+mockito = "1.6.1"
 
 # Utils
 tempfile = "3.15.0"
