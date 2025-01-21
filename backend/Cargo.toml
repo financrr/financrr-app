@@ -37,7 +37,7 @@ loco-rs = { workspace = true }
 async-trait = "0.1.85"
 
 # Axum
-axum = { version = "0.8.1", features = ["json", "tokio"] }
+axum = { version = "0.8.2", features = ["json", "tokio"] }
 
 # Tower
 tower = "0.5.2"
