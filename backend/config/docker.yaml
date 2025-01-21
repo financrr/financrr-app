@@ -99,9 +99,16 @@ bank_data_linking:
   secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
   secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
 
+opensearch:
+  is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="false")}}
+  host: {{get_env(name="OPENSEARCH_HOST", default="127.0.0.1")}}
+  port: {{get_env(name="OPENSEARCH_PORT", default="9200")}}
+  username: {{get_env(name="OPENSEARCH_USER")}}
+  password: {{get_env(name="OPENSEARCH_PASSWORD")}}
+
 scheduler:
   jobs:
     sync_institutions:
       run: "SyncInstitutions"
       schedule: "every 24 hours"
-#      run_on_start: true
+      run_on_start: true

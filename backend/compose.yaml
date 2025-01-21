@@ -17,6 +17,27 @@ services:
       timeout: 3s
       retries: 3
 
+  opensearch:
+    image: opensearchproject/opensearch:2
+    init: true
+    environment:
+      TZ: ${TZ}
+      discovery.type: single-node
+      bootstrap.memory_lock: true # Disable JVM heap memory swapping
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx8192m" # Set min and max JVM heap sizes to at least 50% of system RAM
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_PASSWORD}
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9600:9600"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -u admin:${OPENSEARCH_PASSWORD} --silent --fail https://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   mailpit:
     image: axllent/mailpit:latest
     init: true
@@ -33,4 +54,5 @@ services:
 
 volumes:
   postgres-data: ~
+  opensearch-data: ~
   mailpit-data: ~

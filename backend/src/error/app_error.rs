@@ -16,7 +16,7 @@ pub type AppResult<T> = Result<T, AppError>;
 
 /// AppError is a custom error type that we use to return errors in the API with a specific structure.
 #[derive(Debug, Clone, Serialize, ToSchema, Display, Error)]
-#[display("{}", serde_json::to_string(self).expect("Failed to serialize AppError"))]
+#[display("{:#?}", self)]
 pub struct AppError {
     #[serde(skip)]
     pub status_code: StatusCode,
@@ -179,6 +179,12 @@ impl From<LocoError> for AppError {
             LocoError::Any(err) => AppError::GeneralInternalServerError(err.to_string()),
             LocoError::RequestError(err) => AppError::GeneralInternalServerError(err.to_string()),
             LocoError::SemVer(err) => AppError::VersionCheckError(err.to_string()),
+            LocoError::ValidationError(err) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&err))
+            }
+            LocoError::AxumFormRejection(err) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&err.to_string()))
+            }
         }
     }
 }
@@ -304,6 +310,18 @@ impl IntoResponse for AppError {
 impl From<AppError> for LocoError {
     fn from(value: AppError) -> Self {
         LocoError::Any(value.into())
+    }
+}
+
+impl From<url::ParseError> for AppError {
+    fn from(value: url::ParseError) -> Self {
+        AppError::ConfigurationError(value.to_string())
+    }
+}
+
+impl From<opensearch::http::transport::BuildError> for AppError {
+    fn from(value: opensearch::http::transport::BuildError) -> Self {
+        AppError::ConfigurationError(value.to_string())
     }
 }
 

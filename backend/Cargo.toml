@@ -28,7 +28,7 @@ non_ascii_idents = "forbid"
 ignored = ["include_dir"]
 
 [workspace.dependencies]
-loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
+loco-rs = { version = "0.14.1", features = ["with-db", "cache_inmem"] }
 financrr_macros = { path = "financrr_macros" }
 
 [dependencies]
@@ -51,6 +51,10 @@ sea-orm = { version = "1.1.4", features = [
     "macros",
 ] }
 migration = { path = "migration" }
+
+# Opensearch
+opensearch = { version = "2.3.0", features = ["rustls-tls"], default-features = false }
+url = "2.5.4"
 
 # Async runtime and scheduler
 tokio = { version = "1.43.0", default-features = false, features = [

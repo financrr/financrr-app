@@ -1,4 +1,5 @@
 use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
+use crate::services::custom_configs::opensearch::OpensearchConfig;
 use crate::services::Service;
 use loco_rs::app::AppContext;
 use loco_rs::environment::Environment;
@@ -15,9 +16,10 @@ pub const DEFAULT_CONFIG_FOLDER: &str = "config";
 
 pub type CustomConfig = Arc<CustomConfigInner>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct CustomConfigInner {
     pub bank_data_linking: Option<BankDataLinkingConfig>,
+    pub opensearch: OpensearchConfig,
 }
 
 impl Service for CustomConfigInner {

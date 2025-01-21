@@ -133,6 +133,7 @@ impl StatusServiceInner {
     }
 
     pub async fn get_complete_health_response(&self) -> HealthResponse {
+        // TODO add opensearch and task/command
         let database_status = self.get_db_health().await;
         let cache_status = self.get_cache_health().await;
         let storage_status = self.get_storage_health().await;
