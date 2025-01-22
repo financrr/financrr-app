@@ -9,8 +9,10 @@ use axum::{Extension, Router as AxumRouter};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
 use secret_generator::SecretGeneratorInner;
+use std::any::type_name;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
+use tracing::debug;
 
 pub mod bank_linking_data;
 pub mod custom_configs;
@@ -61,6 +63,7 @@ where
     }
 
     fn get_extension(ctx: &AppContext) -> impl Future<Output = Result<Extension<Arc<Self>>>> {
+        debug!("Adding extension for {}", type_name::<Self>());
         async { Ok(Extension(Self::get_arc(ctx).await?)) }
     }
 }

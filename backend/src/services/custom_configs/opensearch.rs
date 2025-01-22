@@ -9,6 +9,8 @@ pub struct OpensearchConfig {
     pub password: String,
     #[serde(default = "default_disable_proxy")]
     pub disable_proxy: bool,
+    #[serde(default = "disable_cert_validation")]
+    pub disable_cert_validation: bool,
 }
 
 impl OpensearchConfig {
@@ -21,4 +23,8 @@ impl OpensearchConfig {
 
 pub fn default_disable_proxy() -> bool {
     true
+}
+
+pub fn disable_cert_validation() -> bool {
+    false
 }

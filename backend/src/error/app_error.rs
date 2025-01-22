@@ -125,6 +125,7 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_PARSE_JSON, DbParseJson, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::MIGRATION_ERROR, MigrationError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_MESSAGE_ERROR, DbMessageError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::OPENSEARCH_ERROR, OpensearchError, argument=String);
 );
 
 // Auth errors
@@ -322,6 +323,12 @@ impl From<url::ParseError> for AppError {
 impl From<opensearch::http::transport::BuildError> for AppError {
     fn from(value: opensearch::http::transport::BuildError) -> Self {
         AppError::ConfigurationError(value.to_string())
+    }
+}
+
+impl From<opensearch::Error> for AppError {
+    fn from(value: opensearch::Error) -> Self {
+        AppError::OpensearchError(format!("{:#?}", value))
     }
 }
 

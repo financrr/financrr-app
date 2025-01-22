@@ -1,9 +1,11 @@
+use crate::services::opensearch::client::{OpensearchClient, OpensearchClientInner};
 use crate::services::Service;
 use crate::views::status::{HealthReport, HealthResponse, HealthStatus, StatusComponents};
 use bytes::Bytes;
 use loco_rs::app::AppContext;
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, OnceLock};
+use tokio::join;
 
 pub type StatusService = Arc<StatusServiceInner>;
 
@@ -16,11 +18,15 @@ pub static TEST_STORAGE_CONTENT_BYTES: LazyLock<Bytes> = LazyLock::new(|| Bytes:
 
 pub struct StatusServiceInner {
     ctx: AppContext,
+    opensearch_client: OpensearchClient,
 }
 
 impl Service for StatusServiceInner {
     async fn new(ctx: &AppContext) -> loco_rs::Result<Self> {
-        Ok(Self { ctx: ctx.clone() })
+        Ok(Self {
+            ctx: ctx.clone(),
+            opensearch_client: OpensearchClientInner::get_arc(ctx).await?,
+        })
     }
 
     fn get_static_once() -> &'static OnceLock<Arc<Self>> {
@@ -132,14 +138,38 @@ impl StatusServiceInner {
         }
     }
 
+    pub async fn get_opensearch_health(&self) -> HealthReport {
+        let mut failed_components = vec![];
+
+        if !self.opensearch_client.is_healthy().await {
+            failed_components.push(StatusComponents::Opensearch);
+        }
+
+        let health_status = HealthStatus::from(failed_components.is_empty());
+
+        HealthReport {
+            status: health_status,
+            failed_components: if failed_components.is_empty() {
+                None
+            } else {
+                Some(failed_components)
+            },
+        }
+    }
+
     pub async fn get_complete_health_response(&self) -> HealthResponse {
-        // TODO add opensearch and task/command
-        let database_status = self.get_db_health().await;
-        let cache_status = self.get_cache_health().await;
-        let storage_status = self.get_storage_health().await;
+        // TODO add task/command
+        let (database_status, cache_status, storage_status, opensearch_status) = join!(
+            self.get_db_health(),
+            self.get_cache_health(),
+            self.get_storage_health(),
+            self.get_opensearch_health()
+        );
+
         let status = if matches!(database_status.status, HealthStatus::Healthy)
             && matches!(cache_status.status, HealthStatus::Healthy)
             && matches!(storage_status.status, HealthStatus::Healthy)
+            && matches!(opensearch_status.status, HealthStatus::Healthy)
         {
             HealthStatus::Healthy
         } else {
@@ -151,6 +181,7 @@ impl StatusServiceInner {
             database_status,
             cache_status,
             storage_status,
+            opensearch_status,
         }
     }
 }

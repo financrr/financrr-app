@@ -63,6 +63,7 @@ fn healthy_example() -> Value {
         database_status: health_report.clone(),
         cache_status: health_report.clone(),
         storage_status: health_report.clone(),
+        opensearch_status: health_report
     })
 }
 
@@ -83,6 +84,10 @@ fn unhealthy_example() -> Value {
         storage_status: HealthReport {
             status: HealthStatus::Unhealthy,
             failed_components: Some(vec![StatusComponents::StorageInsertion]),
+        },
+        opensearch_status: HealthReport {
+            status: HealthStatus::Unhealthy,
+            failed_components: Some(vec![StatusComponents::Opensearch]),
         },
     })
 }

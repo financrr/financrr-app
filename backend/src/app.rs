@@ -124,6 +124,7 @@ impl Hooks for App {
 
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::sync_institutions::SyncInstitutions);
+        tasks.register(tasks::check_health::CheckHealth);
         // tasks-inject (do not remove)
     }
 
