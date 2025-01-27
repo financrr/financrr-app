@@ -38,6 +38,17 @@ services:
       retries: 5
       start_period: 5s
 
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2
+    init: true
+    ports:
+      - "127.0.0.1:5601:5601" # Map host port 5601 to container port 5601
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
   mailpit:
     image: axllent/mailpit:latest
     init: true

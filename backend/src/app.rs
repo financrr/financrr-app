@@ -1,4 +1,6 @@
+use crate::initializers::context::ContextInitializer;
 use crate::initializers::openapi::OpenApiInitializer;
+use crate::initializers::opensearch::OpensearchInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::instances;
@@ -8,7 +10,7 @@ use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
-use crate::workers::clean_up_external_institutions::CleanUpExternalInstitutions;
+use crate::workers::external_bank_institutions as external_bank_institutions_workers;
 use crate::workers::session_used::SessionUsedWorker;
 use crate::workers::sync_go_cardless_institutions::SyncGoCardlessInstitutionsWorker;
 use crate::{controllers, models::_entities::users, tasks};
@@ -68,9 +70,11 @@ impl Hooks for App {
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
         Ok(vec![
+            Box::new(ContextInitializer),
             Box::new(PathNormalizationInitializer),
             Box::new(OpenApiInitializer),
             Box::new(ServicesInitializer),
+            Box::new(OpensearchInitializer),
         ])
     }
 
@@ -115,7 +119,9 @@ impl Hooks for App {
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(CleanUpExternalInstitutions::build(ctx)).await?;
+        // External Bank institutions
+        external_bank_institutions_workers::connect_worker(ctx, queue).await?;
+
         queue.register(SyncGoCardlessInstitutionsWorker::build(ctx)).await?;
         queue.register(SessionUsedWorker::build(ctx)).await?;
 

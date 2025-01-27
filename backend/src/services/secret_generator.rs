@@ -4,7 +4,7 @@ use base64::prelude::BASE64_URL_SAFE;
 use base64::Engine;
 use loco_rs::app::AppContext;
 use rand::rngs::OsRng;
-use rand::RngCore;
+use rand::TryRngCore;
 use sha2::{Digest, Sha256};
 use std::sync::{Arc, OnceLock};
 
@@ -38,7 +38,9 @@ impl SecretGeneratorInner {
 
     pub fn generate_token_with_length(&self, length: usize) -> String {
         let mut random_bytes = [0u8; 32];
-        OsRng.fill_bytes(&mut random_bytes);
+        OsRng
+            .try_fill_bytes(&mut random_bytes)
+            .expect("Could not generate random bytes.");
 
         let mut hasher = Sha256::new();
         hasher.update(self.instance_handler.get_instance_id().to_string().as_bytes());

@@ -2,9 +2,20 @@ pub use super::_entities::external_bank_institutions::{ActiveModel, Entity, Mode
 use crate::bank_account_linking::constants::GO_CARDLESS_PROVIDER;
 use crate::bank_account_linking::institutions::Institution;
 use crate::error::app_error::{AppError, AppResult};
+use crate::initializers::context::try_get_global_app_context;
 use crate::models::_entities::external_bank_institutions::Column;
 use crate::services::snowflake_generator::SnowflakeGenerator;
+use crate::workers::external_bank_institutions::crud::deleted::{
+    ExternalBankInstitutionDeleted, ExternalBankInstitutionDeletedArgs,
+};
+use crate::workers::external_bank_institutions::crud::insert::{
+    ExternalBankInstitutionInserted, ExternalBankInstitutionInsertedArgs,
+};
+use crate::workers::external_bank_institutions::crud::update::{
+    ExternalBankInstitutionUpdated, ExternalBankInstitutionUpdatedArgs,
+};
 use chrono::Utc;
+use loco_rs::prelude::{AppContext, BackgroundWorker};
 use sea_orm::entity::prelude::*;
 use sea_orm::{DbBackend, Set, Statement, TransactionTrait, Unchanged};
 use tracing::error;
@@ -27,6 +38,65 @@ impl ActiveModelBehavior for ActiveModel {
 
         Ok(self)
     }
+
+    async fn after_save<C>(
+        model: <Self::Entity as EntityTrait>::Model,
+        _: &C,
+        insert: bool,
+    ) -> Result<<Self::Entity as EntityTrait>::Model, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(ctx) = try_get_global_app_context() {
+            match insert {
+                true => send_inserted_event(ctx, model.id).await,
+                false => send_updated_event(ctx, model.id).await,
+            }
+        }
+
+        Ok(model)
+    }
+
+    async fn after_delete<C>(self, _db: &C) -> Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(ctx) = try_get_global_app_context() {
+            send_deleted_event(ctx, self.id.clone().unwrap()).await
+        }
+
+        Ok(self)
+    }
+}
+
+async fn send_updated_event(ctx: &AppContext, id: i64) {
+    if let Err(err) = try_send_updated_event(ctx, id).await {
+        error!("Error occurred while trying to send updated event. Error: {}", err)
+    }
+}
+
+async fn try_send_updated_event(ctx: &AppContext, id: i64) -> AppResult<()> {
+    Ok(ExternalBankInstitutionUpdated::perform_later(ctx, ExternalBankInstitutionUpdatedArgs { id }).await?)
+}
+
+async fn send_inserted_event(ctx: &AppContext, id: i64) {
+    if let Err(err) = try_send_inserted_event(ctx, id).await {
+        error!("Error occurred while trying to send inserted event. Error: {}", err)
+    }
+}
+
+async fn try_send_inserted_event(ctx: &AppContext, id: i64) -> AppResult<()> {
+    Ok(ExternalBankInstitutionInserted::perform_later(ctx, ExternalBankInstitutionInsertedArgs { id }).await?)
+}
+
+async fn send_deleted_event(ctx: &AppContext, id: i64) {
+    if let Err(err) = try_send_deleted_event(ctx, id).await {
+        error!("Error occurred while trying to send deleted event. Error: {}", err)
+    }
+}
+
+async fn try_send_deleted_event(ctx: &AppContext, id: i64) -> AppResult<()> {
+    Ok(ExternalBankInstitutionDeleted::perform_later(ctx, ExternalBankInstitutionDeletedArgs { id }).await?)
 }
 
 // implement your read-oriented logic here

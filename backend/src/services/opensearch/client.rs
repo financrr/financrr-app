@@ -1,4 +1,4 @@
-use crate::error::app_error::AppResult;
+use crate::error::app_error::{AppError, AppResult};
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
 use crate::services::Service;
@@ -6,18 +6,29 @@ use loco_rs::app::AppContext;
 use opensearch::auth::Credentials;
 use opensearch::cert::CertificateValidation;
 use opensearch::cluster::ClusterHealthParts;
+use opensearch::http::request::JsonBody;
 use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
-use opensearch::OpenSearch;
-use serde_json::Value;
+use opensearch::indices::{IndicesCreateParts, IndicesExistsParts};
+use opensearch::{BulkParts, DeleteParts, IndexParts, OpenSearch};
+use serde::Serialize;
+use serde_json::{json, Value};
 use std::sync::{Arc, OnceLock};
 use tracing::warn;
 
 pub type OpensearchClient = Arc<OpensearchClientInner>;
 
+pub struct OpensearchIndex;
+
+impl OpensearchIndex {
+    pub const INDICES: [&'static str; 1] = [Self::EXTERNAL_BANK_INSTITUTIONS];
+
+    pub const EXTERNAL_BANK_INSTITUTIONS: &'static str = "external_bank_institutions";
+}
+
 #[derive(Debug)]
 pub struct OpensearchClientInner {
-    opensearch: OpenSearch,
+    opensearch: Arc<OpenSearch>,
 }
 
 impl Service for OpensearchClientInner {
@@ -27,7 +38,7 @@ impl Service for OpensearchClientInner {
         let internal_client = Self::get_client(&custom_config.opensearch).await?;
 
         Ok(Self {
-            opensearch: internal_client,
+            opensearch: Arc::new(internal_client),
         })
     }
 
@@ -91,5 +102,68 @@ impl OpensearchClientInner {
                 Ok(false)
             }
         }
+    }
+
+    pub fn get_inner_client(&self) -> Arc<OpenSearch> {
+        self.opensearch.clone()
+    }
+
+    pub async fn create_missing_indices(&self) -> AppResult<()> {
+        for index in OpensearchIndex::INDICES {
+            let exists = self
+                .opensearch
+                .indices()
+                .exists(IndicesExistsParts::Index(&[index]))
+                .send()
+                .await?;
+
+            if !exists.status_code().is_success() {
+                self.opensearch
+                    .indices()
+                    .create(IndicesCreateParts::Index(index))
+                    .send()
+                    .await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn bulk_insert<T: Serialize>(&self, index: &str, body: Vec<JsonBody<T>>) -> AppResult<()> {
+        let res = self.opensearch.bulk(BulkParts::Index(index)).body(body).send().await?;
+        if !res.status_code().is_success() {
+            return Err(AppError::OpensearchError(res.text().await?));
+        }
+
+        Ok(())
+    }
+
+    pub async fn index<T: Serialize>(&self, id: i64, index: &str, body: &T) -> AppResult<()> {
+        let res = self
+            .opensearch
+            .index(IndexParts::IndexId(index, id.to_string().as_str()))
+            .body(json!({
+                "doc": body
+            }))
+            .send()
+            .await?;
+        if !res.status_code().is_success() {
+            return Err(AppError::OpensearchError(res.text().await?));
+        }
+
+        Ok(())
+    }
+
+    pub async fn delete(&self, index: &str, id: i64) -> AppResult<()> {
+        let res = self
+            .opensearch
+            .delete(DeleteParts::IndexId(index, id.to_string().as_str()))
+            .send()
+            .await?;
+        if !res.status_code().is_success() {
+            return Err(AppError::OpensearchError(res.text().await?));
+        }
+
+        Ok(())
     }
 }

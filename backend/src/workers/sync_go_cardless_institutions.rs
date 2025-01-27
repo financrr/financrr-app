@@ -1,11 +1,8 @@
-use crate::bank_account_linking::constants::GO_CARDLESS_PROVIDER;
 use crate::error::app_error::AppError;
 use crate::models::external_bank_institutions;
 use crate::services::bank_linking_data::BankLinkingDataInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
 use crate::services::Service;
-use crate::workers::clean_up_external_institutions::CleanUpExternalInstitutions;
-use crate::workers::clean_up_external_institutions::WorkerArgs as CleanUpExternalInstitutionsArgs;
 use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 use tracing::{error, info, warn};
@@ -53,15 +50,6 @@ impl BackgroundWorker<WorkerArgs> for SyncGoCardlessInstitutionsWorker {
                 warn!("Could not insert institution. Error: {}", err)
             }
         }
-
-        CleanUpExternalInstitutions::perform_later(
-            &self.ctx,
-            CleanUpExternalInstitutionsArgs {
-                external_ids,
-                provider: GO_CARDLESS_PROVIDER.to_string(),
-            },
-        )
-        .await?;
 
         info!("Finish syncing institutions.");
 

@@ -67,7 +67,7 @@ tokio-cron-scheduler = { version = "0.13.0", features = ["signal"] }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.137"
 serde_yml = "0.0.12"
-# Old/archived serde_yaml because loco uses is
+# Old/archived serde_yaml because loco uses it
 serde_yaml = "0.9.34"
 
 # Template engine
@@ -114,7 +114,7 @@ include_dir = "0.7.4"
 bytes = "1.9.0"
 
 # Tokene genration
-rand = "0.8.5"
+rand = "0.9.0"
 sha2 = "0.10.8"
 base64 = "0.22.1"
 
@@ -130,11 +130,6 @@ const_format = "0.2.34"
 # Code generation/custom macros
 financrr_macros.workspace = true
 
-[[bin]]
-name = "financrr-cli"
-path = "src/bin/main.rs"
-required-features = []
-
 [dev-dependencies]
 # Loco
 loco-rs = { workspace = true, features = ["testing"] }
@@ -142,13 +137,18 @@ loco-rs = { workspace = true, features = ["testing"] }
 # Testing frameworks
 serial_test = "3.2.0"
 rstest = "0.24.0"
-insta = { version = "1.42.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
+insta = { version = "1.42.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Mocking
 mockito = "1.6.1"
 
 # Utils
 tempfile = "3.15.0"
+
+[[bin]]
+name = "financrr-cli"
+path = "src/bin/main.rs"
+required-features = []
 
 [profile.release]
 lto = true
