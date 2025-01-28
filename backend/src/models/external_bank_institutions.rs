@@ -2,23 +2,14 @@ pub use super::_entities::external_bank_institutions::{ActiveModel, Entity, Mode
 use crate::bank_account_linking::constants::GO_CARDLESS_PROVIDER;
 use crate::bank_account_linking::institutions::Institution;
 use crate::error::app_error::{AppError, AppResult};
-use crate::initializers::context::try_get_global_app_context;
 use crate::models::_entities::external_bank_institutions::Column;
 use crate::services::snowflake_generator::SnowflakeGenerator;
-use crate::workers::external_bank_institutions::crud::deleted::{
-    ExternalBankInstitutionDeleted, ExternalBankInstitutionDeletedArgs,
-};
-use crate::workers::external_bank_institutions::crud::insert::{
-    ExternalBankInstitutionInserted, ExternalBankInstitutionInsertedArgs,
-};
-use crate::workers::external_bank_institutions::crud::update::{
-    ExternalBankInstitutionUpdated, ExternalBankInstitutionUpdatedArgs,
-};
 use chrono::Utc;
-use loco_rs::prelude::{AppContext, BackgroundWorker};
 use sea_orm::entity::prelude::*;
-use sea_orm::{DbBackend, Set, Statement, TransactionTrait, Unchanged};
-use tracing::error;
+use sea_orm::sea_query::OnConflict;
+use sea_orm::{DbBackend, IntoActiveModel, Set, Statement, TransactionTrait};
+use tracing::log::warn;
+use tracing::{error, info};
 
 pub type ExternalBankInstitutions = Entity;
 
@@ -38,85 +29,36 @@ impl ActiveModelBehavior for ActiveModel {
 
         Ok(self)
     }
-
-    async fn after_save<C>(
-        model: <Self::Entity as EntityTrait>::Model,
-        _: &C,
-        insert: bool,
-    ) -> Result<<Self::Entity as EntityTrait>::Model, DbErr>
-    where
-        C: ConnectionTrait,
-    {
-        if let Some(ctx) = try_get_global_app_context() {
-            match insert {
-                true => send_inserted_event(ctx, model.id).await,
-                false => send_updated_event(ctx, model.id).await,
-            }
-        }
-
-        Ok(model)
-    }
-
-    async fn after_delete<C>(self, _db: &C) -> Result<Self, DbErr>
-    where
-        C: ConnectionTrait,
-    {
-        if let Some(ctx) = try_get_global_app_context() {
-            send_deleted_event(ctx, self.id.clone().unwrap()).await
-        }
-
-        Ok(self)
-    }
-}
-
-async fn send_updated_event(ctx: &AppContext, id: i64) {
-    if let Err(err) = try_send_updated_event(ctx, id).await {
-        error!("Error occurred while trying to send updated event. Error: {}", err)
-    }
-}
-
-async fn try_send_updated_event(ctx: &AppContext, id: i64) -> AppResult<()> {
-    Ok(ExternalBankInstitutionUpdated::perform_later(ctx, ExternalBankInstitutionUpdatedArgs { id }).await?)
-}
-
-async fn send_inserted_event(ctx: &AppContext, id: i64) {
-    if let Err(err) = try_send_inserted_event(ctx, id).await {
-        error!("Error occurred while trying to send inserted event. Error: {}", err)
-    }
-}
-
-async fn try_send_inserted_event(ctx: &AppContext, id: i64) -> AppResult<()> {
-    Ok(ExternalBankInstitutionInserted::perform_later(ctx, ExternalBankInstitutionInsertedArgs { id }).await?)
-}
-
-async fn send_deleted_event(ctx: &AppContext, id: i64) {
-    if let Err(err) = try_send_deleted_event(ctx, id).await {
-        error!("Error occurred while trying to send deleted event. Error: {}", err)
-    }
-}
-
-async fn try_send_deleted_event(ctx: &AppContext, id: i64) -> AppResult<()> {
-    Ok(ExternalBankInstitutionDeleted::perform_later(ctx, ExternalBankInstitutionDeletedArgs { id }).await?)
 }
 
 // implement your read-oriented logic here
 impl Model {}
 
 // implement your write-oriented logic here
-impl ActiveModel {}
-
-// implement your custom finders, selectors oriented logic here
-impl Entity {
-    pub async fn add_or_update_from_go_cardless(
+impl ActiveModel {
+    pub async fn delete_unknown_institutions(
         db: &DatabaseConnection,
-        snowflake_generator: &SnowflakeGenerator,
-        institution: Institution,
-    ) -> AppResult<Model> {
-        let external_id = institution.id.clone();
+        external_ids: Vec<String>,
+        provider: String,
+    ) -> AppResult<()> {
+        let institutions = Entity::find_unknown_institutions(db, external_ids, provider).await?;
+
+        info!("Deleting {} external institutions.", institutions.len());
+        for institution in institutions {
+            if let Err(err) = institution.into_active_model().delete(db).await {
+                warn!("Could not delete external institution with err: {}", err);
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn from_go_cardless(institution: Institution, snowflake_generator: &SnowflakeGenerator) -> AppResult<Self> {
+        let id = snowflake_generator.next_id()?;
         let max_access_valid_for_days = institution.max_access_valid_for_days.parse::<i32>().ok();
 
-        let mut model = ActiveModel {
-            id: Default::default(),
+        Ok(Self {
+            id: Set(id),
             external_id: Set(institution.id),
             provider: Set(GO_CARDLESS_PROVIDER.to_string()),
             name: Set(institution.name),
@@ -124,24 +66,55 @@ impl Entity {
             countries: Set(institution.countries),
             logo_link: Set(institution.logo),
             access_valid_for_days: Set(max_access_valid_for_days),
-            created_at: Default::default(),
-            updated_at: Default::default(),
-        };
+            created_at: Set(Utc::now().into()),
+            updated_at: Set(Utc::now().into()),
+        })
+    }
 
-        match Self::find_by_external_id(db, external_id.as_str(), GO_CARDLESS_PROVIDER).await? {
-            Some(found_model) => {
-                model.id = Unchanged(found_model.id);
-                model.created_at = Unchanged(found_model.created_at);
+    fn from_go_cardless_vec(institutions: Vec<Institution>, snowflake_generator: &SnowflakeGenerator) -> Vec<Self> {
+        let mut successful_models = Vec::new();
 
-                Ok(model.update(db).await?)
-            }
-            None => {
-                model.id = Set(snowflake_generator.next_id()?);
-                model.created_at = Set(Utc::now().into());
-
-                Ok(model.insert(db).await?)
+        for institution in institutions {
+            let external_id = institution.id.clone();
+            match ActiveModel::from_go_cardless(institution, snowflake_generator) {
+                Ok(active_model) => successful_models.push(active_model),
+                Err(err) => warn!(
+                    "Failed to convert institution to active model: {}. Error: {}",
+                    external_id, err
+                ),
             }
         }
+
+        successful_models
+    }
+}
+
+// implement your custom finders, selectors oriented logic here
+impl Entity {
+    pub async fn add_or_update_many_from_go_cardless(
+        db: &DatabaseConnection,
+        snowflake_generator: &SnowflakeGenerator,
+        institutions: Vec<Institution>,
+    ) -> AppResult<()> {
+        let active_models = ActiveModel::from_go_cardless_vec(institutions, snowflake_generator);
+        let on_conflict = OnConflict::columns([Column::ExternalId, Column::Provider])
+            .update_columns([
+                Column::Name,
+                Column::Bic,
+                Column::Countries,
+                Column::LogoLink,
+                Column::AccessValidForDays,
+                Column::UpdatedAt,
+            ])
+            .to_owned();
+
+        Self::insert_many(active_models)
+            .on_empty_do_nothing()
+            .on_conflict(on_conflict)
+            .exec_without_returning(db)
+            .await?;
+
+        Ok(())
     }
 
     pub async fn find_by_external_id(

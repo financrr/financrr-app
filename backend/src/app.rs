@@ -12,7 +12,6 @@ use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::external_bank_institutions as external_bank_institutions_workers;
 use crate::workers::session_used::SessionUsedWorker;
-use crate::workers::sync_go_cardless_institutions::SyncGoCardlessInstitutionsWorker;
 use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
 use loco_rs::cache::Cache;
@@ -122,7 +121,6 @@ impl Hooks for App {
         // External Bank institutions
         external_bank_institutions_workers::connect_worker(ctx, queue).await?;
 
-        queue.register(SyncGoCardlessInstitutionsWorker::build(ctx)).await?;
         queue.register(SessionUsedWorker::build(ctx)).await?;
 
         Ok(())

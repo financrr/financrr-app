@@ -7,15 +7,8 @@ use std::sync::OnceLock;
 static GLOBAL_APP_CONTEXT: OnceLock<AppContext> = OnceLock::new();
 
 /// This method should not be used if not necessary!
-/// Use "try_get_global_app_context" when possible!
 ///
 /// It was introduced to get the AppContext inside hooks like ActiveModelBehavior.
-pub fn get_global_app_context() -> &'static AppContext {
-    GLOBAL_APP_CONTEXT
-        .get()
-        .expect("GLOBAL_APP_CONTEXT should be set by now!")
-}
-
 pub fn try_get_global_app_context() -> Option<&'static AppContext> {
     GLOBAL_APP_CONTEXT.get()
 }
