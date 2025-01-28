@@ -1,7 +1,8 @@
 use crate::models::_entities::external_bank_institutions::Column;
 use crate::models::external_bank_institutions::ExternalBankInstitutions;
-use crate::opensearch::external_bank_institutions::IndexableExternalBankInstitution;
-use crate::services::opensearch::client::{OpensearchClientInner, OpensearchIndex};
+use crate::opensearch::indices::OpensearchIndex;
+use crate::opensearch::models::external_bank_institutions::IndexableExternalBankInstitution;
+use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::Service;
 use async_trait::async_trait;
 use loco_rs::prelude::{AppContext, BackgroundWorker};
@@ -47,7 +48,7 @@ impl BackgroundWorker<IndexExternalInstitutionsWorkerArgs> for IndexExternalInst
             }
 
             opensearch
-                .bulk_insert(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS, body)
+                .bulk_insert(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, body)
                 .await?;
         }
 

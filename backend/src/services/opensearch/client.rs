@@ -1,4 +1,5 @@
 use crate::error::app_error::{AppError, AppResult};
+use crate::opensearch::indices::OpensearchIndex;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
 use crate::services::Service;
@@ -17,14 +18,6 @@ use std::sync::{Arc, OnceLock};
 use tracing::warn;
 
 pub type OpensearchClient = Arc<OpensearchClientInner>;
-
-pub struct OpensearchIndex;
-
-impl OpensearchIndex {
-    pub const INDICES: [&'static str; 1] = [Self::EXTERNAL_BANK_INSTITUTIONS];
-
-    pub const EXTERNAL_BANK_INSTITUTIONS: &'static str = "external_bank_institutions";
-}
 
 #[derive(Debug)]
 pub struct OpensearchClientInner {
@@ -110,17 +103,19 @@ impl OpensearchClientInner {
 
     pub async fn create_missing_indices(&self) -> AppResult<()> {
         for index in OpensearchIndex::INDICES {
+            // TODO check if mappings match
             let exists = self
                 .opensearch
                 .indices()
-                .exists(IndicesExistsParts::Index(&[index]))
+                .exists(IndicesExistsParts::Index(&[index.name]))
                 .send()
                 .await?;
 
             if !exists.status_code().is_success() {
                 self.opensearch
                     .indices()
-                    .create(IndicesCreateParts::Index(index))
+                    .create(IndicesCreateParts::Index(index.name))
+                    .body(index.get_mapping())
                     .send()
                     .await?;
             }

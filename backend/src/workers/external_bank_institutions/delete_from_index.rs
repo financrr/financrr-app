@@ -1,4 +1,5 @@
-use crate::services::opensearch::client::{OpensearchClientInner, OpensearchIndex};
+use crate::opensearch::indices::OpensearchIndex;
+use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::Service;
 use async_trait::async_trait;
 use loco_rs::prelude::{AppContext, BackgroundWorker};
@@ -23,7 +24,7 @@ impl BackgroundWorker<DeleteInstitutionFromIndexArgs> for DeleteInstitutionFromI
         let client = OpensearchClientInner::get_arc(&self.ctx).await?;
 
         client
-            .delete(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS, args.id)
+            .delete(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, args.id)
             .await?;
 
         Ok(())
