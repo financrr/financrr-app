@@ -11,11 +11,11 @@ use opensearch::http::request::JsonBody;
 use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
 use opensearch::indices::{IndicesCreateParts, IndicesExistsParts};
-use opensearch::{BulkParts, DeleteParts, IndexParts, OpenSearch};
+use opensearch::{BulkParts, DeleteParts, IndexParts, OpenSearch, SearchParts};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, OnceLock};
-use tracing::warn;
+use tracing::{info, warn};
 
 pub type OpensearchClient = Arc<OpensearchClientInner>;
 
@@ -103,7 +103,6 @@ impl OpensearchClientInner {
 
     pub async fn create_missing_indices(&self) -> AppResult<()> {
         for index in OpensearchIndex::INDICES {
-            // TODO check if mappings match
             let exists = self
                 .opensearch
                 .indices()
@@ -112,12 +111,19 @@ impl OpensearchClientInner {
                 .await?;
 
             if !exists.status_code().is_success() {
-                self.opensearch
+                info!("Creating index: {}", index.name);
+
+                let res = self
+                    .opensearch
                     .indices()
                     .create(IndicesCreateParts::Index(index.name))
                     .body(index.get_mapping())
                     .send()
                     .await?;
+
+                if !res.status_code().is_success() {
+                    return Err(AppError::OpensearchError(res.text().await?));
+                }
             }
         }
 
@@ -160,5 +166,20 @@ impl OpensearchClientInner {
         }
 
         Ok(())
+    }
+
+    pub async fn search(&self, index: &str, body: Value) -> AppResult<Value> {
+        let res = self
+            .opensearch
+            .search(SearchParts::Index(&[index]))
+            .body(body)
+            .send()
+            .await?;
+
+        if !res.status_code().is_success() {
+            return Err(AppError::OpensearchError(res.text().await?));
+        }
+
+        Ok(res.json().await?)
     }
 }

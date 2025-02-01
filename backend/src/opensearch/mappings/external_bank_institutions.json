@@ -8,6 +8,19 @@
             "lowercase"
           ]
         }
+      },
+      "tokenizer": {
+        "name_ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 3,
+          "max_gram": 4
+        }
+      },
+      "analyzer": {
+        "name_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "name_ngram_tokenizer"
+        }
       }
     }
   },
@@ -27,6 +40,10 @@
           "keyword": {
             "type": "keyword",
             "normalizer": "lowercase_normalizer"
+          },
+          "ngram": {
+            "type": "text",
+            "analyzer": "name_ngram_analyzer"
           }
         }
       },

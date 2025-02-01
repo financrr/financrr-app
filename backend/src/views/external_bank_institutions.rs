@@ -18,6 +18,12 @@ pub struct ExternalBankInstitutionResponse {
     pub updated_at: DateTime<FixedOffset>,
 }
 
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ExternalBankInstitutionCountryOverviewResponse {
+    pub country: String,
+    pub count: u64,
+}
+
 impl From<Model> for ExternalBankInstitutionResponse {
     fn from(value: Model) -> Self {
         Self {

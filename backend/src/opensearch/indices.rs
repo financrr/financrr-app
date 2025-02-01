@@ -1,4 +1,5 @@
-use serde_json::{json, Value};
+use serde_json::Value;
+use std::sync::LazyLock;
 
 pub struct OpensearchIndex {
     pub name: &'static str,
@@ -19,5 +20,10 @@ impl OpensearchIndex {
 }
 
 fn get_external_bank_institutions_mapping() -> Value {
-    json!(include_str!("mappings/external_bank_institutions.json"))
+    static LAZY: LazyLock<Value> = LazyLock::new(|| {
+        serde_json::from_str(include_str!("mappings/external_bank_institutions.json"))
+            .expect("Could not parse opensearch mapping file!")
+    });
+
+    LAZY.clone()
 }

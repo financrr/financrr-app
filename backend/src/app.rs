@@ -3,7 +3,7 @@ use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::opensearch::OpensearchInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
-use crate::models::_entities::instances;
+use crate::models::_entities::{instances, sessions};
 use crate::models::external_bank_institutions;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
@@ -136,6 +136,7 @@ impl Hooks for App {
         let db = &ctx.db;
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
+        truncate_table(db, sessions::Entity).await?;
         truncate_table(db, instances::Entity).await?;
         truncate_table(db, external_bank_institutions::Entity).await?;
 
