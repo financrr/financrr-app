@@ -158,7 +158,6 @@ impl StatusServiceInner {
     }
 
     pub async fn get_complete_health_response(&self) -> HealthResponse {
-        // TODO add task/command
         let (database_status, cache_status, storage_status, opensearch_status) = join!(
             self.get_db_health(),
             self.get_cache_health(),

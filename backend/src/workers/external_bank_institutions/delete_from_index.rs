@@ -22,11 +22,13 @@ impl BackgroundWorker<DeleteInstitutionFromIndexArgs> for DeleteInstitutionsFrom
 
     async fn perform(&self, args: DeleteInstitutionFromIndexArgs) -> loco_rs::Result<()> {
         let client = OpensearchClientInner::get_arc(&self.ctx).await?;
+        const CHUNK_SIZE: usize = 500;
 
-        // TODO only bulk remove 500 at once at max
-        client
-            .bulk_delete(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, args.ids)
-            .await?;
+        for chunk in args.ids.chunks(CHUNK_SIZE) {
+            client
+                .bulk_delete(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, chunk.to_vec())
+                .await?;
+        }
 
         Ok(())
     }
