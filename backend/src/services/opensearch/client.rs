@@ -1,5 +1,4 @@
 use crate::error::app_error::{AppError, AppResult};
-use crate::opensearch::indices::OpensearchIndex;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
 use crate::services::Service;
@@ -10,18 +9,17 @@ use opensearch::cluster::ClusterHealthParts;
 use opensearch::http::request::JsonBody;
 use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
-use opensearch::indices::{IndicesCreateParts, IndicesExistsParts};
 use opensearch::{BulkParts, DeleteParts, IndexParts, OpenSearch, SearchParts};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, OnceLock};
-use tracing::{info, warn};
+use tracing::warn;
 
 pub type OpensearchClient = Arc<OpensearchClientInner>;
 
 #[derive(Debug)]
 pub struct OpensearchClientInner {
-    opensearch: Arc<OpenSearch>,
+    pub opensearch: Arc<OpenSearch>,
 }
 
 impl Service for OpensearchClientInner {
@@ -99,35 +97,6 @@ impl OpensearchClientInner {
 
     pub fn get_inner_client(&self) -> Arc<OpenSearch> {
         self.opensearch.clone()
-    }
-
-    pub async fn create_missing_indices(&self) -> AppResult<()> {
-        for index in OpensearchIndex::INDICES {
-            let exists = self
-                .opensearch
-                .indices()
-                .exists(IndicesExistsParts::Index(&[index.name]))
-                .send()
-                .await?;
-
-            if !exists.status_code().is_success() {
-                info!("Creating index: {}", index.name);
-
-                let res = self
-                    .opensearch
-                    .indices()
-                    .create(IndicesCreateParts::Index(index.name))
-                    .body(index.get_mapping())
-                    .send()
-                    .await?;
-
-                if !res.status_code().is_success() {
-                    return Err(AppError::OpensearchError(res.text().await?));
-                }
-            }
-        }
-
-        Ok(())
     }
 
     pub async fn bulk_insert<T: Serialize>(&self, index: &str, body: Vec<JsonBody<T>>) -> AppResult<()> {

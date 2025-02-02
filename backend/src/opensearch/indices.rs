@@ -7,8 +7,6 @@ pub struct OpensearchIndex {
 }
 
 impl OpensearchIndex {
-    pub const INDICES: [OpensearchIndex; 1] = [Self::EXTERNAL_BANK_INSTITUTIONS];
-
     pub const EXTERNAL_BANK_INSTITUTIONS: OpensearchIndex = OpensearchIndex {
         name: "external_bank_institutions",
         get_mappings: get_external_bank_institutions_mapping,
