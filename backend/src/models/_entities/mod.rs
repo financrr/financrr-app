@@ -20,6 +20,7 @@ pub mod file_attachments;
 pub mod inactive_contracts;
 pub mod instances;
 pub mod linked_back_accounts;
+pub mod opensearch_migrations;
 pub mod pending_transactions;
 pub mod recurring_transactions;
 pub mod sea_orm_active_enums;

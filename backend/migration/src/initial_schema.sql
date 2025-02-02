@@ -4,6 +4,12 @@
 -- #                                                          #
 -- ############################################################
 
+CREATE TABLE opensearch_migrations
+(
+    version     TEXT PRIMARY KEY UNIQUE,
+    executed_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE instances
 (
     node_id        SMALLINT PRIMARY KEY,
