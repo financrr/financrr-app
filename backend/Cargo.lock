@@ -1338,6 +1338,7 @@ dependencies = [
  "enumflags2",
  "financrr_macros",
  "include_dir",
+ "include_json",
  "insta",
  "loco-rs",
  "migration",
@@ -2160,6 +2161,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_json"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e76487edab122dc11ad91192c8e8d21d1914c22e6fcc320a1235db99cbd2442"
+dependencies = [
+ "macro-string",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn 2.0.98",
+]
+
+[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2517,6 +2531,17 @@ name = "mac"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
+
+[[package]]
+name = "macro-string"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fbbde8b83c2ab7f3d475a7842030bd1f35cce00f53c95a1d0e1c96a7e68489b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+]
 
 [[package]]
 name = "markup5ever"

@@ -36,12 +36,16 @@ impl Model {}
 
 // implement your write-oriented logic here
 impl ActiveModel {
+    /// Deletes all entities that are not in the list.
+    ///
+    /// Returns a list of ids that have been deleted.
     pub async fn delete_unknown_institutions(
         db: &DatabaseConnection,
         external_ids: Vec<String>,
         provider: String,
-    ) -> AppResult<()> {
+    ) -> AppResult<Vec<i64>> {
         let institutions = Entity::find_unknown_institutions(db, external_ids, provider).await?;
+        let ids: Vec<i64> = institutions.iter().map(|i| i.id).collect();
 
         info!("Deleting {} external institutions.", institutions.len());
         for institution in institutions {
@@ -50,7 +54,7 @@ impl ActiveModel {
             }
         }
 
-        Ok(())
+        Ok(ids)
     }
 
     pub fn from_go_cardless(institution: Institution, snowflake_generator: &SnowflakeGenerator) -> AppResult<Self> {

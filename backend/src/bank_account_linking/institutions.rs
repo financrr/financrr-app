@@ -4,7 +4,7 @@ use const_format::concatcp;
 use serde::Deserialize;
 use tracing::error;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Institution {
     pub id: String,
     pub name: String,
@@ -21,7 +21,7 @@ impl GoCardlessClient {
         let url = Self::build_request_url(&self.config, URL_SUFFIX);
 
         let response = self.client.get(url).bearer_auth(self.get_token()).send().await?;
-        match response.status().as_u16() > 299 {
+        match !response.status().is_success() {
             true => {
                 let status_code = response.status();
                 let payload = response.text().await?;
@@ -29,7 +29,21 @@ impl GoCardlessClient {
 
                 Err(AppError::GeneralInternalServerError("".to_string()))
             }
-            false => Ok(response.json().await?),
+            false => {
+                let json: Vec<Institution> = response.json().await?;
+                let json = json
+                    .into_iter()
+                    .map(|mut ins| {
+                        // Convert to lowercase for later aggregation
+                        ins.countries = ins.countries.into_iter().map(|c| c.to_lowercase()).collect();
+                        ins
+                    })
+                    // Sort out test institutions
+                    .filter(|ins| !ins.countries.contains(&"xx".to_string()))
+                    .collect();
+
+                Ok(json)
+            }
         }
     }
 }

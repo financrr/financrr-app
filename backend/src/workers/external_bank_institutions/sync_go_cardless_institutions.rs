@@ -44,9 +44,7 @@ impl BackgroundWorker<WorkerArgs> for SyncGoCardlessInstitutionsWorker {
         let mut batch = Vec::with_capacity(BATCH_SIZE);
         let mut external_ids = Vec::with_capacity(institutions.len());
 
-        for mut institution in institutions {
-            // Convert to lowercase for later aggregation
-            institution.countries = institution.countries.into_iter().map(|s| s.to_lowercase()).collect();
+        for institution in institutions {
             external_ids.push(institution.id.clone());
             batch.push(institution);
 

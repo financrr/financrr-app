@@ -6,10 +6,9 @@ use loco_rs::app::AppContext;
 use opensearch::auth::Credentials;
 use opensearch::cert::CertificateValidation;
 use opensearch::cluster::ClusterHealthParts;
-use opensearch::http::request::JsonBody;
 use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
-use opensearch::{BulkParts, DeleteParts, IndexParts, OpenSearch, SearchParts};
+use opensearch::{BulkOperation, BulkParts, OpenSearch, SearchParts};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, OnceLock};
@@ -99,7 +98,13 @@ impl OpensearchClientInner {
         self.opensearch.clone()
     }
 
-    pub async fn bulk_insert<T: Serialize>(&self, index: &str, body: Vec<JsonBody<T>>) -> AppResult<()> {
+    pub async fn bulk_insert<T: Serialize>(&self, index: &str, docs: Vec<(i64, T)>) -> AppResult<()> {
+        let mut body: Vec<BulkOperation<Value>> = Vec::with_capacity(docs.len());
+
+        for (id, doc) in docs {
+            body.push(BulkOperation::index(json!(doc)).id(id.to_string()).into())
+        }
+
         let res = self.opensearch.bulk(BulkParts::Index(index)).body(body).send().await?;
         if !res.status_code().is_success() {
             return Err(AppError::OpensearchError(res.text().await?));
@@ -108,28 +113,14 @@ impl OpensearchClientInner {
         Ok(())
     }
 
-    pub async fn index<T: Serialize>(&self, id: i64, index: &str, body: &T) -> AppResult<()> {
-        let res = self
-            .opensearch
-            .index(IndexParts::IndexId(index, id.to_string().as_str()))
-            .body(json!({
-                "doc": body
-            }))
-            .send()
-            .await?;
-        if !res.status_code().is_success() {
-            return Err(AppError::OpensearchError(res.text().await?));
+    pub async fn bulk_delete(&self, index: &str, ids: Vec<i64>) -> AppResult<()> {
+        let mut body: Vec<BulkOperation<Value>> = Vec::with_capacity(ids.len());
+        for id in ids {
+            body.push(BulkOperation::delete(id.to_string()).into())
         }
 
-        Ok(())
-    }
+        let res = self.opensearch.bulk(BulkParts::Index(index)).body(body).send().await?;
 
-    pub async fn delete(&self, index: &str, id: i64) -> AppResult<()> {
-        let res = self
-            .opensearch
-            .delete(DeleteParts::IndexId(index, id.to_string().as_str()))
-            .send()
-            .await?;
         if !res.status_code().is_success() {
             return Err(AppError::OpensearchError(res.text().await?));
         }

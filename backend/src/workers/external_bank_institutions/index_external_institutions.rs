@@ -6,10 +6,8 @@ use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::Service;
 use async_trait::async_trait;
 use loco_rs::prelude::{AppContext, BackgroundWorker};
-use opensearch::http::request::JsonBody;
 use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use tracing::info;
 
 pub struct IndexExternalInstitutionsWorker {
@@ -38,17 +36,13 @@ impl BackgroundWorker<IndexExternalInstitutionsWorkerArgs> for IndexExternalInst
             .paginate(&self.ctx.db, PAGE_SIZE);
 
         while let Some(institutions) = paginator.fetch_and_next().await? {
-            let mut body: Vec<JsonBody<_>> = Vec::with_capacity(institutions.len());
-
-            for institution in institutions {
-                let institution = IndexableExternalBankInstitution::from(institution);
-
-                body.push(json!({"index": {"_id": institution.id}}).into());
-                body.push(json!(institution).into());
-            }
+            let institutions: Vec<(i64, IndexableExternalBankInstitution)> = institutions
+                .into_iter()
+                .map(|i| (i.id, IndexableExternalBankInstitution::from(i)))
+                .collect();
 
             opensearch
-                .bulk_insert(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, body)
+                .bulk_insert(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, institutions)
                 .await?;
         }
 

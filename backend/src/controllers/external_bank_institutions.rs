@@ -102,6 +102,7 @@ async fn get_countries_overview(
                 "countries_facets": {
                   "terms": {
                     "field": "countries",
+                    "size": 10000
                   }
                 }
               }
