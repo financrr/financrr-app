@@ -1,37 +1,37 @@
 use crate::error::app_error::AppResult;
 use crate::error::app_error::GeneralInternalServerErrorResponse;
 use crate::middlewares::authentication::Authenticated;
-use crate::models::_entities::external_bank_institutions::Column;
 use crate::models::_entities::sessions;
-use crate::models::external_bank_institutions::Entity;
 use crate::opensearch::indices::OpensearchIndex;
+use crate::opensearch::models::external_bank_institutions::IndexableExternalBankInstitution;
 use crate::services::opensearch::client::OpensearchClient;
 use crate::views::external_bank_institutions::{
     ExternalBankInstitutionCountryOverviewResponse, ExternalBankInstitutionResponse,
 };
 use crate::views::pagination::{Pager, PaginationQuery};
-use axum::extract::{Query, State};
+use axum::extract::Query;
 use axum::http::StatusCode;
 use axum::routing::get;
-use axum::{debug_handler, Extension, Json};
-use loco_rs::app::AppContext;
-use loco_rs::model::query;
+use axum::{Extension, Json};
 use loco_rs::prelude::Routes;
-use sea_orm::EntityTrait;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::sync::LazyLock;
 use tracing::error;
 use utoipa::IntoParams;
+use validator::Validate;
 
-#[derive(Debug, Deserialize, IntoParams)]
+#[derive(Debug, Deserialize, Validate, IntoParams)]
 pub struct SearchQuery {
+    #[validate(length(min = 1))]
     #[serde(default)]
-    pub name: String,
+    pub fts: String,
+    #[validate(length(min = 2, max = 3))]
     #[serde(default)]
-    pub provider: String,
+    pub country: String,
 }
 
+/// Search for supported bank institutions
 #[utoipa::path(get,
     path = "/",
     context_path = "/api/v1/external-bank-institutions",
@@ -48,36 +48,39 @@ pub struct SearchQuery {
         ("bearer_token" = [])
     ),
 )]
-#[debug_handler]
 async fn get_external_bank_institutions(
-    State(ctx): State<AppContext>,
+    Extension(opensearch): Extension<OpensearchClient>,
     Query(search_query): Query<SearchQuery>,
     Query(pagination): Query<PaginationQuery>,
     _: Authenticated<sessions::Model>,
 ) -> AppResult<(StatusCode, Json<Pager<ExternalBankInstitutionResponse>>)> {
-    let mut condition = query::condition();
-    let pagination = pagination.into();
+    let query = build_search_query(&search_query, &pagination);
 
-    if !search_query.name.is_empty() {
-        condition = condition.contains(Column::Name, search_query.name);
-    }
+    let pager = opensearch
+        .search::<IndexableExternalBankInstitution>(
+            OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name,
+            query,
+            pagination.page,
+            pagination.page_size,
+        )
+        .await?;
 
-    if !search_query.provider.is_empty() {
-        condition = condition.eq(Column::Provider, search_query.provider);
-    }
+    let mapped_pager = Pager {
+        results: pager
+            .results
+            .into_iter()
+            .map(ExternalBankInstitutionResponse::from)
+            .collect(),
+        info: pager.info,
+    };
 
-    let external_bank_institutions =
-        query::paginate(&ctx.db, Entity::find(), Some(condition.build()), &pagination).await?;
-
-    Ok((
-        StatusCode::OK,
-        Json(ExternalBankInstitutionResponse::response(
-            external_bank_institutions,
-            &pagination,
-        )),
-    ))
+    Ok((StatusCode::OK, Json(mapped_pager)))
 }
 
+/// Get countries overview
+///
+/// A faceted list of all countries that we support plus the number of banks we support in that
+/// specific country.
 #[utoipa::path(get,
     path = "/countries-overview",
     context_path = "/api/v1/external-bank-institutions",
@@ -90,9 +93,9 @@ async fn get_external_bank_institutions(
         ("bearer_token" = [])
     ),
 )]
-#[debug_handler]
 async fn get_countries_overview(
     Extension(opensearch): Extension<OpensearchClient>,
+    _: Authenticated<sessions::Model>,
 ) -> AppResult<(StatusCode, Json<Vec<ExternalBankInstitutionCountryOverviewResponse>>)> {
     static BODY: LazyLock<Value> = LazyLock::new(|| {
         json!(
@@ -111,7 +114,7 @@ async fn get_countries_overview(
     });
 
     let response = opensearch
-        .search(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, BODY.clone())
+        .search_custom(OpensearchIndex::EXTERNAL_BANK_INSTITUTIONS.name, BODY.clone())
         .await?;
 
     let default_buckets = vec![];
@@ -137,9 +140,184 @@ async fn get_countries_overview(
     Ok((StatusCode::OK, Json(result)))
 }
 
+fn build_search_query(search_query: &SearchQuery, pagination: &PaginationQuery) -> Value {
+    let fts = search_query.fts.trim();
+    let country = search_query.country.trim();
+
+    let mut query = json!({
+        "from": (pagination.page - 1) * pagination.page_size,
+        "size": pagination.page_size,
+        "query": {
+            "bool": {
+                "must": []
+            }
+        }
+    });
+
+    if !fts.is_empty() {
+        query["query"]["bool"]["must"].as_array_mut().unwrap().push(json!({
+            "multi_match": {
+                "query": fts,
+                "fields": ["name", "bic"]
+            }
+        }));
+    }
+
+    if !country.is_empty() {
+        query["query"]["bool"]["must"].as_array_mut().unwrap().push(json!({
+            "term": {
+                "countries": country
+            }
+        }));
+    }
+
+    query
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("/external-bank-institutions")
         .add("/", get(get_external_bank_institutions))
         .add("/countries-overview", get(get_countries_overview))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_build_search_query_with_fts_and_country() {
+        let search_query = SearchQuery {
+            fts: "test".to_string(),
+            country: "US".to_string(),
+        };
+        let pagination = PaginationQuery { page: 1, page_size: 10 };
+
+        let expected_query = json!({
+            "from": 0,
+            "size": 10,
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "multi_match": {
+                                "query": "test",
+                                "fields": ["name", "bic"]
+                            }
+                        },
+                        {
+                            "term": {
+                                "countries": "US"
+                            }
+                        }
+                    ]
+                }
+            }
+        });
+
+        let actual_query = build_search_query(&search_query, &pagination);
+        assert_eq!(expected_query, actual_query);
+    }
+
+    #[test]
+    fn test_build_search_query_with_fts_only() {
+        let search_query = SearchQuery {
+            fts: "test".to_string(),
+            country: "".to_string(),
+        };
+        let pagination = PaginationQuery { page: 1, page_size: 10 };
+
+        let expected_query = json!({
+            "from": 0,
+            "size": 10,
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "multi_match": {
+                                "query": "test",
+                                "fields": ["name", "bic"]
+                            }
+                        }
+                    ]
+                }
+            }
+        });
+
+        let actual_query = build_search_query(&search_query, &pagination);
+        assert_eq!(expected_query, actual_query);
+    }
+
+    #[test]
+    fn test_build_search_query_with_country_only() {
+        let search_query = SearchQuery {
+            fts: "".to_string(),
+            country: "US".to_string(),
+        };
+        let pagination = PaginationQuery { page: 1, page_size: 10 };
+
+        let expected_query = json!({
+            "from": 0,
+            "size": 10,
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "countries": "US"
+                            }
+                        }
+                    ]
+                }
+            }
+        });
+
+        let actual_query = build_search_query(&search_query, &pagination);
+        assert_eq!(expected_query, actual_query);
+    }
+
+    #[test]
+    fn test_build_search_query_with_no_fts_and_no_country() {
+        let search_query = SearchQuery {
+            fts: "".to_string(),
+            country: "".to_string(),
+        };
+        let pagination = PaginationQuery { page: 1, page_size: 10 };
+
+        let expected_query = json!({
+            "from": 0,
+            "size": 10,
+            "query": {
+                "bool": {
+                    "must": []
+                }
+            }
+        });
+
+        let actual_query = build_search_query(&search_query, &pagination);
+        assert_eq!(expected_query, actual_query);
+    }
+
+    #[test]
+    fn test_build_search_query_with_only_spaces() {
+        let search_query = SearchQuery {
+            fts: " ".to_string(),
+            country: "     ".to_string(),
+        };
+        let pagination = PaginationQuery { page: 1, page_size: 10 };
+
+        let expected_query = json!({
+            "from": 0,
+            "size": 10,
+            "query": {
+                "bool": {
+                    "must": []
+                }
+            }
+        });
+
+        let actual_query = build_search_query(&search_query, &pagination);
+        assert_eq!(expected_query, actual_query);
+    }
 }

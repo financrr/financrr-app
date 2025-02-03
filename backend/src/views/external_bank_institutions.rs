@@ -1,4 +1,5 @@
 use crate::models::external_bank_institutions::Model;
+use crate::opensearch::models::external_bank_institutions::IndexableExternalBankInstitution;
 use crate::types::snowflake::Snowflake;
 use crate::views::pagination::{Pager, PagerMeta};
 use chrono::{DateTime, FixedOffset};
@@ -26,6 +27,21 @@ pub struct ExternalBankInstitutionCountryOverviewResponse {
 
 impl From<Model> for ExternalBankInstitutionResponse {
     fn from(value: Model) -> Self {
+        Self {
+            id: Snowflake::new(value.id),
+            provider: value.provider,
+            name: value.name,
+            bic: value.bic,
+            countries: value.countries,
+            logo_link: value.logo_link,
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+        }
+    }
+}
+
+impl From<IndexableExternalBankInstitution> for ExternalBankInstitutionResponse {
+    fn from(value: IndexableExternalBankInstitution) -> Self {
         Self {
             id: Snowflake::new(value.id),
             provider: value.provider,

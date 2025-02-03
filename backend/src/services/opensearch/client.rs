@@ -2,6 +2,7 @@ use crate::error::app_error::{AppError, AppResult};
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
 use crate::services::Service;
+use crate::views::pagination::{Pager, PagerMeta};
 use loco_rs::app::AppContext;
 use opensearch::auth::Credentials;
 use opensearch::cert::CertificateValidation;
@@ -9,6 +10,7 @@ use opensearch::cluster::ClusterHealthParts;
 use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
 use opensearch::{BulkOperation, BulkParts, OpenSearch, SearchParts};
+use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, OnceLock};
@@ -128,7 +130,35 @@ impl OpensearchClientInner {
         Ok(())
     }
 
-    pub async fn search(&self, index: &str, body: Value) -> AppResult<Value> {
+    pub async fn search<T>(&self, index: &str, body: Value, page: u64, page_size: u64) -> AppResult<Pager<T>>
+    where
+        T: DeserializeOwned,
+    {
+        let value = self.search_custom(index, body).await?;
+
+        let default_hits = vec![];
+        let hits = value["hits"]["hits"].as_array().unwrap_or(&default_hits);
+        let total = value["hits"]["total"]["value"].as_u64().unwrap_or(0);
+
+        let results: Vec<T> = hits
+            .iter()
+            .map(|hit| serde_json::from_value(hit["_source"].clone()).expect("Unexpected data in index"))
+            .collect();
+
+        let pager = Pager {
+            results,
+            info: PagerMeta {
+                page,
+                page_size,
+                total_pages: (total as f64 / page_size as f64).ceil() as u64,
+                total,
+            },
+        };
+
+        Ok(pager)
+    }
+
+    pub async fn search_custom(&self, index: &str, body: Value) -> AppResult<Value> {
         let res = self
             .opensearch
             .search(SearchParts::Index(&[index]))
