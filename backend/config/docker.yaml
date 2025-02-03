@@ -37,7 +37,7 @@ server:
     compression:
       enable: true
     timeout_request:
-      enable: true
+      enable: {{get_env(name="TIMEOUT_ENABLED", default="true")}}
       timeout: {{get_env(name="TIMEOUT_REQUEST", default="5000")}}
 
 # Worker Configuration
@@ -54,8 +54,10 @@ queue:
   kind: Postgres
   # Redis connection URI
   uri: {{get_env(name="DATABASE_URL")}}
-  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
+  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_flush: false
+  # Represents the number of tasks a worker can handle simultaneously.
+  num_workers: {{get_env(name="NUM_WORKERS", default="10")}}
 
 # Mailer Configuration.
 mailer:
