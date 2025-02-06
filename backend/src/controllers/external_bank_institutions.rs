@@ -1,5 +1,5 @@
-use crate::error::app_error::AppResult;
 use crate::error::app_error::GeneralInternalServerErrorResponse;
+use crate::error::app_error::{AppResult, UnauthorizedResponse};
 use crate::middlewares::authentication::Authenticated;
 use crate::models::_entities::sessions;
 use crate::opensearch::indices::OpensearchIndex;
@@ -39,6 +39,7 @@ pub struct SearchQuery {
     responses(
         (status = StatusCode::OK, description = "Successfully retrieved External Bank Institutions.", content_type="application/json", body = Pager<ExternalBankInstitutionResponse>),
         GeneralInternalServerErrorResponse,
+        UnauthorizedResponse
     ),
     params(
         SearchQuery,
@@ -88,6 +89,7 @@ async fn get_external_bank_institutions(
     responses(
         (status = StatusCode::OK, description = "Successfully retrieved External Bank Institutions.", content_type="application/json", body = Vec<ExternalBankInstitutionCountryOverviewResponse>),
         GeneralInternalServerErrorResponse,
+        UnauthorizedResponse
     ),
     security(
         ("bearer_token" = [])

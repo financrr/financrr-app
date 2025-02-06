@@ -4,37 +4,37 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "external_bank_institutions")]
+#[sea_orm(table_name = "go_cardless_enduser_agreements")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
-    #[sea_orm(column_type = "Text")]
+    #[sea_orm(column_type = "Text", unique)]
     pub external_id: String,
-    #[sea_orm(column_type = "Text")]
-    pub provider: String,
-    #[sea_orm(column_type = "Text")]
-    pub name: String,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub bic: Option<String>,
-    pub countries: Vec<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub logo_link: Option<String>,
-    pub access_valid_for_days: Option<i32>,
+    #[sea_orm(unique)]
+    pub external_bank_institution_id: i64,
+    pub max_historical_days: i32,
+    pub access_valid_for_days: i32,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_one = "super::go_cardless_enduser_agreements::Entity")]
-    GoCardlessEnduserAgreements,
+    #[sea_orm(
+        belongs_to = "super::external_bank_institutions::Entity",
+        from = "Column::ExternalBankInstitutionId",
+        to = "super::external_bank_institutions::Column::Id",
+        on_update = "NoAction",
+        on_delete = "NoAction"
+    )]
+    ExternalBankInstitutions,
     #[sea_orm(has_many = "super::go_cardless_requisitions::Entity")]
     GoCardlessRequisitions,
 }
 
-impl Related<super::go_cardless_enduser_agreements::Entity> for Entity {
+impl Related<super::external_bank_institutions::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::GoCardlessEnduserAgreements.def()
+        Relation::ExternalBankInstitutions.def()
     }
 }
 

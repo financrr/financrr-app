@@ -3,7 +3,7 @@ use crate::controllers::session::CreateSessionParams;
 use crate::error::app_error::{AppError, AppResult};
 use crate::middlewares::authentication::Authenticate;
 use crate::models::_entities::sessions;
-use crate::models::users;
+use crate::models::users::users;
 use crate::services::secret_generator::SecretGenerator;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::workers::session_used::{SessionUsedWorker, SessionUsedWorkerArgs};
@@ -74,6 +74,10 @@ impl sessions::Model {
 
     pub async fn find_by_token(db: &DatabaseConnection, token: &str) -> AppResult<Option<Self>> {
         Ok(Entity::find().filter(Column::ApiKey.eq(token)).one(db).await?)
+    }
+
+    pub async fn get_user(&self, db: &DatabaseConnection) -> AppResult<users::Model> {
+        Ok(self.find_related(users::Entity).one(db).await?.unwrap())
     }
 }
 

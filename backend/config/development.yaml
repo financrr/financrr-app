@@ -38,7 +38,7 @@ server:
       enable: true
     timeout_request:
       enable: {{get_env(name="TIMEOUT_ENABLED", default="true")}}
-      timeout: {{get_env(name="TIMEOUT_REQUEST", default="5000")}}
+      timeout: {{get_env(name="TIMEOUT_REQUEST", default="10000")}}
 
 # Worker Configuration
 workers:
@@ -100,6 +100,7 @@ bank_data_linking:
   enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
   secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
   secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
+  redirect_url: {{get_env(name="GO_CARDLESS_REDIRECT_URL", default="")}}
 
 opensearch:
   is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="true")}}

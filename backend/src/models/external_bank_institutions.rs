@@ -224,4 +224,8 @@ impl Entity {
     pub async fn count_all(db: &DatabaseConnection) -> AppResult<u64> {
         Ok(Entity::find().count(db).await?)
     }
+
+    pub async fn find_by_id(db: &DatabaseConnection, id: i64) -> AppResult<Option<Model>> {
+        Ok(Entity::find().filter(Column::Id.eq(id)).one(db).await?)
+    }
 }

@@ -6,6 +6,7 @@ pub struct BankDataLinkingConfig {
     pub enabled: bool,
     pub secret_id: String,
     pub secret_key: String,
+    pub redirect_url: String,
     #[serde(default = "default_go_cardless_api_url")]
     pub api_url: String,
 }

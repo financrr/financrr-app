@@ -20,6 +20,8 @@ use utoipauto::utoipauto;
         (name = "Session", description = "Endpoints for session management."),
         (name = "User", description = "Endpoints for user management."),
         (name = "External Bank Institutions", description = "Endpoints for external bank institutions."),
+        (name = "Bank Account Linking", description = "Endpoints for starting the bank account linking process."),
+        (name = "GoCardless", description = "Endpoints that are used to link with GoCardless provider."),
     ),
     modifiers(&ApiKeyModifier)
 )]

@@ -151,6 +151,35 @@ CREATE TABLE external_bank_institutions
 
 -- ############################################################
 -- #                                                          #
+-- #                      GoCardless                          #
+-- #                                                          #
+-- ############################################################
+
+CREATE TABLE go_cardless_enduser_agreements
+(
+    id                           BIGINT PRIMARY KEY,
+    external_id                  TEXT UNIQUE                                       NOT NULL,
+    external_bank_institution_id BIGINT REFERENCES external_bank_institutions (id) NOT NULL UNIQUE,
+    max_historical_days          INT                                               NOT NULL,
+    access_valid_for_days        INT                                               NOT NULL,
+    created_at                   timestamp with time zone                          NOT NULL,
+    updated_at                   timestamp with time zone                          NOT NULL
+);
+
+CREATE TABLE go_cardless_requisitions
+(
+    id                           BIGINT PRIMARY KEY,
+    external_id                  TEXT UNIQUE                                           NOT NULL,
+    link                         TEXT UNIQUE                                           NOT NULL,
+    agreement_id                 BIGINT REFERENCES go_cardless_enduser_agreements (id) NOT NULL,
+    external_bank_institution_id BIGINT REFERENCES external_bank_institutions (id)     NOT NULL,
+    user_id                      BIGINT REFERENCES users (id)                          NOT NULL,
+    created_at                   timestamp with time zone                              NOT NULL,
+    updated_at                   timestamp with time zone                              NOT NULL
+);
+
+-- ############################################################
+-- #                                                          #
 -- #                External Bank Accounts                    #
 -- #                                                          #
 -- ############################################################

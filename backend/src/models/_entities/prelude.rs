@@ -15,6 +15,8 @@ pub use super::external_bank_account_ibans::Entity as ExternalBankAccountIbans;
 pub use super::external_bank_accounts::Entity as ExternalBankAccounts;
 pub use super::external_bank_institutions::Entity as ExternalBankInstitutions;
 pub use super::file_attachments::Entity as FileAttachments;
+pub use super::go_cardless_enduser_agreements::Entity as GoCardlessEnduserAgreements;
+pub use super::go_cardless_requisitions::Entity as GoCardlessRequisitions;
 pub use super::inactive_contracts::Entity as InactiveContracts;
 pub use super::instances::Entity as Instances;
 pub use super::linked_back_accounts::Entity as LinkedBackAccounts;

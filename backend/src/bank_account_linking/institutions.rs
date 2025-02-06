@@ -21,15 +21,15 @@ impl GoCardlessClient {
         let url = Self::build_request_url(&self.config, URL_SUFFIX);
 
         let response = self.client.get(url).bearer_auth(self.get_token()).send().await?;
-        match !response.status().is_success() {
-            true => {
+        match response.status().is_success() {
+            false => {
                 let status_code = response.status();
                 let payload = response.text().await?;
                 error!("Response failed. \nStatus code: {} \nPayload: {}", status_code, payload);
 
                 Err(AppError::GeneralInternalServerError("".to_string()))
             }
-            false => {
+            true => {
                 let json: Vec<Institution> = response.json().await?;
                 let json = json
                     .into_iter()
