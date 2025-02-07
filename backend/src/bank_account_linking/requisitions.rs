@@ -17,6 +17,8 @@ pub struct Requisition {
     pub redirect: String,
     pub institution_id: String,
     pub agreement: String,
+    #[serde(default)]
+    pub accounts: Vec<String>,
     pub link: String,
 }
 
@@ -43,6 +45,25 @@ impl GoCardlessClient {
             .bearer_auth(self.get_token())
             .send()
             .await?;
+
+        match response.status().is_success() {
+            false => {
+                let status_code = response.status();
+                let payload = response.text().await?;
+                error!("Response failed. \nStatus code: {} \nPayload: {}", status_code, payload);
+
+                Err(AppError::GeneralInternalServerError("".to_string()))
+            }
+            true => Ok(response.json().await?),
+        }
+    }
+
+    pub async fn get_requisition(&self, id: &str) -> AppResult<Requisition> {
+        const URL_SUFFIX: &str = concatcp!(API_V2, "/requisitions");
+        let url = format!("{URL_SUFFIX}/{id}");
+        let url = Self::build_request_url(&self.config, url.as_str());
+
+        let response = self.client.get(url).send().await?;
 
         match response.status().is_success() {
             false => {

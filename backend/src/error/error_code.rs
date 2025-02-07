@@ -106,6 +106,11 @@ error_codes!(
     (7003, INVALID_BEARER_TOKEN, "Invalid bearer token.");
 );
 
+// GoCardless
+error_codes!(
+    (8000, NO_ACCOUNT_LINKED_WITH_GO_CARDLESS, "No account has been linked with GoCardless.");
+);
+
 // Misc Errors
 error_codes!(
     (99999, CUSTOM_ERROR, "Some kind of unmappable/custom error.");

@@ -64,7 +64,7 @@ impl CustomConfigInner {
     fn load_from_string(yaml: String, path: String) -> loco_rs::Result<Self> {
         let rendered = Tera::one_off(yaml.as_str(), &Context::new(), false)?;
 
-        serde_yml::from_str(&rendered).map_err(|err| {
+        serde_norway::from_str(&rendered).map_err(|err| {
             error!("Yaml Error: {} | File: {}", err.to_string(), path);
 
             Error::Any(err.into())

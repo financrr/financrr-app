@@ -4,7 +4,7 @@ use crate::initializers::opensearch::OpensearchInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::{instances, sessions};
-use crate::models::external_bank_institutions;
+use crate::models::{external_bank_institutions, go_cardless_enduser_agreements, go_cardless_requisitions};
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::Service;
@@ -141,6 +141,8 @@ impl Hooks for App {
         truncate_table(db, sessions::Entity).await?;
         truncate_table(db, instances::Entity).await?;
         truncate_table(db, external_bank_institutions::Entity).await?;
+        truncate_table(db, go_cardless_enduser_agreements::Entity).await?;
+        truncate_table(db, go_cardless_requisitions::Entity).await?;
 
         Ok(())
     }

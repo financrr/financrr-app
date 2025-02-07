@@ -4,8 +4,7 @@ use crate::error::app_error::{AppError, AppResult};
 use chrono::{DateTime, FixedOffset};
 use const_format::concatcp;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use tracing::{error, warn};
+use tracing::error;
 
 #[derive(Debug, Serialize)]
 pub struct CreateEndUserAgreement {
@@ -55,12 +54,7 @@ impl GoCardlessClient {
 
                 Err(AppError::GeneralInternalServerError("".to_string()))
             }
-            true => {
-                let value = response.text().await?;
-                warn!("Value: {}", value);
-
-                Ok(serde_json::from_str(value.as_str()).unwrap())
-            }
+            true => Ok(response.json().await?),
         }
     }
 

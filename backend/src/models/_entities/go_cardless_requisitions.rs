@@ -15,6 +15,7 @@ pub struct Model {
     pub agreement_id: i64,
     pub external_bank_institution_id: i64,
     pub user_id: i64,
+    pub used_at: Option<DateTimeWithTimeZone>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }

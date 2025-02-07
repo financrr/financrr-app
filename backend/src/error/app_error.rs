@@ -134,6 +134,11 @@ app_errors!(
     (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_BEARER_TOKEN, InvalidBearerToken);
 );
 
+// GoCardless
+app_errors!(
+    (StatusCode::BAD_REQUEST, ErrorCode::NO_ACCOUNT_LINKED_WITH_GO_CARDLESS, NoAccountLinkedWithGoCardless);
+);
+
 impl From<LocoError> for AppError {
     fn from(value: LocoError) -> Self {
         match value {

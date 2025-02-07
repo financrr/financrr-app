@@ -174,6 +174,7 @@ CREATE TABLE go_cardless_requisitions
     agreement_id                 BIGINT REFERENCES go_cardless_enduser_agreements (id) NOT NULL,
     external_bank_institution_id BIGINT REFERENCES external_bank_institutions (id)     NOT NULL,
     user_id                      BIGINT REFERENCES users (id)                          NOT NULL,
+    used_at                      timestamp with time zone,
     created_at                   timestamp with time zone                              NOT NULL,
     updated_at                   timestamp with time zone                              NOT NULL
 );

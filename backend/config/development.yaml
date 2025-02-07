@@ -117,3 +117,7 @@ scheduler:
       run: "SyncInstitutions"
       schedule: "every 24 hours"
       run_on_start: true
+
+    clean_up_requisitions:
+      run: "CleanUpRequisitions"
+      schedule: "every 24 hours"
