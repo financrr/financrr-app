@@ -26,9 +26,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04 # Replace with latest when https://github.com/rust-lang/rust/issues/135867 is fixed
             platform: linux/amd64
-          - os: ubuntu-latest-arm
+          - os: ubuntu-22.04-arm # Replace with latest when https://github.com/rust-lang/rust/issues/135867 is fixed
             platform: linux/arm64
     permissions:
       contents: read
