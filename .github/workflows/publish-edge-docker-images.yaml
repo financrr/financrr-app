@@ -17,9 +17,7 @@ defaults:
     working-directory: ./backend  # Change the working directory to /backend
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: financrr/backend
-  GHCR_REPO: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+  GHCR_REPO: ghcr.io/financrr/backend
 
 jobs:
   build:

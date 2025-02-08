@@ -1,6 +1,5 @@
 # financrr Backend
 
-
 ![](../resources/Logo/banner_light_bg.png "Financrr Banner")
 
 The backend and cli for financrr - The most modern finance manager you've ever seen!
