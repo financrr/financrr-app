@@ -5532,18 +5532,18 @@ dependencies = [
 
 [[package]]
 name = "utoipauto"
-version = "0.2.0"
+version = "0.3.0-alpha.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cba36db2c397c614110554a60fbb4bb97d5f8c6823775c766e6f455e37377047"
+checksum = "5b51f6104f5a48663a7172fa48d1242f1417dc16788bc578bde069079b6786f6"
 dependencies = [
  "utoipauto-macro",
 ]
 
 [[package]]
 name = "utoipauto-core"
-version = "0.2.0"
+version = "0.3.0-alpha.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "268d76aaebb80eba79240b805972e52d7d410d4bcc52321b951318b0f440cd60"
+checksum = "f5623bca4252102afc1cc58c3a6c5744a740c1c17c861641d8c1a5634a996f47"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5552,9 +5552,9 @@ dependencies = [
 
 [[package]]
 name = "utoipauto-macro"
-version = "0.2.0"
+version = "0.3.0-alpha.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "382673bda1d05c85b4550d32fd4192ccd4cffe9a908543a0795d1e7682b36246"
+checksum = "e0b93fc5998da9473226222d019c619cbaf9baebe2073f86a7e128f290a1ad68"
 dependencies = [
  "proc-macro2",
  "quote",
