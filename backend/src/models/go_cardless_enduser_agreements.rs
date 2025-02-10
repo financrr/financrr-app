@@ -28,7 +28,14 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 // implement your read-oriented logic here
-impl Model {}
+impl Model {
+    pub async fn find_by_external_institution_id(db: &DatabaseConnection, id: i64) -> AppResult<Option<Model>> {
+        Ok(Entity::find()
+            .filter(Column::ExternalBankInstitutionId.eq(id))
+            .one(db)
+            .await?)
+    }
+}
 
 // implement your write-oriented logic here
 impl ActiveModel {}

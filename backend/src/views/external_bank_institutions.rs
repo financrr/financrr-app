@@ -68,6 +68,7 @@ impl ExternalBankInstitutionResponse {
                 page_size: query.page_size,
                 total_pages: data.total_pages,
                 // TODO fix!
+                //  - will be fixable in loco v0.15
                 total: 0,
             },
         }

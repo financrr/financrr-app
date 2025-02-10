@@ -63,7 +63,7 @@ impl GoCardlessClient {
         let url = format!("{URL_SUFFIX}/{id}");
         let url = Self::build_request_url(&self.config, url.as_str());
 
-        let response = self.client.get(url).send().await?;
+        let response = self.client.get(url).bearer_auth(self.get_token()).send().await?;
 
         match response.status().is_success() {
             false => {

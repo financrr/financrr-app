@@ -5,7 +5,7 @@ use crate::error::app_error::{
 use crate::middlewares::authentication::Authenticated;
 use crate::models::_entities::sessions;
 use crate::models::external_bank_institutions::ExternalBankInstitutions;
-use crate::models::go_cardless_enduser_agreements::Entity;
+use crate::models::go_cardless_enduser_agreements::{Entity, Model};
 use crate::services::bank_linking_data::BankLinkingData;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::types::snowflake::Snowflake;
@@ -57,7 +57,7 @@ async fn start_linking_process(
         .ok_or(AppError::NotFound())?;
 
     if let Some(go_cardless_client) = bank_linking_data.get_go_cardless_client() {
-        if Entity::find_by_external_id(&ctx.db, institution.external_id.as_str())
+        if Model::find_by_external_institution_id(&ctx.db, institution.id)
             .await?
             .is_none()
         {

@@ -70,34 +70,39 @@ async fn create_linking_link(
             "Bank linking config is not configured!".to_string(),
         ))?;
 
-    // TODO check if link already exist and use that one
-    let institution = external_bank_institutions::Entity::find_by_id(&ctx.db, data.external_bank_institution_id.id)
-        .await?
-        .ok_or(AppError::EntityNotFound())?;
-    let agreement = go_cardless_enduser_agreements::Entity::find_by_external_bank_institution(
-        &ctx.db,
-        data.external_bank_institution_id.id,
-    )
-    .await?
-    .ok_or(AppError::EntityNotFound())?;
+    let requisition = match go_cardless_requisitions::Model::find_by_user_id(&ctx.db, user.id).await? {
+        Some(req) => req,
+        None => {
+            let institution =
+                external_bank_institutions::Entity::find_by_id(&ctx.db, data.external_bank_institution_id.id)
+                    .await?
+                    .ok_or(AppError::EntityNotFound())?;
+            let agreement = go_cardless_enduser_agreements::Entity::find_by_external_bank_institution(
+                &ctx.db,
+                data.external_bank_institution_id.id,
+            )
+            .await?
+            .ok_or(AppError::EntityNotFound())?;
 
-    let response = go_cardless_client
-        .create_requisition(
-            bank_linking_config.redirect_url.as_str(),
-            institution.external_id.as_str(),
-            agreement.external_id.as_str(),
-        )
-        .await?;
+            let response = go_cardless_client
+                .create_requisition(
+                    bank_linking_config.redirect_url.as_str(),
+                    institution.external_id.as_str(),
+                    agreement.external_id.as_str(),
+                )
+                .await?;
 
-    let requisition = go_cardless_requisitions::ActiveModel::from_api_response(
-        &ctx.db,
-        &snowflake_generator,
-        &agreement,
-        &institution,
-        &user,
-        response,
-    )
-    .await?;
+            go_cardless_requisitions::ActiveModel::from_api_response(
+                &ctx.db,
+                &snowflake_generator,
+                &agreement,
+                &institution,
+                &user,
+                response,
+            )
+            .await?
+        }
+    };
 
     Ok((
         StatusCode::CREATED,

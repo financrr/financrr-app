@@ -4,7 +4,7 @@ use loco_rs::prelude::BackgroundWorker;
 use serde::Serialize;
 
 pub struct SyncAccountData {
-    ctx: AppContext,
+    _ctx: AppContext,
 }
 
 #[derive(Debug, Serialize)]
@@ -15,7 +15,7 @@ pub struct SyncAccountDataArgs {
 #[async_trait]
 impl BackgroundWorker<SyncAccountDataArgs> for SyncAccountData {
     fn build(ctx: &AppContext) -> Self {
-        Self { ctx: ctx.clone() }
+        Self { _ctx: ctx.clone() }
     }
 
     async fn perform(&self, _: SyncAccountDataArgs) -> loco_rs::Result<()> {
