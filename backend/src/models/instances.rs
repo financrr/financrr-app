@@ -65,6 +65,10 @@ impl Model {
         result.ok_or_else(|| ModelError::EntityNotFound)
     }
 
+    pub async fn count_instances(db: &impl ConnectionTrait) -> ModelResult<u64> {
+        Ok(Entity::find().count(db).await?)
+    }
+
     pub async fn create_new_instance(db: &impl ConnectionTrait, node_id: i16) -> ModelResult<Self> {
         let instance = ActiveModel {
             node_id: ActiveValue::set(node_id),

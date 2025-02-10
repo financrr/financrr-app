@@ -1,9 +1,16 @@
+use crate::initializers::context::ContextInitializer;
 use crate::initializers::openapi::OpenApiInitializer;
+use crate::initializers::opensearch::OpensearchInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
-use crate::models::_entities::instances;
+use crate::models::_entities::{instances, sessions};
+use crate::models::{external_bank_institutions, go_cardless_enduser_agreements, go_cardless_requisitions};
+use crate::services::custom_configs::base::CustomConfigInner;
+use crate::services::instance_handler::InstanceHandlerInner;
+use crate::services::Service;
 use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
 use crate::utils::routes::ExtendedAppRoutes;
+use crate::workers::external_bank_institutions as external_bank_institutions_workers;
 use crate::workers::session_used::SessionUsedWorker;
 use crate::{controllers, models::_entities::users, tasks};
 use async_trait::async_trait;
@@ -16,7 +23,7 @@ use loco_rs::{
     boot::{create_app, BootResult, StartMode},
     cache,
     controller::AppRoutes,
-    db::{self, truncate_table},
+    db::truncate_table,
     environment::Environment,
     storage,
     task::Tasks,
@@ -24,8 +31,8 @@ use loco_rs::{
 };
 use migration::Migrator;
 use mimalloc::MiMalloc;
-use sea_orm::DatabaseConnection;
 use std::path::Path;
+use tracing::{debug, info};
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -62,10 +69,26 @@ impl Hooks for App {
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
         Ok(vec![
+            Box::new(ContextInitializer),
             Box::new(PathNormalizationInitializer),
             Box::new(OpenApiInitializer),
             Box::new(ServicesInitializer),
+            Box::new(OpensearchInitializer),
         ])
+    }
+
+    async fn before_run(ctx: &AppContext) -> Result<()> {
+        // Load and parse CustomConfig
+        let conf = CustomConfigInner::get_arc(ctx).await?;
+        debug!(
+            "Bank account linking configured: {}",
+            conf.is_bank_data_linking_configured()
+        );
+
+        let instance_handler = InstanceHandlerInner::get_arc(ctx).await?;
+        info!("Instance started with id: {}", instance_handler.get_instance_id());
+
+        Ok(())
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
@@ -82,6 +105,9 @@ impl Hooks for App {
             .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
             .add_route(controllers::status::routes())
+            .add_route(controllers::external_bank_institutions::routes())
+            .add_route(controllers::bank_account_linking::routes())
+            .add_route(controllers::go_cardless::routes())
             .into()
     }
 
@@ -94,26 +120,34 @@ impl Hooks for App {
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
+        // External Bank institutions
+        external_bank_institutions_workers::connect_worker(ctx, queue).await?;
+
         queue.register(SessionUsedWorker::build(ctx)).await?;
 
         Ok(())
     }
+
     fn register_tasks(tasks: &mut Tasks) {
-        tasks.register(tasks::seed::SeedData);
+        tasks.register(tasks::sync_institutions::SyncInstitutions);
+        tasks.register(tasks::check_health::CheckHealth);
         // tasks-inject (do not remove)
     }
 
-    async fn truncate(db: &DatabaseConnection) -> Result<()> {
+    async fn truncate(ctx: &AppContext) -> Result<()> {
+        let db = &ctx.db;
         // TODO add all other tables
         truncate_table(db, users::Entity).await?;
+        truncate_table(db, sessions::Entity).await?;
         truncate_table(db, instances::Entity).await?;
+        truncate_table(db, external_bank_institutions::Entity).await?;
+        truncate_table(db, go_cardless_enduser_agreements::Entity).await?;
+        truncate_table(db, go_cardless_requisitions::Entity).await?;
 
         Ok(())
     }
 
-    async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
-        db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
-
+    async fn seed(_ctx: &AppContext, _path: &Path) -> Result<()> {
         Ok(())
     }
 }
