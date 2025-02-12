@@ -1,5 +1,4 @@
 use crate::bank_account_linking::client::{GoCardlessClient, API_V2};
-use crate::bank_account_linking::constants::DEFAULT_TRANSACTION_TOTAL_DAYS;
 use crate::error::app_error::{AppError, AppResult};
 use chrono::{DateTime, FixedOffset};
 use const_format::concatcp;
@@ -28,10 +27,11 @@ impl GoCardlessClient {
         &self,
         institution_id: &str,
         access_valid_for_days: u16,
+        transaction_total_days: u16
     ) -> AppResult<EndUserAgreement> {
         let data = CreateEndUserAgreement {
             institution_id: institution_id.to_string(),
-            max_historical_days: DEFAULT_TRANSACTION_TOTAL_DAYS,
+            max_historical_days: transaction_total_days,
             access_valid_for_days,
         };
 
