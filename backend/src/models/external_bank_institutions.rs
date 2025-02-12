@@ -60,6 +60,7 @@ impl ActiveModel {
     pub fn from_go_cardless(institution: Institution, snowflake_generator: &SnowflakeGenerator) -> AppResult<Self> {
         let id = snowflake_generator.next_id()?;
         let max_access_valid_for_days = institution.max_access_valid_for_days.parse::<i32>().ok();
+        let transaction_total_days = institution.transaction_total_days.parse::<i32>().ok();
 
         Ok(Self {
             id: Set(id),
@@ -70,6 +71,7 @@ impl ActiveModel {
             countries: Set(institution.countries),
             logo_link: Set(institution.logo),
             access_valid_for_days: Set(max_access_valid_for_days),
+            transaction_total_days: Set(transaction_total_days),
             created_at: Set(Utc::now().into()),
             updated_at: Set(Utc::now().into()),
         })

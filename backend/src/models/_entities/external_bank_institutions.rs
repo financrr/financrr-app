@@ -20,6 +20,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub logo_link: Option<String>,
     pub access_valid_for_days: Option<i32>,
+    pub transaction_total_days: Option<i32>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }

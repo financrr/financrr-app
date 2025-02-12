@@ -1,4 +1,4 @@
-use crate::bank_account_linking::constants::DEFAULT_ACCESS_VALID_FOR;
+use crate::bank_account_linking::constants::{DEFAULT_ACCESS_VALID_FOR, DEFAULT_TRANSACTION_TOTAL_DAYS};
 use crate::error::app_error::{
     AppError, AppResult, GeneralInternalServerErrorResponse, NotFoundResponse, UnauthorizedResponse,
 };
@@ -68,6 +68,10 @@ async fn start_linking_process(
                         .access_valid_for_days
                         .map(|i| i as u16)
                         .unwrap_or(DEFAULT_ACCESS_VALID_FOR),
+                    institution
+                        .transaction_total_days
+                        .map(|i| i as u16)
+                        .unwrap_or(DEFAULT_TRANSACTION_TOTAL_DAYS),
                 )
                 .await?;
 

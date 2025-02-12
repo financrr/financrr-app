@@ -136,16 +136,17 @@ CREATE INDEX idx_taggings_entity ON taggings (entity_type, entity_id);
 
 CREATE TABLE external_bank_institutions
 (
-    id                    BIGINT PRIMARY KEY,
-    external_id           TEXT                     NOT NULL,
-    provider              TEXT                     NOT NULL,
-    name                  TEXT                     NOT NULL,
-    bic                   TEXT,
-    countries             TEXT[]                   NOT NULL,
-    logo_link             TEXT,
-    access_valid_for_days INT,
-    created_at            timestamp with time zone NOT NULL,
-    updated_at            timestamp with time zone NOT NULL,
+    id                     BIGINT PRIMARY KEY,
+    external_id            TEXT                     NOT NULL,
+    provider               TEXT                     NOT NULL,
+    name                   TEXT                     NOT NULL,
+    bic                    TEXT,
+    countries              TEXT[]                   NOT NULL,
+    logo_link              TEXT,
+    access_valid_for_days  INT,
+    transaction_total_days INT,
+    created_at             timestamp with time zone NOT NULL,
+    updated_at             timestamp with time zone NOT NULL,
     UNIQUE (external_id, provider)
 );
 
