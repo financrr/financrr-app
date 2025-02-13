@@ -16,7 +16,7 @@ pub struct Institution {
 }
 
 impl GoCardlessClient {
-    pub async fn get_supported_institutions(&self) -> AppResult<Vec<Institution>> {
+    pub async fn get_supported_institutions(&self, exclude_sandbox: bool) -> AppResult<Vec<Institution>> {
         const URL_SUFFIX: &str = concatcp!(API_V2, "/institutions/");
         let url = Self::build_request_url(&self.config, URL_SUFFIX);
 

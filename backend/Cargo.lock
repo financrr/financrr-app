@@ -2516,9 +2516,9 @@ checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
 
 [[package]]
 name = "macro-string"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b08b4c8ccdccd4f9244216035540aeb48e9edc04976306addd972b3d75b3d527"
+checksum = "8c49a0f8c7419409eedf44cb3cf8328650023dda7aeb2fd9365ab94237d1ed32"
 dependencies = [
  "proc-macro2",
  "quote",
