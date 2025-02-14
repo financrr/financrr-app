@@ -27,7 +27,7 @@ impl GoCardlessClient {
         &self,
         institution_id: &str,
         access_valid_for_days: u16,
-        transaction_total_days: u16
+        transaction_total_days: u16,
     ) -> AppResult<EndUserAgreement> {
         let data = CreateEndUserAgreement {
             institution_id: institution_id.to_string(),

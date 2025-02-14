@@ -9,6 +9,8 @@ pub struct BankDataLinkingConfig {
     pub redirect_url: String,
     #[serde(default = "default_go_cardless_api_url")]
     pub api_url: String,
+    #[serde(default = "default_enabled")]
+    pub exclude_sandboxes: bool,
 }
 
 fn default_enabled() -> bool {
