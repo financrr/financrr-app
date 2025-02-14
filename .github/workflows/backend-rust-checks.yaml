@@ -39,16 +39,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "date=$(date -d '1 month ago' +'%Y-%m-%d')" >> $GITHUB_ENV
-      - uses: dtolnay/rust-toolchain@master
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install nightly Rust for formatting
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-${{ env.date }}
+          toolchain: nightly
           components: rustfmt
-      - uses: LoliGothick/rustfmt-check@master
+          override: true
+
+      - name: Run rustfmt check and annotate PR
+        uses: clechasseur/rs-fmt-check@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          toolchain: nightly-${{ env.date }}
-          flags: --all
-          args: --config-path=./backend/rustfmt.toml
+          toolchain: nightly
           working-directory: ./backend
