@@ -144,7 +144,7 @@ insta = { version = "1.42.1", features = ["serde", "redactions", "yaml", "filter
 mockito = "1.6.1"
 
 # Utils
-tempfile = "3.16.0"
+tempfile = "3.17.1"
 
 [[bin]]
 name = "financrr-cli"
