@@ -23,7 +23,7 @@ pub async fn create_user(ctx: &AppContext, email: &str, password: &str, activate
         .await
         .unwrap();
 
-    let user = match activate {
+    match activate {
         true => user.into_active_model().verified(&ctx.db).await.unwrap(),
         false => {
             let verification_service = UserVerificationServiceInner::get_arc(ctx).await.unwrap();
@@ -33,9 +33,7 @@ pub async fn create_user(ctx: &AppContext, email: &str, password: &str, activate
                 .await
                 .unwrap()
         }
-    };
-
-    user
+    }
 }
 
 pub async fn create_user_with_email(ctx: &AppContext, email: &str) -> Model {

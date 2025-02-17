@@ -1,6 +1,7 @@
 pub use super::_entities::users::{self, ActiveModel, Entity, Model};
 use crate::controllers::user::RegisterParams;
 use crate::error::app_error::{AppError, AppResult};
+use crate::middlewares::authentication::Authenticate;
 use crate::models::_entities::sessions;
 use crate::services::secret_generator::SecretGenerator;
 use crate::services::snowflake_generator::SnowflakeGenerator;
@@ -26,12 +27,23 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
     where
         C: ConnectionTrait,
     {
-        self.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+        if !self.updated_at.is_set() {
+            self.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+        }
+
         if insert {
             self.created_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
         }
 
         Ok(self)
+    }
+}
+
+impl Authenticate for users::Model {
+    async fn find_by_api_key(ctx: &AppContext, api_key: &str) -> AppResult<Self> {
+        let session = sessions::Model::find_by_api_key(ctx, api_key).await?;
+
+        session.get_user(&ctx.db).await
     }
 }
 
