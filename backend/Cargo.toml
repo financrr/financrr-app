@@ -133,7 +133,7 @@ rstest = "0.24.0"
 insta = { version = "1.42.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Utils
-tempfile = "3.17.0"
+tempfile = "3.17.1"
 
 [profile.release]
 lto = true
