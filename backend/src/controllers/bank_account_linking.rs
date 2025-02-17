@@ -17,7 +17,6 @@ use loco_rs::app::AppContext;
 use loco_rs::prelude::Routes;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-use tracing::info;
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, ToSchema)]

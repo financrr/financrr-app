@@ -17,6 +17,7 @@ pub struct Institution {
 
 impl GoCardlessClient {
     pub async fn get_supported_institutions(&self, exclude_sandbox: bool) -> AppResult<Vec<Institution>> {
+        const TEST_INSTITUTION_COUNTRY_CODE: &str = "xx";
         const URL_SUFFIX: &str = concatcp!(API_V2, "/institutions/");
         let url = Self::build_request_url(&self.config, URL_SUFFIX);
 
@@ -38,8 +39,15 @@ impl GoCardlessClient {
                         ins.countries = ins.countries.into_iter().map(|c| c.to_lowercase()).collect();
                         ins
                     })
-                    // Sort out test institutions
-                    .filter(|ins| !ins.countries.contains(&"xx".to_string()))
+                    // Filter out test institutions if exclude_sandbox is true
+                    .filter(|ins| !(exclude_sandbox && ins.countries.eq(&[TEST_INSTITUTION_COUNTRY_CODE])))
+                    // Remove "xx" from countries if exclude_sandbox is true
+                    .map(|mut ins| {
+                        if exclude_sandbox {
+                            ins.countries.retain(|c| c != TEST_INSTITUTION_COUNTRY_CODE);
+                        }
+                        ins
+                    })
                     .collect();
 
                 Ok(json)
