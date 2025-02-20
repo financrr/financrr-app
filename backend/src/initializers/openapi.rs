@@ -1,9 +1,10 @@
+use crate::utils::type_name::type_name_only;
 use async_trait::async_trait;
 use axum::Router as AxumRouter;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Initializer;
-use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
 use utoipa::openapi::OpenApi as OpenApiStruct;
+use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 use utoipa_scalar::{Scalar, Servable};
 use utoipa_swagger_ui::SwaggerUi;
@@ -17,7 +18,10 @@ use utoipauto::utoipauto;
         (name = "OpenAPI", description = "Endpoints for OpenAPI documentation."),
         (name = "Metrics", description = "Endpoints for prometheus metrics."),
         (name = "Session", description = "Endpoints for session management."),
-        (name = "User", description = "Endpoints for user management.")
+        (name = "User", description = "Endpoints for user management."),
+        (name = "External Bank Institutions", description = "Endpoints for external bank institutions."),
+        (name = "Bank Account Linking", description = "Endpoints for starting the bank account linking process."),
+        (name = "GoCardless", description = "Endpoints that are used to link with GoCardless provider."),
     ),
     modifiers(&ApiKeyModifier)
 )]
@@ -37,7 +41,7 @@ pub struct OpenApiInitializer;
 #[async_trait]
 impl Initializer for OpenApiInitializer {
     fn name(&self) -> String {
-        "OpenAPI".to_string()
+        type_name_only::<Self>().to_string()
     }
 
     async fn after_routes(&self, router: AxumRouter, _ctx: &AppContext) -> loco_rs::Result<AxumRouter> {

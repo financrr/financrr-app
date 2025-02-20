@@ -4,6 +4,12 @@
 -- #                                                          #
 -- ############################################################
 
+CREATE TABLE opensearch_migrations
+(
+    version     TEXT PRIMARY KEY UNIQUE,
+    executed_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE instances
 (
     node_id        SMALLINT PRIMARY KEY,
@@ -121,6 +127,58 @@ CREATE TABLE taggings
 
 CREATE INDEX idx_taggings_tag_id ON taggings (tag_id);
 CREATE INDEX idx_taggings_entity ON taggings (entity_type, entity_id);
+
+-- ############################################################
+-- #                                                          #
+-- #              External Bank Institutions                  #
+-- #                                                          #
+-- ############################################################
+
+CREATE TABLE external_bank_institutions
+(
+    id                     BIGINT PRIMARY KEY,
+    external_id            TEXT                     NOT NULL,
+    provider               TEXT                     NOT NULL,
+    name                   TEXT                     NOT NULL,
+    bic                    TEXT,
+    countries              TEXT[]                   NOT NULL,
+    logo_link              TEXT,
+    access_valid_for_days  INT,
+    transaction_total_days INT,
+    created_at             timestamp with time zone NOT NULL,
+    updated_at             timestamp with time zone NOT NULL,
+    UNIQUE (external_id, provider)
+);
+
+-- ############################################################
+-- #                                                          #
+-- #                      GoCardless                          #
+-- #                                                          #
+-- ############################################################
+
+CREATE TABLE go_cardless_enduser_agreements
+(
+    id                           BIGINT PRIMARY KEY,
+    external_id                  TEXT UNIQUE                                       NOT NULL,
+    external_bank_institution_id BIGINT REFERENCES external_bank_institutions (id) NOT NULL UNIQUE,
+    max_historical_days          INT                                               NOT NULL,
+    access_valid_for_days        INT                                               NOT NULL,
+    created_at                   timestamp with time zone                          NOT NULL,
+    updated_at                   timestamp with time zone                          NOT NULL
+);
+
+CREATE TABLE go_cardless_requisitions
+(
+    id                           BIGINT PRIMARY KEY,
+    external_id                  TEXT UNIQUE                                           NOT NULL,
+    link                         TEXT UNIQUE                                           NOT NULL,
+    agreement_id                 BIGINT REFERENCES go_cardless_enduser_agreements (id) NOT NULL,
+    external_bank_institution_id BIGINT REFERENCES external_bank_institutions (id)     NOT NULL,
+    user_id                      BIGINT REFERENCES users (id)                          NOT NULL,
+    used_at                      timestamp with time zone,
+    created_at                   timestamp with time zone                              NOT NULL,
+    updated_at                   timestamp with time zone                              NOT NULL
+);
 
 -- ############################################################
 -- #                                                          #
