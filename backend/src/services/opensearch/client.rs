@@ -1,18 +1,18 @@
 use crate::error::app_error::{AppError, AppResult};
+use crate::services::Service;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
-use crate::services::Service;
 use crate::views::pagination::{Pager, PagerMeta};
 use loco_rs::app::AppContext;
 use opensearch::auth::Credentials;
 use opensearch::cert::CertificateValidation;
 use opensearch::cluster::ClusterHealthParts;
-use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::http::Url;
+use opensearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use opensearch::{BulkOperation, BulkParts, OpenSearch, SearchParts};
-use serde::de::DeserializeOwned;
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde::de::DeserializeOwned;
+use serde_json::{Value, json};
 use std::sync::{Arc, OnceLock};
 use tracing::warn;
 

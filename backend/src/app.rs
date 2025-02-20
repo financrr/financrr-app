@@ -5,10 +5,10 @@ use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
 use crate::models::_entities::{instances, sessions};
 use crate::models::{external_bank_institutions, go_cardless_enduser_agreements, go_cardless_requisitions};
+use crate::services::Service;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
-use crate::services::Service;
-use crate::utils::folder::{create_necessary_folders, STORAGE_FOLDER};
+use crate::utils::folder::{STORAGE_FOLDER, create_necessary_folders};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::external_bank_institutions as external_bank_institutions_workers;
 use crate::workers::session_used::SessionUsedWorker;
@@ -18,16 +18,16 @@ use loco_rs::cache::Cache;
 use loco_rs::config::Config;
 use loco_rs::storage::Storage;
 use loco_rs::{
+    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
-    boot::{create_app, BootResult, StartMode},
+    boot::{BootResult, StartMode, create_app},
     cache,
     controller::AppRoutes,
     db::truncate_table,
     environment::Environment,
     storage,
     task::Tasks,
-    Result,
 };
 use migration::Migrator;
 use mimalloc::MiMalloc;

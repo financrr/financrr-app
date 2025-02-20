@@ -1,9 +1,9 @@
+use crate::services::Service;
 use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
 use crate::services::custom_configs::opensearch::OpensearchConfig;
-use crate::services::Service;
+use loco_rs::Error;
 use loco_rs::app::AppContext;
 use loco_rs::environment::Environment;
-use loco_rs::Error;
 use serde::Deserialize;
 use std::env;
 use std::fs::read_to_string;

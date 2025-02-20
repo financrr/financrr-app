@@ -1,9 +1,9 @@
 use crate::helpers::init::init_test;
 use financrr::app::App;
 use financrr::models::_entities::instances;
+use financrr::services::Service;
 use financrr::services::instance_handler::InstanceHandlerInner;
 use financrr::services::snowflake_generator::MAX_NODE_ID;
-use financrr::services::Service;
 use insta::assert_debug_snapshot;
 use loco_rs::prelude::boot_test;
 use serial_test::serial;

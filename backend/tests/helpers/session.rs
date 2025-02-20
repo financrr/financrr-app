@@ -2,9 +2,9 @@ use crate::helpers::users::clean_up_user_model;
 use financrr::controllers::session::CreateSessionParams;
 use financrr::models::_entities::sessions;
 use financrr::models::users;
+use financrr::services::Service;
 use financrr::services::secret_generator::SecretGeneratorInner;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
-use financrr::services::Service;
 use loco_rs::app::AppContext;
 
 pub async fn generate_session(ctx: &AppContext, user: &users::Model, password: &str) -> sessions::Model {

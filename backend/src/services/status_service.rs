@@ -1,5 +1,5 @@
-use crate::services::opensearch::client::{OpensearchClient, OpensearchClientInner};
 use crate::services::Service;
+use crate::services::opensearch::client::{OpensearchClient, OpensearchClientInner};
 use crate::views::status::{HealthReport, HealthResponse, HealthStatus, StatusComponents};
 use bytes::Bytes;
 use loco_rs::app::AppContext;

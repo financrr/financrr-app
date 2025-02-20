@@ -1,7 +1,7 @@
 pub use super::_entities::opensearch_migrations::{ActiveModel, Entity, Model};
 use crate::error::app_error::AppResult;
-use sea_orm::entity::prelude::*;
 use sea_orm::Set;
+use sea_orm::entity::prelude::*;
 
 pub type OpensearchMigrations = Entity;
 

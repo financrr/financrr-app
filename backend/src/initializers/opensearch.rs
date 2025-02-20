@@ -1,6 +1,6 @@
 use crate::opensearch::migration_system::migrator::OpensearchMigrator;
-use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::Service;
+use crate::services::opensearch::client::OpensearchClientInner;
 use crate::utils::type_name::type_name_only;
 use async_trait::async_trait;
 use loco_rs::app::AppContext;

@@ -4,9 +4,9 @@ use crate::helpers::users::{
     generate_unactivated_user,
 };
 use financrr::controllers::user::RegisterParams;
+use financrr::services::Service;
 use financrr::services::secret_generator::SecretGeneratorInner;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
-use financrr::services::Service;
 use financrr::{app::App, models::users::Model};
 use insta::assert_debug_snapshot;
 use loco_rs::prelude::boot_test;
@@ -80,11 +80,12 @@ async fn can_verification_token() {
     assert!(user.email_verification_sent_at.is_none());
     assert!(user.email_verification_token.is_none());
 
-    assert!(user
-        .into_active_model()
-        .set_email_verification_sent(&boot.app_context.db, &secret_generator)
-        .await
-        .is_ok());
+    assert!(
+        user.into_active_model()
+            .set_email_verification_sent(&boot.app_context.db, &secret_generator)
+            .await
+            .is_ok()
+    );
 
     let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
@@ -105,11 +106,12 @@ async fn can_set_forgot_password_sent() {
     assert!(user.reset_sent_at.is_none());
     assert!(user.reset_token.is_none());
 
-    assert!(user
-        .into_active_model()
-        .set_forgot_password_sent(&boot.app_context.db, &secret_generator)
-        .await
-        .is_ok());
+    assert!(
+        user.into_active_model()
+            .set_forgot_password_sent(&boot.app_context.db, &secret_generator)
+            .await
+            .is_ok()
+    );
 
     let user = Model::find_by_id(&boot.app_context.db, user_id).await.unwrap();
 
@@ -152,15 +154,18 @@ async fn can_reset_password() {
 
     assert!(user.verify_password(PASSWORD));
 
-    assert!(user
-        .clone()
-        .into_active_model()
-        .reset_password(&boot.app_context.db, NEW_PASSWORD)
-        .await
-        .is_ok());
+    assert!(
+        user.clone()
+            .into_active_model()
+            .reset_password(&boot.app_context.db, NEW_PASSWORD)
+            .await
+            .is_ok()
+    );
 
-    assert!(Model::find_by_id(&boot.app_context.db, user_id)
-        .await
-        .unwrap()
-        .verify_password(NEW_PASSWORD));
+    assert!(
+        Model::find_by_id(&boot.app_context.db, user_id)
+            .await
+            .unwrap()
+            .verify_password(NEW_PASSWORD)
+    );
 }

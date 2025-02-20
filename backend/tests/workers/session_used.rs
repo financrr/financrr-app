@@ -3,7 +3,7 @@ use loco_rs::prelude::*;
 
 use crate::helpers::init::load_envs;
 use crate::helpers::session::generate_session;
-use crate::helpers::users::{create_user_with_email, DEFAULT_PASSWORD};
+use crate::helpers::users::{DEFAULT_PASSWORD, create_user_with_email};
 use financrr::models::_entities::sessions;
 use financrr::workers::session_used::SessionUsedWorker;
 use financrr::workers::session_used::SessionUsedWorkerArgs;

@@ -1,6 +1,6 @@
 use crate::opensearch::indices::OpensearchIndex;
-use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::Service;
+use crate::services::opensearch::client::OpensearchClientInner;
 use async_trait::async_trait;
 use loco_rs::prelude::{AppContext, BackgroundWorker};
 use serde::{Deserialize, Serialize};

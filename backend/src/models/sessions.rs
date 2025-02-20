@@ -7,12 +7,12 @@ use crate::models::users::users;
 use crate::services::secret_generator::SecretGenerator;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::workers::session_used::{SessionUsedWorker, SessionUsedWorkerArgs};
+use ActiveValue::Unchanged;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
-use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue;
 use sea_orm::ActiveValue::Set;
-use ActiveValue::Unchanged;
+use sea_orm::entity::prelude::*;
 
 pub type Sessions = Entity;
 

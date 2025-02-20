@@ -8,7 +8,7 @@ resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [package]
@@ -20,9 +20,13 @@ default-run = "financrr-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace.lints.rust]
-# Forbid
 unsafe_code = "forbid"
 non_ascii_idents = "forbid"
+rust_2024_idioms = "warn"
+
+[workspace.lints.clippy]
+unused_async = "warn"
+use_self = "warn"
 
 [package.metadata.cargo-machete]
 ignored = ["include_dir"]

@@ -1,5 +1,5 @@
-use rand::distr::Alphanumeric;
 use rand::Rng;
+use rand::distr::Alphanumeric;
 
 pub fn generate_random_email() -> String {
     let local_part: String = rand::rng()

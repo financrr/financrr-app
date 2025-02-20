@@ -1,4 +1,4 @@
-use crate::constants::{ApiVersions, ALL_API_VERSIONS, CURRENT_API_VERSION};
+use crate::constants::{ALL_API_VERSIONS, ApiVersions, CURRENT_API_VERSION};
 use serde::Serialize;
 use std::sync::LazyLock;
 use utoipa::ToSchema;

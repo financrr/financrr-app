@@ -1,6 +1,6 @@
 use financrr::models::external_bank_institutions;
-use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::Service;
+use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use loco_rs::prelude::AppContext;
 use sea_orm::{ActiveModelTrait, Set};
 

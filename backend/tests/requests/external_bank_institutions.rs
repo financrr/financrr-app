@@ -1,7 +1,7 @@
 use crate::helpers::external_institutions::generate_institutions;
 use crate::helpers::init::init_test;
 use crate::helpers::session::generate_session;
-use crate::helpers::users::{generate_test_user, DEFAULT_PASSWORD};
+use crate::helpers::users::{DEFAULT_PASSWORD, generate_test_user};
 use axum::http::StatusCode;
 use financrr::app::App;
 use loco_rs::prelude::request;

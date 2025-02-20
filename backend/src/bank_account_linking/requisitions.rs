@@ -1,4 +1,4 @@
-use crate::bank_account_linking::client::{GoCardlessClient, API_V2};
+use crate::bank_account_linking::client::{API_V2, GoCardlessClient};
 use crate::error::app_error::{AppError, AppResult};
 use const_format::concatcp;
 use serde::{Deserialize, Serialize};

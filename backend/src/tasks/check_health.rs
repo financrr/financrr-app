@@ -1,5 +1,5 @@
-use crate::services::status_service::StatusServiceInner;
 use crate::services::Service;
+use crate::services::status_service::StatusServiceInner;
 use crate::views::status::HealthStatus;
 use loco_rs::prelude::*;
 use tracing::{error, info};

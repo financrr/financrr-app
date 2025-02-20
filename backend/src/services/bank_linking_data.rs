@@ -1,6 +1,6 @@
 use crate::bank_account_linking::client::GoCardlessClient;
-use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::Service;
+use crate::services::custom_configs::base::CustomConfigInner;
 use loco_rs::app::AppContext;
 use std::sync::{Arc, OnceLock};
 

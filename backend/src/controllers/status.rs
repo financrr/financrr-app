@@ -2,9 +2,9 @@ use crate::services::status_service::StatusService;
 use crate::views::status::{HealthReport, HealthResponse, HealthStatus, StatusComponents, VersionResponse};
 use axum::http::StatusCode;
 use axum::routing::get;
-use axum::{debug_handler, Extension, Json};
+use axum::{Extension, Json, debug_handler};
 use loco_rs::prelude::Routes;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 /// Health status of the server.
 #[utoipa::path(get,

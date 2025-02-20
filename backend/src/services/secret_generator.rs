@@ -1,10 +1,10 @@
-use crate::services::instance_handler::{InstanceHandler, InstanceHandlerInner};
 use crate::services::Service;
-use base64::prelude::BASE64_URL_SAFE;
+use crate::services::instance_handler::{InstanceHandler, InstanceHandlerInner};
 use base64::Engine;
+use base64::prelude::BASE64_URL_SAFE;
 use loco_rs::app::AppContext;
-use rand::rngs::OsRng;
 use rand::TryRngCore;
+use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 use std::sync::{Arc, OnceLock};
 

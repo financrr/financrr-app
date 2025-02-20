@@ -12,7 +12,7 @@ use crate::views::user::UserResponse;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
-use axum::{debug_handler, Extension, Form, Json};
+use axum::{Extension, Form, Json, debug_handler};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Routes;
 use sea_orm::IntoActiveModel;

@@ -4,8 +4,8 @@ use crate::error::app_error::AppResult;
 use crate::models::_entities::go_cardless_enduser_agreements::Column;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use chrono::Utc;
-use sea_orm::entity::prelude::*;
 use sea_orm::Set;
+use sea_orm::entity::prelude::*;
 
 pub type GoCardlessEnduserAgreements = Entity;
 

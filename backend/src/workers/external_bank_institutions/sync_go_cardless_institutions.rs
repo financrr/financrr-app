@@ -1,10 +1,10 @@
 use crate::bank_account_linking::constants::GO_CARDLESS_PROVIDER;
 use crate::error::app_error::AppError;
 use crate::models::external_bank_institutions;
+use crate::services::Service;
 use crate::services::bank_linking_data::BankLinkingDataInner;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
-use crate::services::Service;
 use crate::workers::external_bank_institutions::clean_up::{
     CleanUpExternalInstitutions, CleanUpExternalInstitutionsArgs,
 };

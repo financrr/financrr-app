@@ -1,5 +1,5 @@
-use crate::services::bank_linking_data::BankLinkingDataInner;
 use crate::services::Service;
+use crate::services::bank_linking_data::BankLinkingDataInner;
 use crate::workers::external_bank_institutions::sync_go_cardless_institutions::{
     SyncGoCardlessInstitutionsWorker, WorkerArgs,
 };

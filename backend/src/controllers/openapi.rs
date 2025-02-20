@@ -2,11 +2,11 @@ use crate::error::app_error::AppResult;
 use axum::body::Body;
 use axum::http::StatusCode;
 use axum::routing::get;
-use axum::{debug_handler, Json};
+use axum::{Json, debug_handler};
 use loco_rs::prelude::Response;
 use loco_rs::prelude::Routes;
-use utoipa::openapi::OpenApi as OpenApiStruct;
 use utoipa::OpenApi;
+use utoipa::openapi::OpenApi as OpenApiStruct;
 
 #[utoipa::path(get,
 path="/api/openapi.json",

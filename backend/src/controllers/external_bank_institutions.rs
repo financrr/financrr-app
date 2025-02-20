@@ -15,7 +15,7 @@ use axum::routing::get;
 use axum::{Extension, Json};
 use loco_rs::prelude::Routes;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::LazyLock;
 use tracing::error;
 use utoipa::IntoParams;
