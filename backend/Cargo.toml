@@ -20,13 +20,30 @@ default-run = "financrr-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace.lints.rust]
+rust_2024_idioms = "warn"
+future_incompatible = { level = "deny", priority = -1 }
+unreachable_pub = "warn"
 unsafe_code = "forbid"
 non_ascii_idents = "forbid"
-rust_2024_idioms = "warn"
+missing_copy_implementations = "warn"
 
 [workspace.lints.clippy]
+pedantic = "warn"
+unwrap_used = "warn"
+expect_used = "warn"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+module_name_repetitions = "warn"
+option_if_let_else = "warn"
+unnecessary_wraps = "warn"
 unused_async = "warn"
 use_self = "warn"
+must_use_candidate = "warn"
+redundant_closure_for_method_calls = "warn"
+semicolon_if_nothing_returned = "warn"
+map_unwrap_or = "warn"
+manual_assert = "warn"
 
 [package.metadata.cargo-machete]
 ignored = ["include_dir"]
