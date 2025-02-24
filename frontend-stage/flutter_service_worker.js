@@ -7,7 +7,7 @@ const RESOURCES = {"icons/Icon-maskable-512.png": "c6f7464a9d8868f582cb82c339f2b
 "icons/Icon-512.png": "c6f7464a9d8868f582cb82c339f2b3ec",
 "icons/Icon-maskable-192.png": "1adb5f7d2bc2aabcc7b6905ce655f518",
 "icons/Icon-192.png": "1adb5f7d2bc2aabcc7b6905ce655f518",
-"flutter_bootstrap.js": "a559de225ba1f35f1cdd5ad85a130d71",
+"flutter_bootstrap.js": "47a86632ee71dacb8750ec83da982b7f",
 "canvaskit/skwasm_st.wasm": "56c3973560dfcbf28ce47cebe40f3206",
 "canvaskit/skwasm_st.js": "d1326ceef381ad382ab492ba5d96f04d",
 "canvaskit/skwasm.wasm": "f0dfd99007f989368db17c9abeed5a49",
@@ -20,7 +20,7 @@ const RESOURCES = {"icons/Icon-maskable-512.png": "c6f7464a9d8868f582cb82c339f2b
 "canvaskit/skwasm.js.symbols": "80806576fa1056b43dd6d0b445b4b6f7",
 "canvaskit/canvaskit.js.symbols": "68eb703b9a609baef8ee0e413b442f33",
 "canvaskit/canvaskit.js": "6cfe36b4647fbfa15683e09e7dd366bc",
-"main.dart.js": "2a5e2e9ab774f8d1542c262736087f1f",
+"main.dart.js": "d5baa4b98f036444e764ffa522b63836",
 "version.json": "bfa013c248e52bb6a4893338e15d476d",
 "assets/FontManifest.json": "7a2b54d0e41650d5a0de09401f24afac",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
@@ -64,8 +64,8 @@ const RESOURCES = {"icons/Icon-maskable-512.png": "c6f7464a9d8868f582cb82c339f2b
 "splash/img/light-1x.png": "f575fa7e61d414f822fb978f9a09ceca",
 "splash/img/light-2x.png": "c7d1f72ed9c17894f67eb417a99df7d5",
 "favicon.png": "5acdb6cb3f089e099bf9739addce99a7",
-"index.html": "36f5d8a277c107abfb00bfeee3d27de1",
-"/": "36f5d8a277c107abfb00bfeee3d27de1",
+"index.html": "64825a5d9b2231c0a5fb21c4193630ea",
+"/": "64825a5d9b2231c0a5fb21c4193630ea",
 "manifest.json": "c4cc8f93fa92c487d0f9342362bfe4dd",
 "flutter.js": "76f08d47ff9f5715220992f993002504"};
 // The application shell files that are downloaded before a service worker can
