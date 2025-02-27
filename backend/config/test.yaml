@@ -68,7 +68,8 @@ bank_data_linking:
   enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
   secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
   secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
-  api_url: {{get_env(name="GO_CARDLESS_API_URL", default="https://financrr.test")}}
+  redirect_url: {{get_env(name="GO_CARDLESS_REDIRECT_URL", default="")}}
+  exclude_sandboxes: {{get_env(name="GO_CARDLESS_EXCLUDE_SANDBOXES", default=true)}}
 
 opensearch:
   is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="true")}}

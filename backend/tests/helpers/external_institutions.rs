@@ -1,3 +1,4 @@
+use financrr::bank_account_linking::constants::DEFAULT_TRANSACTION_TOTAL_DAYS;
 use financrr::models::external_bank_institutions;
 use financrr::services::Service;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
@@ -23,6 +24,7 @@ pub async fn generate_institutions(
                 countries: Set(vec!["de".to_string()]),
                 logo_link: Set(None),
                 access_valid_for_days: Set(None),
+                transaction_total_days: Set(Some(DEFAULT_TRANSACTION_TOTAL_DAYS as i32)),
                 created_at: Set(chrono::Utc::now().into()),
                 updated_at: Default::default(),
             }

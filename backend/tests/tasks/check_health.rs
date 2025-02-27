@@ -24,7 +24,9 @@ async fn test_can_run_check_health() {
 #[serial]
 async fn test_fail_check_health() {
     load_envs();
-    set_var("OPENSEARCH_PASSWORD", "jibberish");
+    unsafe {
+        set_var("OPENSEARCH_PASSWORD", "jibberish");
+    }
 
     let boot = boot_test::<App>().await.unwrap();
 
