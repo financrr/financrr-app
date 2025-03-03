@@ -103,7 +103,7 @@ dotenvy = "0.15.7"
 mimalloc = "0.1.43"
 
 # Derive and Error utils
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 derive_more = { version = "2.0.1", features = ["display", "error"] }
 
 # File utils
