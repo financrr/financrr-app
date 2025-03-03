@@ -55,7 +55,7 @@ financrr_macros = { path = "financrr_macros" }
 [dependencies]
 # Loco Framework
 loco-rs = { workspace = true }
-async-trait = "0.1.86"
+async-trait = "0.1.87"
 
 # Axum
 axum = { version = "0.8.1", features = ["json", "tokio"] }
@@ -65,7 +65,7 @@ tower = "0.5.2"
 tower-http = { version = "0.6.2", features = ["normalize-path", "compression-full", "async-compression"] }
 
 # Database and ORM
-sea-orm = { version = "1.1.6", features = [
+sea-orm = { version = "1.1.7", features = [
     "sqlx-sqlite",
     "sqlx-postgres",
     "runtime-tokio-rustls",
@@ -128,7 +128,7 @@ dotenvy = "0.15.7"
 mimalloc = "0.1.43"
 
 # Derive and Error utils
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 derive_more = { version = "2.0.1", features = ["display", "error"] }
 
 # File utils
@@ -158,8 +158,8 @@ loco-rs = { workspace = true, features = ["testing"] }
 
 # Testing frameworks
 serial_test = "3.2.0"
-rstest = "0.24.0"
-insta = { version = "1.42.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
+rstest = "0.25.0"
+insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Mocking
 mockito = "1.6.1"
