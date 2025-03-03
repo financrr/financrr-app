@@ -3,7 +3,8 @@ use crate::error::app_error::{AppError, AppResult};
 use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
 use const_format::concatcp;
 use parking_lot::RwLock;
-use reqwest::Client;
+use reqwest::{Client, Response};
+use serde::de::DeserializeOwned;
 use serde_json::json;
 use std::sync::Arc;
 use std::time::Duration;
@@ -128,5 +129,18 @@ impl GoCardlessClient {
 
     pub fn is_enabled(&self) -> bool {
         self.config.enabled
+    }
+
+    pub async fn parse_response<T: DeserializeOwned>(&self, response: Response) -> AppResult<T> {
+        match response.status().is_success() {
+            false => {
+                let status_code = response.status();
+                let payload = response.text().await?;
+                error!("Response failed. \nStatus code: {} \nPayload: {}", status_code, payload);
+
+                Err(AppError::GeneralInternalServerError("".to_string()))
+            }
+            true => Ok(response.json().await?),
+        }
     }
 }
