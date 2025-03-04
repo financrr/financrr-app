@@ -162,7 +162,7 @@ rstest = "0.25.0"
 insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Mocking
-mockito = "1.6.1"
+mockito = "1.7.0"
 
 # Utils
 tempfile = "3.17.1"

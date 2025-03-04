@@ -44,6 +44,7 @@ services:
     ports:
       - "127.0.0.1:5601:5601" # Map host port 5601 to container port 5601
     environment:
+      TZ: ${TZ}
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     depends_on:
       opensearch:
@@ -58,10 +59,16 @@ services:
       - "127.0.0.1:8025:8025"
       - "1025:1025"
     environment:
+      TZ: ${TZ}
       MP_MAX_MESSAGES: 5000
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8025/readyz" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres-data: ~
