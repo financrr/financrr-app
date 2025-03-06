@@ -143,7 +143,6 @@ impl Hooks for App {
     async fn truncate(ctx: &AppContext) -> Result<()> {
         let db = &ctx.db;
         // TODO add all other tables
-        // TODO truncate opensearch
         truncate_table(db, users::Entity).await?;
         truncate_table(db, sessions::Entity).await?;
         truncate_table(db, instances::Entity).await?;
@@ -154,6 +153,7 @@ impl Hooks for App {
         truncate_table(db, fixtures::Entity).await?;
         truncate_table(db, currencies::Entity).await?;
 
+        // truncate opensearch
         let opensearch_client = OpensearchClientInner::get_arc(ctx).await?;
         opensearch_client.delete_all_indices().await?;
 
