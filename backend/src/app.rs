@@ -1,13 +1,18 @@
 use crate::initializers::context::ContextInitializer;
+use crate::initializers::fixtures::FixtureInitializer;
 use crate::initializers::openapi::OpenApiInitializer;
 use crate::initializers::opensearch::OpensearchInitializer;
 use crate::initializers::path_normalization::PathNormalizationInitializer;
 use crate::initializers::services::ServicesInitializer;
-use crate::models::_entities::{instances, sessions};
-use crate::models::{external_bank_institutions, go_cardless_enduser_agreements, go_cardless_requisitions};
+use crate::models::_entities::{currencies, instances, sessions};
+use crate::models::{
+    external_bank_institutions, fixtures, go_cardless_enduser_agreements, go_cardless_requisitions,
+    opensearch_migrations,
+};
 use crate::services::Service;
 use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
+use crate::services::opensearch::client::OpensearchClientInner;
 use crate::utils::folder::{STORAGE_FOLDER, create_necessary_folders};
 use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::external_bank_institutions as external_bank_institutions_workers;
@@ -69,6 +74,7 @@ impl Hooks for App {
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
         Ok(vec![
+            Box::new(FixtureInitializer),
             Box::new(ContextInitializer),
             Box::new(PathNormalizationInitializer),
             Box::new(OpenApiInitializer),
@@ -137,12 +143,19 @@ impl Hooks for App {
     async fn truncate(ctx: &AppContext) -> Result<()> {
         let db = &ctx.db;
         // TODO add all other tables
+        // TODO truncate opensearch
         truncate_table(db, users::Entity).await?;
         truncate_table(db, sessions::Entity).await?;
         truncate_table(db, instances::Entity).await?;
         truncate_table(db, external_bank_institutions::Entity).await?;
         truncate_table(db, go_cardless_enduser_agreements::Entity).await?;
         truncate_table(db, go_cardless_requisitions::Entity).await?;
+        truncate_table(db, opensearch_migrations::Entity).await?;
+        truncate_table(db, fixtures::Entity).await?;
+        truncate_table(db, currencies::Entity).await?;
+
+        let opensearch_client = OpensearchClientInner::get_arc(ctx).await?;
+        opensearch_client.delete_all_indices().await?;
 
         Ok(())
     }

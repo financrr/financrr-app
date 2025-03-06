@@ -1,0 +1,23 @@
+---
+source: tests/models/users.rs
+assertion_line: 186
+expression: user
+---
+Some(
+    Model {
+        id: ID,
+        email: "admin@financrr",
+        name: "Admin",
+        flags: 1,
+        password: "PASSWORD",
+        reset_token: None,
+        reset_sent_at: None,
+        email_verification_token: None,
+        email_verification_sent_at: None,
+        email_verified_at: Some(
+            DATE,
+        ),
+        created_at: DATE,
+        updated_at: DATE,
+    },
+)

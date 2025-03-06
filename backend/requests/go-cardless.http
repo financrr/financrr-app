@@ -1,4 +1,5 @@
 ### Obtain JWT Token
+# The token is usally valid for 24 hours.
 POST {{gocardless_api_url}}/token/new
 Content-Type: application/json
 

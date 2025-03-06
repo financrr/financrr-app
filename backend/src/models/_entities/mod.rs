@@ -17,6 +17,7 @@ pub mod external_bank_account_ibans;
 pub mod external_bank_accounts;
 pub mod external_bank_institutions;
 pub mod file_attachments;
+pub mod fixtures;
 pub mod go_cardless_enduser_agreements;
 pub mod go_cardless_requisitions;
 pub mod inactive_contracts;

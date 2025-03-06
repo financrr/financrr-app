@@ -149,6 +149,10 @@ parking_lot = { version = "0.12.3", features = ["deadlock_detection"] }
 # String utils
 const_format = "0.2.34"
 
+# Currency Data
+# When this dependency gets updated we need to check if new data is available!
+iso_currency = { version = "=0.5.1", features = ["iterator"] }
+
 # Code generation/custom macros
 financrr_macros.workspace = true
 
@@ -165,7 +169,7 @@ insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filter
 mockito = "1.7.0"
 
 # Utils
-tempfile = "3.17.1"
+tempfile = "3.18.0"
 
 [[bin]]
 name = "financrr-cli"

@@ -4,9 +4,9 @@ use crate::helpers::users::{
     generate_unactivated_user,
 };
 use financrr::controllers::user::RegisterParams;
-use financrr::services::Service;
 use financrr::services::secret_generator::SecretGeneratorInner;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
+use financrr::services::Service;
 use financrr::{app::App, models::users::Model};
 use insta::assert_debug_snapshot;
 use loco_rs::prelude::boot_test;
@@ -168,4 +168,21 @@ async fn can_reset_password() {
             .unwrap()
             .verify_password(NEW_PASSWORD)
     );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+#[serial]
+async fn can_use_default_admin_user() {
+    init_test!();
+    const ADMIN_EMAIL: &str = "admin@financrr";
+
+    let boot = boot_test::<App>().await.unwrap();
+
+    let user = Model::find_by_email(&boot.app_context.db, ADMIN_EMAIL).await.unwrap();
+
+    insta::with_settings!({
+        filters => clean_up_user_model()
+    }, {
+        assert_debug_snapshot!(user);
+    });
 }

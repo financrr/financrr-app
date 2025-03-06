@@ -172,4 +172,36 @@ impl OpensearchClientInner {
 
         Ok(res.json().await?)
     }
+
+    pub async fn delete_all_indices(&self) -> AppResult<()> {
+        // Get all indices
+        let indices_response = self
+            .opensearch
+            .cat()
+            .indices(opensearch::cat::CatIndicesParts::None)
+            .format("json")
+            .send()
+            .await?;
+
+        let indices: Vec<serde_json::Value> = indices_response.json().await?;
+
+        for index in indices {
+            let index_name = index["index"]
+                .as_str()
+                .ok_or_else(|| AppError::OpensearchError("Could not parse index name".to_string()))?;
+
+            // Skip system indices
+            if index_name.starts_with('.') {
+                continue;
+            }
+
+            self.opensearch
+                .indices()
+                .delete(opensearch::indices::IndicesDeleteParts::Index(&[index_name]))
+                .send()
+                .await?;
+        }
+
+        Ok(())
+    }
 }

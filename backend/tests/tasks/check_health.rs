@@ -28,8 +28,6 @@ async fn test_fail_check_health() {
         set_var("OPENSEARCH_PASSWORD", "jibberish");
     }
 
-    let boot = boot_test::<App>().await.unwrap();
-
-    let rs = run_task::<App>(&boot.app_context, Some(&"healthy".to_string()), &task::Vars::default()).await;
-    assert!(rs.is_err());
+    let boot = boot_test::<App>().await;
+    assert!(boot.is_err());
 }

@@ -13,6 +13,7 @@ data/
 # will have compiled files and executables
 debug/
 target/
+/vendor
 
 # include cargo lock
 !Cargo.lock
