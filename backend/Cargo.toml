@@ -20,26 +20,33 @@ default-run = "financrr-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace.lints.rust]
-rust_2024_idioms = "warn"
-future_incompatible = { level = "deny", priority = -1 }
-unreachable_pub = "warn"
+# Forbid
 unsafe_code = "forbid"
 non_ascii_idents = "forbid"
+future_incompatible = { level = "forbid", priority = -1 }
+
+# Warnings
 missing_copy_implementations = "warn"
+unreachable_pub = "warn"
 
 [workspace.lints.clippy]
-pedantic = "warn"
+# Restriction
+absolute_paths = "warn"
 unwrap_used = "warn"
-expect_used = "warn"
-missing_errors_doc = "warn"
-missing_panics_doc = "warn"
-missing_safety_doc = "warn"
 module_name_repetitions = "warn"
-option_if_let_else = "warn"
+
+# Pedantic
+wildcard-imports = "deny"
+cloned_instead_of_copied = "warn"
+explicit_iter_loop = "warn"
 unnecessary_wraps = "warn"
+unused_self = "warn"
 unused_async = "warn"
+
+# Nursey
+cognitive_complexity = "deny"
 use_self = "warn"
-must_use_candidate = "warn"
+option_if_let_else = "warn"
 redundant_closure_for_method_calls = "warn"
 semicolon_if_nothing_returned = "warn"
 map_unwrap_or = "warn"
