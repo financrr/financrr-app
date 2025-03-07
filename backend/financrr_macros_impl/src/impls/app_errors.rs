@@ -1,7 +1,7 @@
 use crate::utils::parsing::parse_bool;
 use crate::utils::string::StringExt;
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::parse::{Parse, ParseStream};
 use syn::{Attribute, Expr, Token};
 

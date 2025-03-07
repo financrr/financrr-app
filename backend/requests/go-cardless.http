@@ -1,0 +1,35 @@
+### Obtain JWT Token
+# The token is usally valid for 24 hours.
+POST {{gocardless_api_url}}/token/new
+Content-Type: application/json
+
+{
+  "secret_id": "{{gocardless.secret_id}}",
+  "secret_key": "{{gocardless.secret_key}}"
+}
+
+> {% client.global.set("access_key", response.body.access) %}
+
+### Get all requisitions
+GET {{gocardless_api_url}}/requisitions
+Authorization: Bearer {{access_key}}
+
+### Accounts
+# Bank account id
+@account_id = 81226c35-4c96-4ce2-8b3a-dbc983c0407a
+
+### Get bank information
+GET {{gocardless_api_url}}/accounts/{{account_id}}
+Authorization: Bearer {{access_key}}
+
+### Get Balances
+GET {{gocardless_api_url}}/accounts/{{account_id}}/balances
+Authorization: Bearer {{access_key}}
+
+### Get Details
+GET {{gocardless_api_url}}/accounts/{{account_id}}/details
+Authorization: Bearer {{access_key}}
+
+### Get Transactions
+GET {{gocardless_api_url}}/accounts/{{account_id}}/transactions
+Authorization: Bearer {{access_key}}

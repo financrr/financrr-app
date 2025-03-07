@@ -1,0 +1,8 @@
+---
+source: tests/models/instances.rs
+assertion_line: 97
+expression: error
+---
+Any(
+    NodeIdTooLarge,
+)

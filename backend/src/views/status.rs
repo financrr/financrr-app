@@ -1,4 +1,4 @@
-use crate::constants::{ApiVersions, ALL_API_VERSIONS, CURRENT_API_VERSION};
+use crate::constants::{ALL_API_VERSIONS, ApiVersions, CURRENT_API_VERSION};
 use serde::Serialize;
 use std::sync::LazyLock;
 use utoipa::ToSchema;
@@ -9,6 +9,7 @@ pub struct HealthResponse {
     pub database_status: HealthReport,
     pub cache_status: HealthReport,
     pub storage_status: HealthReport,
+    pub opensearch_status: HealthReport,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, ToSchema)]
@@ -32,6 +33,7 @@ pub enum StatusComponents {
     StorageInsertion,
     StorageRetrieval,
     StorageDeletion,
+    Opensearch,
 }
 
 #[derive(Debug, Copy, Clone, Serialize, ToSchema)]
@@ -48,5 +50,14 @@ impl Default for VersionResponse {
         });
 
         *INSTANCE
+    }
+}
+
+impl From<bool> for HealthStatus {
+    fn from(value: bool) -> Self {
+        match value {
+            true => HealthStatus::Healthy,
+            false => HealthStatus::Unhealthy,
+        }
     }
 }

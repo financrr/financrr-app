@@ -11,3 +11,4 @@ logs
 .env
 .env.dist
 rust-toolchain.toml
+vendor

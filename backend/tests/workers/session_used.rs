@@ -3,13 +3,13 @@ use loco_rs::prelude::*;
 
 use crate::helpers::init::load_envs;
 use crate::helpers::session::generate_session;
-use crate::helpers::users::{create_user_with_email, DEFAULT_PASSWORD};
+use crate::helpers::users::{DEFAULT_PASSWORD, create_user_with_email};
 use financrr::models::_entities::sessions;
 use financrr::workers::session_used::SessionUsedWorker;
 use financrr::workers::session_used::SessionUsedWorkerArgs;
 use serial_test::serial;
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 #[serial]
 async fn test_run_session_used_worker() {
     load_envs();
