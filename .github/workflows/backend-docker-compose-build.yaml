@@ -15,6 +15,7 @@ defaults:
   run:
     working-directory: ./backend  # Change the working directory to /backend
 
+# Define reusable matrix for both jobs
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -29,17 +30,58 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Prepare for build
-        run: bash bin/install.bash
-
+        run: bash bin/install
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
+          platforms: ${{ matrix.platform }}
+          load: true
+
+  build-dev:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04 # Replace with latest when https://github.com/rust-lang/rust/issues/135867 is fixed
+            platform: linux/amd64
+          - os: ubuntu-22.04-arm # Replace with latest when https://github.com/rust-lang/rust/issues/135867 is fixed
+            platform: linux/arm64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # To get changes between this commit and previous
+
+      - name: Check if dev.Dockerfile changed
+        id: check_changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q "backend/dev.Dockerfile"; then
+            echo "dev_dockerfile_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "dev_dockerfile_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up QEMU
+        if: steps.check_changes.outputs.dev_dockerfile_changed == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.check_changes.outputs.dev_dockerfile_changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare for build
+        if: steps.check_changes.outputs.dev_dockerfile_changed == 'true'
+        run: bash bin/install
+
+      - name: Build Dev Docker image
+        if: steps.check_changes.outputs.dev_dockerfile_changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/dev.Dockerfile
           platforms: ${{ matrix.platform }}
           load: true
