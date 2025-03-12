@@ -5,7 +5,9 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     curl \
     bash \
     build-essential \
-    libssl-dev
+    libssl-dev \
+    lldb \
+    gdb
 
 ARG UID=1000
 ARG GUID=1000
