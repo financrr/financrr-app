@@ -35,10 +35,10 @@ jobs:
         with:
           tool: nextest
       - name: Run installation script
-        run: bash bin/install.bash
+        run: bash bin/install
       - name: Start Docker Container
         run: docker compose up -d
       - name: Build tests
         run: cargo nextest run --workspace --no-run
       - name: Run tests
-        run: bash bin/test.bash
+        run: bash bin/test

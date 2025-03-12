@@ -12,6 +12,6 @@ use std::path::Path;
 pub fn load_envs() {
     load_env_file();
     if Path::new(".env.test").exists() {
-        dotenvy::from_path(".env.test").unwrap();
+        dotenvy::from_path_override(".env.test").unwrap();
     }
 }
