@@ -31,6 +31,8 @@ See: [Reverse proxy quick-start - Caddy Documentation](https://caddyserver.com/d
 Everything is docker-based!  
 This means that you don't run or install anything besides docker locally.
 
+**Remember to regularly pull containers!** `docker compose pull`
+
 <details>
 <summary>Why we do this</summary>
 
