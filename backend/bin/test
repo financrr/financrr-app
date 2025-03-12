@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Set fast-fails
+set -euo pipefail
+
+# working dir preparation
+WORK_DIR="$(pwd)"
+cd "$(dirname "$0")"
+# cd out of bin directory
+cd ..
+
+cd_into_work_dir() {
+    cd "${WORK_DIR}"
+}
+
+trap cd_into_work_dir EXIT
+
+# Run cargo nextest with or without arguments
+if [ $# -eq 0 ]; then
+    app/cargo nextest run --workspace
+else
+    app/cargo nextest run "$@" --workspace
+fi

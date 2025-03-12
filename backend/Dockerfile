@@ -11,6 +11,8 @@ WORKDIR /usr/src/
 
 COPY . .
 
+RUN rm rust-toolchain.toml
+
 RUN cargo build --release
 
 FROM alpine:3.21.3

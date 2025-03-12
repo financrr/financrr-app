@@ -1,4 +1,24 @@
 services:
+  rust:
+    image: ghcr.io/financrr/backend-dev:latest
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    tty: true
+    stdin_open: true
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./:/home/financrr/app
+      - cargo-registry:/home/financrr/.cargo/registry
+      - cargo-git:/home/financrr/.cargo/git
+      - cargo-global-registry:/usr/local/cargo/registry
+      - cargo-advisory-db:/home/financrr/.cargo/advisory-db
+
   db:
     image: postgres:17.4-alpine3.21
     init: true
@@ -28,9 +48,6 @@ services:
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_PASSWORD}
     volumes:
       - opensearch-data:/usr/share/opensearch/data
-    ports:
-      - "127.0.0.1:9200:9200"
-      - "127.0.0.1:9600:9600"
     healthcheck:
       test: [ "CMD-SHELL", "curl -k -u admin:${OPENSEARCH_PASSWORD} --silent --fail https://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
@@ -57,7 +74,6 @@ services:
       - mailpit-data:/data
     ports:
       - "127.0.0.1:8025:8025"
-      - "1025:1025"
     environment:
       TZ: ${TZ}
       MP_MAX_MESSAGES: 5000
@@ -74,3 +90,8 @@ volumes:
   postgres-data: ~
   opensearch-data: ~
   mailpit-data: ~
+  # Rust cargo cache
+  cargo-registry: ~
+  cargo-git: ~
+  cargo-global-registry: ~
+  cargo-advisory-db: ~

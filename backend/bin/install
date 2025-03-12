@@ -12,7 +12,7 @@ cd_into_work_dir() {
 
 echo "Creating .env file..."
 set +e
-cp -n .env.dist .env
+cp --update=none .env.dist .env
 set -e
 
 echo "Creating logs directory..."
