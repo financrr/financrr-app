@@ -35,7 +35,7 @@ financrr_macros = { path = "financrr_macros" }
 [dependencies]
 # Loco Framework
 loco-rs = { workspace = true }
-async-trait = "0.1.87"
+async-trait = "0.1.88"
 
 # Axum
 axum = { version = "0.8.1", features = ["json", "tokio"] }
