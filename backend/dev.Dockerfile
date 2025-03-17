@@ -1,13 +1,19 @@
 FROM rust:1.85.0-bookworm
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install dependencies
-RUN apt-get update && apt-get upgrade && apt-get install -y \
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
     curl \
     bash \
     build-essential \
     libssl-dev \
     lldb \
-    gdb
+    rust-lldb \
+    gdb \
+    g++-multilib \
+    lib32stdc++6 \
+    libncurses5-dev
 
 ARG UID=1000
 ARG GUID=1000
@@ -38,7 +44,7 @@ RUN rustup show && rustup component list --installed
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 
 # Install cargo clis
-RUN --mount=type=cache,target=/home/financrr/.cargo/bin \
-    cargo binstall cargo-nextest@0.9.92 loco@0.14.0 sea-orm-cli@1.1.7 cargo-audit@0.21.2 --secure
+#RUN --mount=type=cache,target=/home/financrr/.cargo/bin \
+#    cargo binstall cargo-nextest@0.9.92 loco@0.14.0 sea-orm-cli@1.1.7 cargo-audit@0.21.2 --secure
 
 CMD ["/usr/bin/env", "bash"]

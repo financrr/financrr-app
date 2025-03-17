@@ -10,6 +10,7 @@ services:
     stdin_open: true
     ports:
       - "8080:8080"
+      - "63342:63342"
     environment:
       TZ: ${TZ}
     volumes:
