@@ -21,19 +21,29 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: docker:dind
+      options: >-
+        --user 1000:1000
+        -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
+      - name: Run installation script
+        run: bash bin/install
+      - name: Start Docker Container
+        run: docker compose up -d --build
       - name: Build
-        run: cargo build --release
+        run: bin/cargo build --release
 
   test:
     runs-on: ubuntu-latest
+    container:
+      image: docker:dind
+      options: >-
+        --user 1000:1000
+        -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
-      - name: Instal nextst
-        uses: taiki-e/install-action@v2
-        with:
-          tool: nextest
       - name: Run installation script
         run: bash bin/install
       - name: Start Docker Container
