@@ -64,11 +64,18 @@ database:
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_recreate: false
 
-# Authentication Configuration
-auth:
-  # JWT authentication
-  jwt:
-    # Secret key for token generation and verification
-    secret: QZTFYbbH0dw8fESXXvCC
-    # Token expiration time in seconds
-    expiration: 604800 # 7 days
+bank_data_linking:
+  enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
+  secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
+  secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
+  redirect_url: {{get_env(name="GO_CARDLESS_REDIRECT_URL", default="")}}
+  exclude_sandboxes: {{get_env(name="GO_CARDLESS_EXCLUDE_SANDBOXES", default=true)}}
+
+opensearch:
+  is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="true")}}
+  host: {{get_env(name="OPENSEARCH_HOST", default="127.0.0.1")}}
+  port: {{get_env(name="OPENSEARCH_PORT", default="9200")}}
+  username: {{get_env(name="OPENSEARCH_USER")}}
+  password: {{get_env(name="OPENSEARCH_PASSWORD")}}
+  disable_proxy: {{get_env(name="OPENSEARCH_DISABLE_PROXY", default="false")}}
+  disable_cert_validation: {{get_env(name="OPENSEARCH_DISABLE_CERT_VALIDATION", default="false")}}

@@ -3,14 +3,16 @@ use crate::controllers::session::CreateSessionParams;
 use crate::error::app_error::{AppError, AppResult};
 use crate::middlewares::authentication::Authenticate;
 use crate::models::_entities::sessions;
-use crate::models::users;
+use crate::models::users::users;
 use crate::services::secret_generator::SecretGenerator;
 use crate::services::snowflake_generator::SnowflakeGenerator;
 use crate::workers::session_used::{SessionUsedWorker, SessionUsedWorkerArgs};
+use ActiveValue::Unchanged;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
-use sea_orm::entity::prelude::*;
+use sea_orm::ActiveValue;
 use sea_orm::ActiveValue::Set;
+use sea_orm::entity::prelude::*;
 
 pub type Sessions = Entity;
 
@@ -73,11 +75,29 @@ impl sessions::Model {
     pub async fn find_by_token(db: &DatabaseConnection, token: &str) -> AppResult<Option<Self>> {
         Ok(Entity::find().filter(Column::ApiKey.eq(token)).one(db).await?)
     }
+
+    pub async fn get_user(&self, db: &DatabaseConnection) -> AppResult<users::Model> {
+        Ok(self.find_related(users::Entity).one(db).await?.unwrap())
+    }
 }
 
 impl sessions::ActiveModel {
     pub async fn update_last_accessed_at(mut self, db: &DatabaseConnection) -> AppResult<sessions::Model> {
-        self.last_accessed_at = Set(Some(chrono::Utc::now().into()));
+        let now = chrono::Utc::now();
+
+        match self.last_accessed_at {
+            Set(Some(last_accessed)) => {
+                if last_accessed > now {
+                    self.last_accessed_at = Set(Some(now.into()));
+                }
+            }
+            Unchanged(Some(last_accessed)) => {
+                if last_accessed > now {
+                    self.last_accessed_at = Set(Some(now.into()));
+                }
+            }
+            _ => self.last_accessed_at = Set(Some(now.into())),
+        }
 
         Ok(self.update(db).await?)
     }

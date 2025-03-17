@@ -1,6 +1,6 @@
+use syn::Expr;
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
-use syn::Expr;
 
 pub(crate) fn parse_bool(input: ParseStream) -> syn::Result<bool> {
     let expr: Expr = input.parse()?;

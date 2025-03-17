@@ -11,7 +11,7 @@ use crate::views::session::SessionResponse;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::{get, post};
-use axum::{debug_handler, Extension, Json};
+use axum::{Extension, Json, debug_handler};
 use loco_rs::app::AppContext;
 use loco_rs::controller::Routes;
 use serde::Deserialize;
