@@ -25,6 +25,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run installation script
         run: bash bin/install
+      - name: Create Docker Compose override
+        run: |
+          cat > compose.override.yaml << EOF
+          services:
+            rust:
+              user: "1000:1000"
+              environment:
+                - HOST_UID=1000
+                - HOST_GID=1000
+          EOF
+      - name: Set up user permissions
+        run: |
+          sudo chown -R 1000:1000 ./
       - name: Start Docker Container
         run: docker compose up -d rust --build
       - name: Build
@@ -34,16 +47,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create Docker Compose override
-        run: |
-          echo "Creating compose.override.yaml with UID=$(id -u) and GID=$(id -g)"
-          cat > docker-compose.override.yaml << EOF
-          services:
-            rust:
-              user: "$(id -u):$(id -g)"
-          EOF
       - name: Run installation script
         run: bash bin/install
+      - name: Create Docker Compose override
+        run: |
+          cat > compose.override.yaml << EOF
+          services:
+            rust:
+              user: "1000:1000"
+              environment:
+                - HOST_UID=1000
+                - HOST_GID=1000
+          EOF
+      - name: Set up user permissions
+        run: |
+          sudo chown -R 1000:1000 ./
       - name: Start Docker Container
         run: docker compose up -d --build
       - name: Build tests
