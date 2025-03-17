@@ -62,7 +62,7 @@ financrr_macros = { path = "financrr_macros" }
 [dependencies]
 # Loco Framework
 loco-rs = { workspace = true }
-async-trait = "0.1.87"
+async-trait = "0.1.88"
 
 # Axum
 axum = { version = "0.8.1", features = ["json", "tokio"] }
@@ -85,7 +85,7 @@ opensearch = { version = "2.3.0", features = ["rustls-tls"], default-features = 
 url = "2.5.4"
 
 # Async runtime and scheduler
-tokio = { version = "1.44.0", default-features = false, features = [
+tokio = { version = "1.44.1", default-features = false, features = [
     "rt-multi-thread",
     "parking_lot"
 ] }
@@ -176,7 +176,7 @@ insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filter
 mockito = "1.7.0"
 
 # Utils
-tempfile = "3.18.0"
+tempfile = "3.19.0"
 
 [[bin]]
 name = "financrr-cli"
