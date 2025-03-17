@@ -21,29 +21,27 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: docker:dind
-      options: >-
-        --user 1000:1000
-        -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - name: Run installation script
         run: bash bin/install
       - name: Start Docker Container
-        run: docker compose up -d --build
+        run: docker compose up -d rust --build
       - name: Build
         run: bin/cargo build --release
 
   test:
     runs-on: ubuntu-latest
-    container:
-      image: docker:dind
-      options: >-
-        --user 1000:1000
-        -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
+      - name: Create Docker Compose override
+        run: |
+          echo "Creating compose.override.yaml with UID=$(id -u) and GID=$(id -g)"
+          cat > docker-compose.override.yaml << EOF
+          services:
+            rust:
+              user: "$(id -u):$(id -g)"
+          EOF
       - name: Run installation script
         run: bash bin/install
       - name: Start Docker Container
