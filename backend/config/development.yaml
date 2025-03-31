@@ -38,7 +38,7 @@ server:
       enable: true
     timeout_request:
       enable: {{get_env(name="TIMEOUT_ENABLED", default="true")}}
-      timeout: {{get_env(name="TIMEOUT_REQUEST", default="5000")}}
+      timeout: {{get_env(name="TIMEOUT_REQUEST", default="10000")}}
 
 # Worker Configuration
 workers:
@@ -54,8 +54,10 @@ queue:
   kind: Postgres
   # Redis connection URI
   uri: {{get_env(name="DATABASE_URL")}}
-  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
+  # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_flush: false
+  # Represents the number of tasks a worker can handle simultaneously.
+  num_workers: {{get_env(name="NUM_WORKERS", default="10")}}
 
 # Mailer Configuration.
 mailer:
@@ -93,3 +95,30 @@ database:
   dangerously_truncate: false
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you're using this flag only on dev environments or test mode
   dangerously_recreate: false
+
+bank_data_linking:
+  enabled: {{get_env(name="GO_CARDLESS_ENABLED", default=false)}}
+  secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
+  secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
+  redirect_url: {{get_env(name="GO_CARDLESS_REDIRECT_URL", default="")}}
+  exclude_sandboxes: {{get_env(name="GO_CARDLESS_EXCLUDE_SANDBOXES", default=true)}}
+
+opensearch:
+  is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="true")}}
+  host: {{get_env(name="OPENSEARCH_HOST", default="127.0.0.1")}}
+  port: {{get_env(name="OPENSEARCH_PORT", default="9200")}}
+  username: {{get_env(name="OPENSEARCH_USER")}}
+  password: {{get_env(name="OPENSEARCH_PASSWORD")}}
+  disable_proxy: {{get_env(name="OPENSEARCH_DISABLE_PROXY", default="false")}}
+  disable_cert_validation: {{get_env(name="OPENSEARCH_DISABLE_CERT_VALIDATION", default="false")}}
+
+scheduler:
+  jobs:
+    sync_institutions:
+      run: "SyncInstitutions"
+      schedule: "every 24 hours"
+      run_on_start: true
+
+    clean_up_requisitions:
+      run: "CleanUpRequisitions"
+      schedule: "every 24 hours"
