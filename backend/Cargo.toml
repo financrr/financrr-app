@@ -81,7 +81,7 @@ utoipa = { version = "5.3.1", features = [
     "chrono"
 ] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
-utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "debug-embed"] }
+utoipa-swagger-ui = { version = "9.0.1", features = ["axum", "debug-embed"] }
 utoipauto = "0.2.0"
 
 # Logging
