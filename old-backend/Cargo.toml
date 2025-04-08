@@ -44,7 +44,7 @@ use_self = "warn"
 
 [workspace.dependencies]
 # Async runtime
-tokio = { version = "1.40.0", features = ["macros", "rt", "rt-multi-thread", "sync", "time", "parking_lot"] }
+tokio = { version = "1.44.2", features = ["macros", "rt", "rt-multi-thread", "sync", "time", "parking_lot"] }
 
 # OpenApi
 utoipa = { version = "5.0.0-beta.0", features = ["actix_extras", "openapi_extensions", "time", "preserve_order", "preserve_path_order", "non_strict_integers"] }
