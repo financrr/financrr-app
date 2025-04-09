@@ -54,7 +54,7 @@ sea-orm = { version = "1.1.8", features = [
 migration = { path = "migration" }
 
 # Async runtime and scheduler
-tokio = { version = "1.44.1", default-features = false, features = [
+tokio = { version = "1.44.2", default-features = false, features = [
     "rt-multi-thread",
     "parking_lot"
 ] }
