@@ -2,9 +2,9 @@ use crate::helpers::faker::generate_random_email;
 use financrr::controllers::user::RegisterParams;
 use financrr::models::users;
 use financrr::models::users::Model;
+use financrr::services::Service;
 use financrr::services::snowflake_generator::SnowflakeGeneratorInner;
 use financrr::services::user_verification::UserVerificationServiceInner;
-use financrr::services::Service;
 use loco_rs::app::AppContext;
 use sea_orm::IntoActiveModel;
 
@@ -23,7 +23,7 @@ pub async fn create_user(ctx: &AppContext, email: &str, password: &str, activate
         .await
         .unwrap();
 
-    let user = match activate {
+    match activate {
         true => user.into_active_model().verified(&ctx.db).await.unwrap(),
         false => {
             let verification_service = UserVerificationServiceInner::get_arc(ctx).await.unwrap();
@@ -33,9 +33,7 @@ pub async fn create_user(ctx: &AppContext, email: &str, password: &str, activate
                 .await
                 .unwrap()
         }
-    };
-
-    user
+    }
 }
 
 pub async fn create_user_with_email(ctx: &AppContext, email: &str) -> Model {

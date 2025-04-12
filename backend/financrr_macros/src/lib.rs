@@ -1,4 +1,4 @@
-use financrr_macros_impl::impls::app_errors::{app_error_implementation, AppErrorsInput};
+use financrr_macros_impl::impls::app_errors::{AppErrorsInput, app_error_implementation};
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 

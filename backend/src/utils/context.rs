@@ -1,5 +1,5 @@
-use crate::services::custom_config::{CustomConfig, CustomConfigInner};
 use crate::services::Service;
+use crate::services::custom_configs::base::{CustomConfig, CustomConfigInner};
 use loco_rs::app::AppContext;
 use std::future::Future;
 
