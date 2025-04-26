@@ -130,7 +130,7 @@ loco-rs = { workspace = true, features = ["testing"] }
 # Testing frameworks
 serial_test = "3.2.0"
 rstest = "0.25.0"
-insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filters", "json"] }
+insta = { version = "1.43.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Utils
 tempfile = "3.19.1"
