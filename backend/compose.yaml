@@ -47,6 +47,8 @@ services:
       bootstrap.memory_lock: true # Disable JVM heap memory swapping
       OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx8192m" # Set min and max JVM heap sizes to at least 50% of system RAM
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_PASSWORD}
+    ports:
+      - "127.0.0.1:9200:9200"
     volumes:
       - opensearch-data:/usr/share/opensearch/data
     healthcheck:

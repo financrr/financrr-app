@@ -14,7 +14,6 @@ use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
 use crate::services::opensearch::client::OpensearchClientInner;
 use crate::utils::folder::{STORAGE_FOLDER, create_necessary_folders};
-use crate::utils::routes::ExtendedAppRoutes;
 use crate::workers::external_bank_institutions as external_bank_institutions_workers;
 use crate::workers::session_used::SessionUsedWorker;
 use crate::{controllers, models::_entities::users, tasks};
@@ -98,23 +97,19 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
-        // TODO fix AppRoutes somehow and remove custom ExtendedAppRoutes
-        //  Currently fucked. See issue: https://github.com/loco-rs/loco/issues/1116
-
-        ExtendedAppRoutes::empty()
+        AppRoutes::empty()
             // All routes MUST be prefixed with /api
             // This helps with routing between the api and the frontend
             .prefix("/api")
             .add_route(controllers::status::non_versioned_routes())
             .add_route(controllers::openapi::non_versioned_routes())
-            .prefix("/v1")
+            .nest_prefix("/v1")
             .add_route(controllers::user::routes())
             .add_route(controllers::session::routes())
             .add_route(controllers::status::routes())
             .add_route(controllers::external_bank_institutions::routes())
             .add_route(controllers::bank_account_linking::routes())
             .add_route(controllers::go_cardless::routes())
-            .into()
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
@@ -137,6 +132,7 @@ impl Hooks for App {
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::sync_institutions::SyncInstitutions);
         tasks.register(tasks::check_health::CheckHealth);
+        tasks.register(tasks::clean_up_requisitions::CleanUpRequisitions);
         // tasks-inject (do not remove)
     }
 

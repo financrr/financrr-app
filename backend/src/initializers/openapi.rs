@@ -1,6 +1,8 @@
 use crate::utils::type_name::type_name_only;
 use async_trait::async_trait;
 use axum::Router as AxumRouter;
+use axum::response::Redirect;
+use axum::routing::get;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Initializer;
 use utoipa::openapi::OpenApi as OpenApiStruct;
@@ -49,7 +51,8 @@ impl Initializer for OpenApiInitializer {
 
         let routes = AxumRouter::new()
             .merge(SwaggerUi::new("/api/openapi/swagger-ui").url("/api/openapi/openapi.json", doc.clone()))
-            .merge(Scalar::with_url("/api/openapi/scalar", doc));
+            .merge(Scalar::with_url("/api/openapi/scalar", doc))
+            .route("/api", get(async || Redirect::permanent("/api/openapi/scalar")));
 
         Ok(router.merge(routes))
     }

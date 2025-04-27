@@ -1,4 +1,3 @@
-pub mod sync_institutions;
-
 pub mod check_health;
-mod clean_up_requisitions;
+pub mod clean_up_requisitions;
+pub mod sync_institutions;
