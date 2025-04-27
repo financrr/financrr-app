@@ -2270,14 +2270,14 @@ dependencies = [
 
 [[package]]
 name = "iso_currency"
-version = "0.5.1"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21cb463eec852038d9685e2095fb8fae12661c5ab8f13462c2530233ec31ef78"
+checksum = "fed4b3f0921193400b1df556228bfd917c57c7fa38bda904d552653c5c3b641b"
 dependencies = [
  "iso_country",
  "proc-macro2",
  "quote",
- "strum",
+ "strum 0.27.1",
 ]
 
 [[package]]
@@ -2426,29 +2426,31 @@ dependencies = [
 
 [[package]]
 name = "loco-gen"
-version = "0.14.1"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ec8762a66ade27c5157288ca46db51a77bbd95cb2d7ad87bcaada9621e3a4d9"
+checksum = "af6a65aa52f43363e67c8e300d997f55a79bf5b7b3ad02e794dfd0414d012ecd"
 dependencies = [
  "chrono",
  "clap",
  "colored 2.2.0",
  "cruet 0.14.0",
  "duct",
+ "heck 0.4.1",
  "include_dir",
  "regex",
  "rrgen",
  "serde",
  "serde_json",
+ "tera",
  "thiserror 1.0.69",
  "tracing",
 ]
 
 [[package]]
 name = "loco-rs"
-version = "0.14.1"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19decee5529e36ffd3e22f83cf601c1fcb35a8932886fc33c19e8482bc1baf88"
+checksum = "c1122ebb1e981888d26ecbf33e323bf9816b3748b57a3fd5e67b37cfe44750e3"
 dependencies = [
  "argon2",
  "async-trait",
@@ -2467,7 +2469,6 @@ dependencies = [
  "duct",
  "duct_sh",
  "english-to-cron",
- "fs-err",
  "futures-util",
  "heck 0.4.1",
  "hyper",
@@ -2476,7 +2477,6 @@ dependencies = [
  "jsonwebtoken",
  "lettre",
  "loco-gen",
- "mime",
  "moka",
  "opendal",
  "rand 0.8.5",
@@ -3973,7 +3973,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
- "strum",
+ "strum 0.26.3",
  "thiserror 2.0.12",
  "time",
  "tracing",
@@ -4767,15 +4767,21 @@ name = "strum"
 version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+
+[[package]]
+name = "strum"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f64def088c51c9510a8579e3c5d67c65349dcf755e5479ad3d010aa6454e2c32"
 dependencies = [
  "strum_macros",
 ]
 
 [[package]]
 name = "strum_macros"
-version = "0.26.4"
+version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+checksum = "c77a8c5abcaf0f9ce05d62342b7d298c346515365c36b673df4ebe3ced01fde8"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -5619,9 +5625,9 @@ dependencies = [
 
 [[package]]
 name = "validator"
-version = "0.19.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0b4a29d8709210980a09379f27ee31549b73292c87ab9899beee1c0d3be6303"
+checksum = "43fb22e1a008ece370ce08a3e9e4447a910e92621bb49b85d6e48a45397e7cfa"
 dependencies = [
  "idna",
  "once_cell",
@@ -5635,9 +5641,9 @@ dependencies = [
 
 [[package]]
 name = "validator_derive"
-version = "0.19.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bac855a2ce6f843beb229757e6e570a42e837bcb15e5f449dd48d5747d41bf77"
+checksum = "b7df16e474ef958526d1205f6dda359fdfab79d9aa6d54bafcb92dcd07673dca"
 dependencies = [
  "darling",
  "once_cell",

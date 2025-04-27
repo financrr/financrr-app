@@ -200,8 +200,8 @@ impl From<ModelError> for AppError {
         match value {
             ModelError::EntityAlreadyExists => AppError::EntityAlreadyExists(),
             ModelError::EntityNotFound => AppError::EntityNotFound(),
-            ModelError::ModelValidation { errors } => {
-                AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors))
+            ModelError::Validation(errors) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors.0))
             }
             ModelError::Jwt(err) => AppError::GeneralInternalServerError(err.to_string()),
             ModelError::DbErr(err) => AppError::from(err),
