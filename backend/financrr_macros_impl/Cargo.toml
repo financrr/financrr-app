@@ -6,10 +6,10 @@ publish.workspace = true
 
 [dependencies]
 # Rust code parsing
-syn = { version = "2.0.100", features = ["full"] }
+syn = { version = "2.0.101", features = ["full"] }
 
 # Proc macro
-proc-macro2 = "1.0.94"
+proc-macro2 = "1.0.95"
 
 # utils
 quote = "1.0.40"

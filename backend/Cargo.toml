@@ -65,14 +65,14 @@ loco-rs = { workspace = true }
 async-trait = "0.1.88"
 
 # Axum
-axum = { version = "0.8.1", features = ["json", "tokio"] }
+axum = { version = "0.8.3", features = ["json", "tokio"] }
 
 # Tower
 tower = "0.5.2"
 tower-http = { version = "0.6.2", features = ["normalize-path", "compression-full", "async-compression"] }
 
 # Database and ORM
-sea-orm = { version = "1.1.7", features = [
+sea-orm = { version = "1.1.10", features = [
     "sqlx-sqlite",
     "sqlx-postgres",
     "runtime-tokio-rustls",
@@ -85,7 +85,7 @@ opensearch = { version = "2.3.0", features = ["rustls-tls"], default-features = 
 url = "2.5.4"
 
 # Async runtime and scheduler
-tokio = { version = "1.44.1", default-features = false, features = [
+tokio = { version = "1.44.2", default-features = false, features = [
     "rt-multi-thread",
     "parking_lot"
 ] }
@@ -113,7 +113,7 @@ utoipa = { version = "5.3.1", features = [
     "chrono"
 ] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
-utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "debug-embed"] }
+utoipa-swagger-ui = { version = "9.0.1", features = ["axum", "debug-embed"] }
 utoipauto = "0.3.0-alpha.2"
 
 # Logging
@@ -132,7 +132,7 @@ validator = { version = "0.19.0" }
 dotenvy = "0.15.7"
 
 # Mimalloc for better performance (eg. Alpine)
-mimalloc = "0.1.43"
+mimalloc = "0.1.46"
 
 # Derive and Error utils
 thiserror = "2.0.12"
@@ -170,13 +170,13 @@ loco-rs = { workspace = true, features = ["testing"] }
 # Testing frameworks
 serial_test = "3.2.0"
 rstest = "0.25.0"
-insta = { version = "1.42.2", features = ["serde", "redactions", "yaml", "filters", "json"] }
+insta = { version = "1.43.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Mocking
 mockito = "1.7.0"
 
 # Utils
-tempfile = "3.19.0"
+tempfile = "3.19.1"
 
 [[bin]]
 name = "financrr-cli"
