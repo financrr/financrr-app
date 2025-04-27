@@ -47,12 +47,16 @@ impl Initializer for OpenApiInitializer {
     }
 
     async fn after_routes(&self, router: AxumRouter, _ctx: &AppContext) -> loco_rs::Result<AxumRouter> {
+        const API_DOCS_PATH: &str = "/api/openapi/openapi.json";
+        const API_SWAGGER_UI_PATH: &str = "/api/openapi/swagger-ui";
+        const API_SCALAR_PATH: &str = "/api/openapi/scalar";
+
         let doc = ApiDocs::openapi();
 
         let routes = AxumRouter::new()
-            .merge(SwaggerUi::new("/api/openapi/swagger-ui").url("/api/openapi/openapi.json", doc.clone()))
-            .merge(Scalar::with_url("/api/openapi/scalar", doc))
-            .route("/api", get(async || Redirect::permanent("/api/openapi/scalar")));
+            .merge(SwaggerUi::new(API_SWAGGER_UI_PATH).url(API_DOCS_PATH, doc.clone()))
+            .merge(Scalar::with_url(API_SCALAR_PATH, doc))
+            .route("/api", get(async || Redirect::permanent(API_SCALAR_PATH)));
 
         Ok(router.merge(routes))
     }
