@@ -180,6 +180,7 @@ impl From<LocoError> for AppError {
             LocoError::Sqlx(err) => AppError::GeneralDatabaseError(Some(err.to_string())),
             LocoError::Storage(err) => AppError::StorageError(err.to_string()),
             LocoError::Cache(err) => AppError::CacheError(err.to_string()),
+            #[cfg(debug_assertions)]
             LocoError::Generators(err) => AppError::GeneratorError(err.to_string()),
             LocoError::VersionCheck(err) => AppError::VersionCheckError(err.to_string()),
             LocoError::Any(err) => AppError::GeneralInternalServerError(err.to_string()),
