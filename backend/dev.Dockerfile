@@ -44,6 +44,6 @@ RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ca
 
 # Install cargo clis
 RUN --mount=type=cache,target=/home/financrr/.cargo/bin \
-    cargo binstall cargo-nextest@0.9.92 loco@0.14.0 sea-orm-cli@1.1.7 cargo-audit@0.21.2 --secure
+    cargo binstall cargo-nextest@0.9.94 loco@0.15.0 sea-orm-cli@1.1.10 cargo-audit@0.21.2 --secure
 
 CMD ["/usr/bin/env", "bash"]
