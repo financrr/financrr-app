@@ -101,6 +101,7 @@ bank_data_linking:
   secret_id: {{get_env(name="GO_CARDLESS_SECRET_ID", default="")}}
   secret_key: {{get_env(name="GO_CARDLESS_SECRET_KEY", default="")}}
   redirect_url: {{get_env(name="GO_CARDLESS_REDIRECT_URL", default="")}}
+  exclude_sandboxes: {{get_env(name="GO_CARDLESS_EXCLUDE_SANDBOXES", default=true)}}
 
 opensearch:
   is_https: {{get_env(name="OPENSEARCH_IS_HTTPS", default="true")}}
@@ -117,3 +118,7 @@ scheduler:
       run: "SyncInstitutions"
       schedule: "every 24 hours"
       run_on_start: true
+
+    clean_up_requisitions:
+      run: "CleanUpRequisitions"
+      schedule: "every 24 hours"
