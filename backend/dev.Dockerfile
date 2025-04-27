@@ -1,4 +1,4 @@
-FROM rust:1.85.0-bookworm
+FROM rust:1.86.0-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
