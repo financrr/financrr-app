@@ -88,7 +88,7 @@ utoipauto = "0.2.0"
 tracing = "0.1.41"
 
 # Time
-chrono = { version = "0.4.40", features = ["clock"] }
+chrono = { version = "0.4.41", features = ["clock"] }
 
 # Flags
 enumflags2 = { version = "0.7.11", features = ["std", "serde"] }
