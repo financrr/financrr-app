@@ -53,7 +53,12 @@ Be aware that you have to do some kind of path mapping to make this work when yo
 We would love to use dev containers but unfortunately, the support for them on JetBrains IDEs is not great.  
 Maybe this is a user error so if you can make it work we will be open to suggestions.
 
-## Swagger UI
+## Api Documentation
+
+We provide a full OpenAPI 3.1 specification for our API.  
+It can be found at `http://localhost:8080/api`
+
+### Swagger UI
 
 We have a `swagger-ui` instance running at `http://localhost:8080/api/openapi/swagger-ui` for testing and research
 purposes
@@ -61,7 +66,7 @@ regarding the API.
 **NOTE: Keep in mind that you have to change the URL based on your preferences (`.env` config file and/or reverse
 proxies)**
 
-## Scalar
+### Scalar
 
 We also have a `scalar` instance running at `http://localhost:8080/api/openapi/scalar` for testing and research purposes
 regarding the API.  
