@@ -120,7 +120,7 @@ utoipauto = "0.3.0-alpha.2"
 tracing = "0.1.41"
 
 # Time
-chrono = { version = "0.4.40", features = ["clock"] }
+chrono = { version = "0.4.41", features = ["clock"] }
 
 # Flags
 enumflags2 = { version = "0.7.11", features = ["std", "serde"] }
@@ -170,7 +170,7 @@ loco-rs = { workspace = true, features = ["testing"] }
 # Testing frameworks
 serial_test = "3.2.0"
 rstest = "0.25.0"
-insta = { version = "1.43.0", features = ["serde", "redactions", "yaml", "filters", "json"] }
+insta = { version = "1.43.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
 # Mocking
 mockito = "1.7.0"
