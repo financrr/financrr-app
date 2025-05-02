@@ -4,11 +4,11 @@ members = [
     "financrr_macros",
     "financrr_macros_impl"
 ]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [package]
@@ -23,13 +23,40 @@ default-run = "financrr-cli"
 # Forbid
 unsafe_code = "forbid"
 non_ascii_idents = "forbid"
+future_incompatible = { level = "forbid", priority = -1 }
+
+# Warnings
+missing_copy_implementations = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+# Restriction
+absolute_paths = "warn"
+unwrap_used = "warn"
+module_name_repetitions = "warn"
+
+# Pedantic
+wildcard-imports = "deny"
+cloned_instead_of_copied = "warn"
+explicit_iter_loop = "warn"
+unnecessary_wraps = "warn"
+unused_self = "warn"
+unused_async = "warn"
+
+# Nursey
+cognitive_complexity = "deny"
+use_self = "warn"
+option_if_let_else = "warn"
+redundant_closure_for_method_calls = "warn"
+semicolon_if_nothing_returned = "warn"
+map_unwrap_or = "warn"
+manual_assert = "warn"
 
 [package.metadata.cargo-machete]
 ignored = ["include_dir"]
 
 [workspace.dependencies]
-#loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
-loco-rs = { git = "https://github.com/loco-rs/loco", rev = "1eb04fbce522b37c0b83f5638d666cfe294e328a", features = ["with-db", "cache_inmem"] }
+loco-rs = { version = "0.15.0", features = ["with-db", "cache_inmem"] }
 financrr_macros = { path = "financrr_macros" }
 
 [dependencies]
@@ -53,6 +80,10 @@ sea-orm = { version = "1.1.10", features = [
 ] }
 migration = { path = "migration" }
 
+# Opensearch
+opensearch = { version = "2.3.0", features = ["rustls-tls"], default-features = false }
+url = "2.5.4"
+
 # Async runtime and scheduler
 tokio = { version = "1.44.2", default-features = false, features = [
     "rt-multi-thread",
@@ -63,8 +94,9 @@ tokio-cron-scheduler = { version = "0.13.0", features = ["signal"] }
 # Serialization
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-serde_yml = "0.0.12"
-# Old/archived serde_yaml because loco uses is
+include_json = "0.1.0"
+serde_norway = "0.9.42"
+# Old/archived serde_yaml because loco uses it
 serde_yaml = "0.9.34"
 
 # Template engine
@@ -82,7 +114,7 @@ utoipa = { version = "5.3.1", features = [
 ] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 utoipa-swagger-ui = { version = "9.0.1", features = ["axum", "debug-embed"] }
-utoipauto = "0.2.0"
+utoipauto = "0.3.0-alpha.2"
 
 # Logging
 tracing = "0.1.41"
@@ -94,7 +126,7 @@ chrono = { version = "0.4.41", features = ["clock"] }
 enumflags2 = { version = "0.7.11", features = ["std", "serde"] }
 
 # Validation
-validator = { version = "0.19.0" }
+validator = { version = "0.20.0" }
 
 # Env loading
 dotenvy = "0.15.7"
@@ -111,17 +143,25 @@ include_dir = "0.7.4"
 bytes = "1.10.1"
 
 # Tokene genration
-rand = "0.8.5"
+rand = "0.9.1"
 sha2 = "0.10.9"
 base64 = "0.22.1"
 
+# HTTP client
+reqwest = { version = "0.12.15", features = ["charset", "http2", "macos-system-configuration", "rustls-tls", "json"], default-features = false }
+
+# Sync utils
+parking_lot = { version = "0.12.3", features = ["deadlock_detection"] }
+
+# String utils
+const_format = "0.2.34"
+
+# Currency Data
+# When this dependency gets updated we need to check if new data is available!
+iso_currency = { version = "=0.5.3", features = ["iterator"] }
+
 # Code generation/custom macros
 financrr_macros.workspace = true
-
-[[bin]]
-name = "financrr-cli"
-path = "src/bin/main.rs"
-required-features = []
 
 [dev-dependencies]
 # Loco
@@ -132,8 +172,16 @@ serial_test = "3.2.0"
 rstest = "0.25.0"
 insta = { version = "1.43.1", features = ["serde", "redactions", "yaml", "filters", "json"] }
 
+# Mocking
+mockito = "1.7.0"
+
 # Utils
 tempfile = "3.19.1"
+
+[[bin]]
+name = "financrr-cli"
+path = "src/bin/main.rs"
+required-features = []
 
 [profile.release]
 lto = true
