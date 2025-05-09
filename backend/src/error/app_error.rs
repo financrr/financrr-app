@@ -1,6 +1,6 @@
 use crate::error::error_code::ErrorCode;
-use axum::http::header::InvalidHeaderValue;
 use axum::http::StatusCode;
+use axum::http::header::InvalidHeaderValue;
 use axum::response::{IntoResponse, Response};
 use derive_more::{Display, Error};
 use financrr_macros::app_errors;
@@ -16,7 +16,7 @@ pub type AppResult<T> = Result<T, AppError>;
 
 /// AppError is a custom error type that we use to return errors in the API with a specific structure.
 #[derive(Debug, Clone, Serialize, ToSchema, Display, Error)]
-#[display("{}", serde_json::to_string(self).expect("Failed to serialize AppError"))]
+#[display("{:#?}", self)]
 pub struct AppError {
     #[serde(skip)]
     pub status_code: StatusCode,
@@ -65,6 +65,7 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CACHE_ERROR, CacheError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::VERSION_CHECK_ERROR, VersionCheckError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::SMTP_ERROR, SmtpError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::CONFIGURATION_ERROR, ConfigurationError, argument=String);
 );
 
 // Validation errors
@@ -124,12 +125,18 @@ app_errors!(
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_PARSE_JSON, DbParseJson, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::MIGRATION_ERROR, MigrationError, argument=String);
     (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::DB_MESSAGE_ERROR, DbMessageError, argument=String);
+    (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::OPENSEARCH_ERROR, OpensearchError, argument=String);
 );
 
 // Auth errors
 app_errors!(
-    (StatusCode::BAD_REQUEST, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
+    (StatusCode::UNAUTHORIZED, ErrorCode::AUTH_HEADER_MISSING, AuthHeaderMissing);
     (StatusCode::UNAUTHORIZED, ErrorCode::INVALID_BEARER_TOKEN, InvalidBearerToken);
+);
+
+// GoCardless
+app_errors!(
+    (StatusCode::BAD_REQUEST, ErrorCode::NO_ACCOUNT_LINKED_WITH_GO_CARDLESS, NoAccountLinkedWithGoCardless);
 );
 
 impl From<LocoError> for AppError {
@@ -173,11 +180,18 @@ impl From<LocoError> for AppError {
             LocoError::Sqlx(err) => AppError::GeneralDatabaseError(Some(err.to_string())),
             LocoError::Storage(err) => AppError::StorageError(err.to_string()),
             LocoError::Cache(err) => AppError::CacheError(err.to_string()),
+            #[cfg(debug_assertions)]
             LocoError::Generators(err) => AppError::GeneratorError(err.to_string()),
             LocoError::VersionCheck(err) => AppError::VersionCheckError(err.to_string()),
             LocoError::Any(err) => AppError::GeneralInternalServerError(err.to_string()),
             LocoError::RequestError(err) => AppError::GeneralInternalServerError(err.to_string()),
             LocoError::SemVer(err) => AppError::VersionCheckError(err.to_string()),
+            LocoError::ValidationError(err) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&err))
+            }
+            LocoError::AxumFormRejection(err) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&err.to_string()))
+            }
         }
     }
 }
@@ -187,8 +201,8 @@ impl From<ModelError> for AppError {
         match value {
             ModelError::EntityAlreadyExists => AppError::EntityAlreadyExists(),
             ModelError::EntityNotFound => AppError::EntityNotFound(),
-            ModelError::ModelValidation { errors } => {
-                AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors))
+            ModelError::Validation(errors) => {
+                AppError::GeneralValidationError(JsonReference::new_with_default_none(&errors.0))
             }
             ModelError::Jwt(err) => AppError::GeneralInternalServerError(err.to_string()),
             ModelError::DbErr(err) => AppError::from(err),
@@ -288,6 +302,12 @@ impl From<InvalidHeaderValue> for AppError {
     }
 }
 
+impl From<reqwest::Error> for AppError {
+    fn from(value: reqwest::Error) -> Self {
+        AppError::GeneralInternalServerError(value.to_string())
+    }
+}
+
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         (self.status_code, axum::Json(self)).into_response()
@@ -297,6 +317,24 @@ impl IntoResponse for AppError {
 impl From<AppError> for LocoError {
     fn from(value: AppError) -> Self {
         LocoError::Any(value.into())
+    }
+}
+
+impl From<url::ParseError> for AppError {
+    fn from(value: url::ParseError) -> Self {
+        AppError::ConfigurationError(value.to_string())
+    }
+}
+
+impl From<opensearch::http::transport::BuildError> for AppError {
+    fn from(value: opensearch::http::transport::BuildError) -> Self {
+        AppError::ConfigurationError(value.to_string())
+    }
+}
+
+impl From<opensearch::Error> for AppError {
+    fn from(value: opensearch::Error) -> Self {
+        AppError::OpensearchError(format!("{:#?}", value))
     }
 }
 

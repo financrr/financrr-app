@@ -14,8 +14,6 @@ The backend and cli for financrr - The most modern finance manager you've ever s
 ## Requirements
 
 - [Docker](https://www.docker.com/)
-- [Rust](https://www.rust-lang.org/)  (latest stable version)
-- [RustUp](https://rustup.rs/) (optional, but recommended)
 
 **NOTE:** When deploying, it is highly recommended to use this in combination with
 a [reverse proxy](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/#:~:text=A%20reverse%20proxy%20is%20a,security%2C%20performance%2C%20and%20reliability.).
@@ -23,33 +21,44 @@ See: [Reverse proxy quick-start - Caddy Documentation](https://caddyserver.com/d
 
 ## Getting Started (Docker Compose)
 
-1. run `bin/install.bash` or `.\bin\install.ps1`
+1. run `bin/install.bash`
 2. run docker compose using `docker compose up -d`
-3. run `cargo loco start --server-and-worker`
+3. run `app/cargo loco start --server-and-worker`
 4. visit [SwaggerUi](http://localhost:8080/api/openapi/swagger-ui) or [Scalar](http://localhost:8080/api/openapi/scalar)
 
-## Testing
+## Development infrastructure
 
-We use [cargo-nextest](https://nexte.st/docs/installation/pre-built-binaries/) to run our tests.
+Everything is docker-based!  
+This means that you don't run or install anything besides docker locally.
 
-After installing, simply run:
+**Remember to regularly pull containers!** `docker compose pull`
 
-On Linux:
+<details>
+<summary>Why we do this</summary>
 
-```bash
-bash bin/test.bash
-```
+- **Consistency**: Every developer has the same environment, no matter what OS they are using
+- **Isolation**: You don't have to worry about dependencies on your local machine
+- **Control**: We can better control what Versions, CLIs etc. are used
 
-On Windows:
+</details>
 
-```powershell
-.\bin\test.ps1
-```
+To access and interact with the containers we provide scripts like `bin/cargo` that executes `cargo` with your arguments
+inside the container.  
+Also some IDEs (RustRover for example) can be configured to execute their run configurations inside the container which
+is useful when debugging.  
+Be aware that you have to do some kind of path mapping to make this work when you IDEs does not make this automatically.
 
-These scripts run `cargo nextest` with the correct arguments (specifically `--test-threads 1`).
-You can pass additional arguments to the script, which will be forwarded to `cargo nextest`.
+### Why we don't use dev containers
 
-## Swagger UI
+We would love to use dev containers but unfortunately, the support for them on JetBrains IDEs is not great.  
+Maybe this is a user error so if you can make it work we will be open to suggestions.
+
+## Api Documentation
+
+We provide a full OpenAPI 3.1 specification for our API.  
+It can be found at `http://localhost:8080/api`
+
+### Swagger UI
 
 We have a `swagger-ui` instance running at `http://localhost:8080/api/openapi/swagger-ui` for testing and research
 purposes
@@ -57,7 +66,7 @@ regarding the API.
 **NOTE: Keep in mind that you have to change the URL based on your preferences (`.env` config file and/or reverse
 proxies)**
 
-## Scalar
+### Scalar
 
 We also have a `scalar` instance running at `http://localhost:8080/api/openapi/scalar` for testing and research purposes
 regarding the API.  
@@ -70,9 +79,9 @@ We provide a default user for every fresh installation.
 
 You can log in with the following credentials:
 
-| Username | Password    |
-|----------|-------------|
-| admin    | Financrr123 |
+| E-Mail         | Password     |
+|----------------|--------------|
+| admin@financrr | Financrr123! |
 
 **We strongly advise you to change the password for production deployments!**
 

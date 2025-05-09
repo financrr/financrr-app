@@ -3,6 +3,7 @@
 pub use sea_orm_migration::prelude::*;
 
 mod m20241126_123847_initial_schema;
+
 pub struct Migrator;
 
 #[async_trait::async_trait]

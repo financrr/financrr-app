@@ -1,6 +1,6 @@
 use crate::helpers::init::init_test;
 use crate::helpers::session::clean_up_session_response;
-use crate::helpers::users::{create_unverified_user_with_email, create_user_with_email, DEFAULT_PASSWORD};
+use crate::helpers::users::{DEFAULT_PASSWORD, create_unverified_user_with_email, create_user_with_email};
 use axum::http::StatusCode;
 use financrr::app::App;
 use financrr::views::session::SessionResponse;
