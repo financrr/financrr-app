@@ -23,22 +23,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Run installation script
+        run: bash bin/install
+      - name: Create Docker Compose override
+        run: |
+          cat > compose.override.yaml << EOF
+          services:
+            rust:
+              user: "1000:1000"
+              environment:
+                - HOST_UID=1000
+                - HOST_GID=1000
+          EOF
+      - name: Set up user permissions
+        run: |
+          sudo chown -R 1000:1000 ./
+      - name: Start Docker Container
+        run: docker compose up -d rust --build
       - name: Build
-        run: cargo build --release
+        run: bin/cargo build --release
 
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Instal nextst
-        uses: taiki-e/install-action@v2
-        with:
-          tool: nextest
       - name: Run installation script
-        run: bash bin/install.bash
+        run: bash bin/install
+      - name: Create Docker Compose override
+        run: |
+          cat > compose.override.yaml << EOF
+          services:
+            rust:
+              user: "1000:1000"
+              environment:
+                - HOST_UID=1000
+                - HOST_GID=1000
+          EOF
+      - name: Set up user permissions
+        run: |
+          sudo chown -R 1000:1000 ./
       - name: Start Docker Container
-        run: docker compose up -d
+        run: docker compose up -d --build
       - name: Build tests
-        run: cargo nextest run --workspace --no-run
+        run: bin/cargo nextest run --workspace --no-run
       - name: Run tests
-        run: bash bin/test.bash
+        run: bash bin/test

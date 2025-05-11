@@ -1,0 +1,4 @@
+[profile.default]
+# Do not run parallel tests (not supported by loco)
+test-threads = 1
+fail-fast = false

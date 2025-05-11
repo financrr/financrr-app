@@ -1,17 +1,26 @@
-use crate::services::custom_config::CustomConfigInner;
+use crate::error::app_error::AppError;
+use crate::services::bank_linking_data::BankLinkingDataInner;
+use crate::services::custom_configs::base::CustomConfigInner;
 use crate::services::instance_handler::InstanceHandlerInner;
+use crate::services::opensearch::client::OpensearchClientInner;
 use crate::services::snowflake_generator::SnowflakeGeneratorInner;
 use crate::services::status_service::StatusServiceInner;
 use crate::services::user_verification::UserVerificationServiceInner;
+use axum::extract::FromRequestParts;
+use axum::http::request::Parts;
 use axum::{Extension, Router as AxumRouter};
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
 use secret_generator::SecretGeneratorInner;
+use std::any::type_name;
 use std::future::Future;
 use std::sync::{Arc, OnceLock};
+use tracing::debug;
 
-pub mod custom_config;
+pub mod bank_linking_data;
+pub mod custom_configs;
 pub mod instance_handler;
+pub mod opensearch;
 pub mod secret_generator;
 pub mod snowflake_generator;
 pub mod status_service;
@@ -24,22 +33,24 @@ pub async fn configure_services(router: AxumRouter, ctx: &AppContext) -> Result<
         .layer(SecretGeneratorInner::get_extension(ctx).await?)
         .layer(UserVerificationServiceInner::get_extension(ctx).await?)
         .layer(SnowflakeGeneratorInner::get_extension(ctx).await?)
-        .layer(StatusServiceInner::get_extension(ctx).await?))
+        .layer(StatusServiceInner::get_extension(ctx).await?)
+        .layer(BankLinkingDataInner::get_extension(ctx).await?)
+        .layer(OpensearchClientInner::get_extension(ctx).await?))
 }
 
 pub trait Service
 where
-    Self: Sized + 'static,
+    Self: Sized + Send + Sync + 'static,
 {
-    fn new(ctx: &AppContext) -> impl Future<Output = Result<Self>>;
+    fn new(ctx: &AppContext) -> impl Future<Output = Result<Self>> + Send;
 
     fn get_static_once() -> &'static OnceLock<Arc<Self>>;
 
-    fn new_arc(ctx: &AppContext) -> impl Future<Output = Result<Arc<Self>>> {
+    fn new_arc(ctx: &AppContext) -> impl Future<Output = Result<Arc<Self>>> + Send {
         async { Ok(Arc::new(Self::new(ctx).await?)) }
     }
 
-    fn get_arc(ctx: &AppContext) -> impl Future<Output = Result<Arc<Self>>> {
+    fn get_arc(ctx: &AppContext) -> impl Future<Output = Result<Arc<Self>>> + Send {
         async {
             let once_lock = Self::get_static_once();
 
@@ -54,7 +65,20 @@ where
         }
     }
 
-    fn get_extension(ctx: &AppContext) -> impl Future<Output = Result<Extension<Arc<Self>>>> {
+    fn get_extension(ctx: &AppContext) -> impl Future<Output = Result<Extension<Arc<Self>>>> + Send {
+        debug!("Adding extension for {}", type_name::<Self>());
         async { Ok(Extension(Self::get_arc(ctx).await?)) }
+    }
+}
+
+pub struct Injectable<T: Service>(pub Arc<T>);
+
+impl<T: Service> FromRequestParts<AppContext> for Injectable<T> {
+    type Rejection = AppError;
+
+    async fn from_request_parts(_: &mut Parts, state: &AppContext) -> std::result::Result<Self, Self::Rejection> {
+        let instance = T::get_arc(state).await?;
+
+        Ok(Injectable(instance))
     }
 }

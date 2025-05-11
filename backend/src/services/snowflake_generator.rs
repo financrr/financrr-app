@@ -1,9 +1,9 @@
-use crate::services::instance_handler::{InstanceHandler, InstanceHandlerInner};
 use crate::services::Service;
+use crate::services::instance_handler::{InstanceHandler, InstanceHandlerInner};
 use crate::utils::datetime::get_epoch_millis;
+use loco_rs::Error;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::Result;
-use loco_rs::Error;
 use std::env::VarError;
 use std::num::ParseIntError;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -47,7 +47,7 @@ impl Service for SnowflakeGeneratorInner {
 }
 
 impl SnowflakeGeneratorInner {
-    fn with_instance_handler(handler: InstanceHandler) -> Self {
+    pub fn with_instance_handler(handler: InstanceHandler) -> Self {
         Self {
             instance_handler: handler,
             last_timestamp: AtomicU64::new(0),

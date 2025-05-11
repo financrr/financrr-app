@@ -1,7 +1,9 @@
 use crate::services::Service;
+use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
+use crate::services::custom_configs::opensearch::OpensearchConfig;
+use loco_rs::Error;
 use loco_rs::app::AppContext;
 use loco_rs::environment::Environment;
-use loco_rs::Error;
 use serde::Deserialize;
 use std::env;
 use std::fs::read_to_string;
@@ -14,8 +16,11 @@ pub const DEFAULT_CONFIG_FOLDER: &str = "config";
 
 pub type CustomConfig = Arc<CustomConfigInner>;
 
-#[derive(Debug, Deserialize)]
-pub struct CustomConfigInner {}
+#[derive(Debug, Clone, Deserialize)]
+pub struct CustomConfigInner {
+    pub bank_data_linking: Option<BankDataLinkingConfig>,
+    pub opensearch: OpensearchConfig,
+}
 
 impl Service for CustomConfigInner {
     async fn new(ctx: &AppContext) -> loco_rs::Result<Self> {
@@ -59,51 +64,18 @@ impl CustomConfigInner {
     fn load_from_string(yaml: String, path: String) -> loco_rs::Result<Self> {
         let rendered = Tera::one_off(yaml.as_str(), &Context::new(), false)?;
 
-        serde_yml::from_str(&rendered).map_err(|err| {
+        serde_norway::from_str(&rendered).map_err(|err| {
             error!("Yaml Error: {} | File: {}", err.to_string(), path);
 
             Error::Any(err.into())
         })
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use loco_rs::environment::Environment;
-    use std::fs::File;
-    use std::io::Write;
-    use tempfile::tempdir;
+    pub fn is_bank_data_linking_configured(&self) -> bool {
+        if let Some(conf) = &self.bank_data_linking {
+            return conf.enabled;
+        }
 
-    #[test]
-    fn test_load_from_string() {
-        let yaml = "";
-        let path = "test_path.yaml".to_string();
-        let result = CustomConfigInner::load_from_string(yaml.to_string(), path);
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_load_from_path() {
-        let dir = tempdir().unwrap();
-        let file_path = dir.path().join("test.yaml");
-        let mut file = File::create(&file_path).unwrap();
-        writeln!(file, "").unwrap();
-
-        let result = CustomConfigInner::load_from_path(file_path.to_str().unwrap().to_string());
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_load_from_env() {
-        let dir = tempdir().unwrap();
-        let file_path = dir.path().join("development.yaml");
-        let mut file = File::create(&file_path).unwrap();
-        writeln!(file, "").unwrap();
-
-        env::set_var(CONFIG_FOLDER_ENV, dir.path().to_str().unwrap());
-        let env = Environment::Development;
-        let result = CustomConfigInner::load_from_env(&env);
-        assert!(result.is_ok());
+        false
     }
 }

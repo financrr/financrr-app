@@ -40,6 +40,8 @@ error_codes!(
     (1010, CACHE_ERROR, "A general cache error occurred.");
     (1011, VERSION_CHECK_ERROR, "Could not complete version check");
     (1012, SMTP_ERROR, "A general smtp error occurred.");
+    (1013, CONFIGURATION_ERROR, "An error in the server configuration.");
+    (1014, OPENSEARCH_ERROR, "An error with opensearch occurred");
 );
 
 // Validation/User errors
@@ -102,6 +104,11 @@ error_codes!(
 error_codes!(
     (7002, AUTH_HEADER_MISSING, "Authorization header required but missing.");
     (7003, INVALID_BEARER_TOKEN, "Invalid bearer token.");
+);
+
+// GoCardless
+error_codes!(
+    (8000, NO_ACCOUNT_LINKED_WITH_GO_CARDLESS, "No account has been linked with GoCardless.");
 );
 
 // Misc Errors

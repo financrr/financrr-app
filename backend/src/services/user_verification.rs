@@ -1,8 +1,8 @@
 use crate::error::app_error::AppResult;
 use crate::mailers::auth::AuthMailer;
 use crate::models::users;
-use crate::services::secret_generator::{SecretGenerator, SecretGeneratorInner};
 use crate::services::Service;
+use crate::services::secret_generator::{SecretGenerator, SecretGeneratorInner};
 use crate::utils::context::AdditionalAppContextMethods;
 use loco_rs::prelude::AppContext;
 use std::sync::{Arc, OnceLock};

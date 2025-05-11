@@ -1,6 +1,6 @@
 use migration::{ArrayType, ColumnType, Value, ValueTypeErr};
 use sea_orm::sea_query::{Nullable, ValueType};
-use sea_orm::{sea_query, ColIdx, QueryResult, TryGetError, TryGetable};
+use sea_orm::{ColIdx, QueryResult, TryGetError, TryGetable, sea_query};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
@@ -62,13 +62,15 @@ impl PartialSchema for Snowflake {
 
 impl IntoParams for Snowflake {
     fn into_params(parameter_in_provider: impl Fn() -> Option<ParameterIn>) -> Vec<Parameter> {
-        vec![ParameterBuilder::new()
-            .name("Snowflake")
-            .description(Some("The snowflake ID."))
-            .required(Required::True)
-            .parameter_in(parameter_in_provider().unwrap_or(ParameterIn::Path))
-            .schema(Some(Self::schema()))
-            .build()]
+        vec![
+            ParameterBuilder::new()
+                .name("Snowflake")
+                .description(Some("The snowflake ID."))
+                .required(Required::True)
+                .parameter_in(parameter_in_provider().unwrap_or(ParameterIn::Path))
+                .schema(Some(Self::schema()))
+                .build(),
+        ]
     }
 }
 

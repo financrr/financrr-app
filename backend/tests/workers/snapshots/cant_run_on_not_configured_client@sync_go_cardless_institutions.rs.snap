@@ -1,0 +1,20 @@
+---
+source: tests/workers/sync_go_cardless_institutions.rs
+assertion_line: 33
+expression: rs.err().unwrap()
+---
+Any(
+    AppError {
+        status_code: 500,
+        error_code: ErrorCode {
+            code: 1013,
+            message: "An error in the server configuration.",
+        },
+        details: None,
+        reference: Some(
+            JsonReference {
+                payload: String("GoCardless client not configured."),
+            },
+        ),
+    },
+)

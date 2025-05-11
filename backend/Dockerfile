@@ -11,6 +11,8 @@ WORKDIR /usr/src/
 
 COPY . .
 
+RUN rm rust-toolchain.toml
+
 RUN cargo build --release
 
 FROM alpine:3.21.3
@@ -58,5 +60,12 @@ EXPOSE ${PORT}
 # Switch to non-root user
 USER financrr
 
-# Entrypoint command
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/api/v1/status/health || exit 1
+
+# Entrypoint
 ENTRYPOINT ["/home/financrr/financrr-cli"]
+
+# Default command
+CMD ["start", "--all"]
