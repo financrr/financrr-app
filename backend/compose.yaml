@@ -1,24 +1,23 @@
 services:
-  rust:
-    image: ghcr.io/financrr/backend-dev:latest
-    build:
-      context: .
-      dockerfile: dev.Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: 1
-    tty: true
-    stdin_open: true
-    ports:
-      - "8080:8080"
-      - "63342:63342"
-    environment:
-      TZ: ${TZ}
-    volumes:
-      - ./:/home/financrr/app
-      - cargo-registry:/home/financrr/.cargo/registry
-      - cargo-git:/home/financrr/.cargo/git
-      - cargo-global-registry:/usr/local/cargo/registry
-      - cargo-advisory-db:/home/financrr/.cargo/advisory-db
+#  rust:
+#    image: ghcr.io/financrr/backend-dev:latest
+#    build:
+#      context: .
+#      dockerfile: dev.Dockerfile
+#      args:
+#        BUILDKIT_INLINE_CACHE: 1
+#    tty: true
+#    stdin_open: true
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      TZ: ${TZ}
+#    volumes:
+#      - ./:/home/financrr/app
+#      - cargo-registry:/home/financrr/.cargo/registry
+#      - cargo-git:/home/financrr/.cargo/git
+#      - cargo-global-registry:/usr/local/cargo/registry
+#      - cargo-advisory-db:/home/financrr/.cargo/advisory-db
 
   db:
     image: postgres:17.4-alpine3.21

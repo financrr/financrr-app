@@ -195,27 +195,28 @@ CREATE TABLE go_cardless_requisitions
 
 CREATE TABLE imported_bank_accounts
 (
-    id            BIGINT PRIMARY KEY,
-    external_id   TEXT                     NOT NULL,
-    provider      TEXT                     NOT NULL,
-    last_import timestamp with time zone NOT NULL,
-    created_at    timestamp with time zone NOT NULL,
-    updated_at    timestamp with time zone NOT NULL,
+    id          BIGINT PRIMARY KEY,
+    external_id TEXT                     NOT NULL,
+    provider    TEXT                     NOT NULL,
+    last_import timestamp with time zone,
+    created_at  timestamp with time zone NOT NULL,
+    updated_at  timestamp with time zone NOT NULL,
     UNIQUE (provider, external_id)
 );
 
 CREATE TABLE bank_accounts
 (
-    id                     BIGINT PRIMARY KEY,
-    currency_id            BIGINT REFERENCES currencies (id) UNIQUE NOT NULL,
-    linked_back_account_id BIGINT                                   REFERENCES imported_bank_accounts (id) ON DELETE SET NULL,
-    name                   TEXT                                     NOT NULL,
-    description            TEXT,
-    iban                   TEXT,
-    balance                BIGINT                                   NOT NULL DEFAULT 0,
-    original_balance       BIGINT                                   NOT NULL DEFAULT 0,
-    created_at             timestamp with time zone                 NOT NULL,
-    updated_at             timestamp with time zone                 NOT NULL
+    id                       BIGINT PRIMARY KEY,
+    currency_id              BIGINT REFERENCES currencies (id) UNIQUE NOT NULL,
+    imported_bank_account_id BIGINT                                   REFERENCES imported_bank_accounts (id) ON DELETE SET NULL,
+    name                     TEXT                                     NOT NULL,
+    description              TEXT,
+    iban                     TEXT,
+    available_balance        BIGINT                                   NOT NULL DEFAULT 0,
+    expected_balance         BIGINT                                   NOT NULL DEFAULT 0,
+    original_balance         BIGINT                                   NOT NULL DEFAULT 0,
+    created_at               timestamp with time zone                 NOT NULL,
+    updated_at               timestamp with time zone                 NOT NULL
 );
 
 CREATE INDEX idx_bank_accounts_iban ON bank_accounts (iban);

@@ -35,4 +35,19 @@ impl Model {
             .await?
             .ok_or_else(AppError::EntityNotFound)
     }
+
+    pub async fn get_by_iso_code(db: &DbConn, code: &str) -> AppResult<Option<Self>> {
+        Ok(Entity::find()
+            .filter(Column::IsoCode.eq(code))
+            .filter(Column::UserId.is_null())
+            .one(db)
+            .await?)
+    }
+
+    pub async fn get_by_iso_code_with_default(db: &DbConn, code: &str) -> AppResult<Self> {
+        match Self::get_by_iso_code(db, code).await? {
+            Some(currency) => Ok(currency),
+            None => Self::get_default_currency(db).await,
+        }
+    }
 }

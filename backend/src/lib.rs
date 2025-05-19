@@ -1,8 +1,10 @@
 pub mod app;
 pub mod bank_account_linking;
+mod bank_data_importer;
 pub mod constants;
 pub mod controllers;
 pub mod error;
+pub mod factories;
 pub mod fixtures;
 pub mod initializers;
 pub mod mailers;

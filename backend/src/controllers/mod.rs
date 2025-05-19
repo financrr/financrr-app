@@ -1,4 +1,5 @@
 pub mod bank_account_linking;
+pub mod bank_data_importer;
 pub mod external_bank_institutions;
 pub mod go_cardless;
 pub mod openapi;

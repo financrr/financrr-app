@@ -1,7 +1,10 @@
 use crate::bank_account_linking::responses::{JwtResponse, RefreshResponse};
 use crate::error::app_error::{AppError, AppResult};
+use crate::factories::bank_account_factory::BankAccountFactory;
+use crate::services::Service;
 use crate::services::custom_configs::bank_data_linking::BankDataLinkingConfig;
 use const_format::concatcp;
+use loco_rs::prelude::AppContext;
 use parking_lot::RwLock;
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
@@ -18,14 +21,16 @@ pub struct GoCardlessClient {
     pub(super) config: BankDataLinkingConfig,
     pub(super) token: Arc<RwLock<JwtResponse>>,
     pub(super) client: Client,
+    pub(super) bank_account_factory: Arc<BankAccountFactory>,
 }
 
 impl GoCardlessClient {
-    pub async fn init(config: BankDataLinkingConfig) -> AppResult<Self> {
+    pub async fn init(ctx: &AppContext, config: BankDataLinkingConfig) -> AppResult<Self> {
         let client = GoCardlessClient {
             config,
             token: Arc::new(RwLock::new(JwtResponse::default())),
             client: Client::new(),
+            bank_account_factory: BankAccountFactory::get_arc(ctx).await?,
         };
         let token = client.create_new_token().await?;
         *client.token.write() = token;

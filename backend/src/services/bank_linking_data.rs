@@ -19,7 +19,7 @@ impl Service for BankLinkingDataInner {
         }
 
         if let Some(conf) = config.bank_data_linking.clone() {
-            let client = GoCardlessClient::init(conf).await?;
+            let client = GoCardlessClient::init(ctx, conf).await?;
 
             return Ok(Self {
                 go_cardless_client: Some(Arc::new(client)),

@@ -1,3 +1,4 @@
+use crate::bank_data_importer::BankDataImporterError;
 use crate::error::error_code::ErrorCode;
 use axum::http::StatusCode;
 use axum::http::header::InvalidHeaderValue;
@@ -335,6 +336,14 @@ impl From<opensearch::http::transport::BuildError> for AppError {
 impl From<opensearch::Error> for AppError {
     fn from(value: opensearch::Error) -> Self {
         AppError::OpensearchError(format!("{:#?}", value))
+    }
+}
+
+impl From<BankDataImporterError> for AppError {
+    fn from(value: BankDataImporterError) -> Self {
+        match value {
+            BankDataImporterError::NoneAvailableImplementations => AppError::ConfigurationError(value.to_string()),
+        }
     }
 }
 
