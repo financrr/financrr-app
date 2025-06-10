@@ -29,7 +29,7 @@ ignored = ["include_dir"]
 
 [workspace.dependencies]
 #loco-rs = { version = "0.14.0", features = ["with-db", "cache_inmem"] }
-loco-rs = { git = "https://github.com/loco-rs/loco", rev = "1eb04fbce522b37c0b83f5638d666cfe294e328a", features = ["with-db", "cache_inmem"] }
+loco-rs = { git = "https://github.com/loco-rs/loco", rev = "efb81aa6dbb8f338b087292ce241ccda6e989481", features = ["with-db", "cache_inmem"] }
 financrr_macros = { path = "financrr_macros" }
 
 [dependencies]
