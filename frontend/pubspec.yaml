@@ -55,7 +55,7 @@ dev_dependencies:
   build_runner: any
 
   flutter_launcher_icons: ^0.14.2
-  flutter_native_splash: ^2.4.4
+  flutter_native_splash: ^2.4.6
   pub_increment:
     git:
       url: https://github.com/jasonlessenich/pub_increment.git
