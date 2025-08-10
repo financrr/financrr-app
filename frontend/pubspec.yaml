@@ -41,7 +41,7 @@ dependencies:
   intl: ^0.19.0
   easy_localization: ^3.0.7
   flutter_secure_storage: ^9.2.3
-  shared_preferences: ^2.3.5
+  shared_preferences: ^2.5.3
   riverpod: ^2.6.1
   hooks_riverpod: ^2.6.1
   flutter_svg: ^2.0.16
