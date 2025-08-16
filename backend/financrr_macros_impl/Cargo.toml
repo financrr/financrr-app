@@ -9,7 +9,7 @@ publish.workspace = true
 syn = { version = "2.0.101", features = ["full"] }
 
 # Proc macro
-proc-macro2 = "1.0.95"
+proc-macro2 = "1.0.101"
 
 # utils
 quote = "1.0.40"
