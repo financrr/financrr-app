@@ -30,7 +30,7 @@ jobs:
           architecture: x64 # optional, x64 or arm64
       - run: flutter pub get
       - name: Analyze Dart
-        uses: zgosalvez/github-actions-analyze-dart@v3
+        uses: zgosalvez/github-actions-analyze-dart@v4
         with:
           line-length: 128
           working-directory: ./frontend
