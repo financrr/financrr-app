@@ -68,7 +68,7 @@ serde_yml = "0.0.12"
 serde_yaml = "0.9.34"
 
 # Template engine
-tera = "1.20.0"
+tera = "1.20.1"
 
 # Utoipa / OpenApi
 utoipa = { version = "5.3.1", features = [
