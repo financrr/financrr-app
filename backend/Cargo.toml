@@ -85,7 +85,7 @@ utoipa-swagger-ui = { version = "9.0.1", features = ["axum", "debug-embed"] }
 utoipauto = "0.2.0"
 
 # Logging
-tracing = "0.1.41"
+tracing = "0.1.44"
 
 # Time
 chrono = { version = "0.4.41", features = ["clock"] }
