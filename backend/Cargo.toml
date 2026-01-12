@@ -41,7 +41,7 @@ async-trait = "0.1.88"
 axum = { version = "0.8.4", features = ["json", "tokio"] }
 
 # Tower
-tower = "0.5.2"
+tower = "0.5.3"
 tower-http = { version = "0.6.4", features = ["normalize-path", "compression-full", "async-compression"] }
 
 # Database and ORM
