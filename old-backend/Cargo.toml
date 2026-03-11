@@ -57,7 +57,7 @@ serde_json = "1.0.127"
 sea-orm = { version = "1.1.0-rc.1", features = ["sqlx-all", "runtime-tokio-rustls", "macros", "mock"] }
 
 # Date/Time
-time = { version = "0.3.36", features = ["serde-human-readable", "local-offset"] }
+time = { version = "0.3.47", features = ["serde-human-readable", "local-offset"] }
 chrono = { version = "0.4.38", features = ["clock"] }
 
 # Error handling
