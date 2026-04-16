@@ -62,7 +62,7 @@ utoipauto = { version = "0.1.14", features = ["generic_full_path"] }
 # Logging
 tracing.workspace = true
 tracing-log = "0.2.0"
-tracing-subscriber = { version = "0.3.18", features = ["time", "fmt"] }
+tracing-subscriber = { version = "0.3.20", features = ["time", "fmt"] }
 tracing-appender = "0.2.3"
 
 # Date/Time
@@ -92,7 +92,7 @@ futures-util = "0.3.30"
 
 # Security & Encryption utils
 uuid = { version = "1.10.0", features = ["v4"] }
-rand = "0.8.5"
+rand = "0.9.3"
 rust-argon2 = { version = "2.1.0", features = ["serde"] }
 
 # mimalloc
