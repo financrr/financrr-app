@@ -24,7 +24,7 @@ sea-orm.workspace = true
 serde.workspace = true
 
 # Encryption
-rand = "0.8.5"
+rand = "0.9.3"
 rust-argon2 = "2.1.0"
 
 # Error handling
