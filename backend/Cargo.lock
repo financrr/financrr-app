@@ -1309,7 +1309,7 @@ dependencies = [
  "loco-rs",
  "migration",
  "mimalloc",
- "rand 0.8.5",
+ "rand 0.9.1",
  "rstest",
  "sea-orm",
  "serde",
