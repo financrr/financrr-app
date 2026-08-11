@@ -1319,7 +1319,7 @@ dependencies = [
  "serial_test",
  "sha2",
  "tempfile",
- "tera",
+ "tera 2.1.1",
  "thiserror 2.0.12",
  "tokio",
  "tokio-cron-scheduler 0.14.0",
@@ -2374,7 +2374,7 @@ dependencies = [
  "serde_variant",
  "serde_yaml",
  "sqlx",
- "tera",
+ "tera 1.20.0",
  "thiserror 1.0.69",
  "thousands",
  "tokio",
@@ -3478,7 +3478,7 @@ dependencies = [
  "serde_json",
  "serde_regex",
  "serde_yaml",
- "tera",
+ "tera 1.20.0",
  "thiserror 1.0.69",
 ]
 
@@ -4695,6 +4695,15 @@ dependencies = [
  "serde_json",
  "slug",
  "unic-segment",
+]
+
+[[package]]
+name = "tera"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "638c0720e7c1f61722366256d369ea46139634e77738735d6d9bb287bbbad35f"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
